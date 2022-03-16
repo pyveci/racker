@@ -20,6 +20,9 @@ Features
 - A managed runtime harness for testing software packages and similar purposes,
   in different environments.
 
+- A lightweight wrapper around ``vagrant`` to provide convenient access to all
+  things needing a full VM, like running Windows on Linux or macOS.
+
 - A lightweight wrapper around ``systemd-nspawn`` to provide container
   environments with ``systemd``.
 
