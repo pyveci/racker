@@ -8,9 +8,20 @@ postroj
 About
 *****
 
-``postroj`` is a lightweight wrapper around ``systemd-nspawn`` to provide a
-managed runtime harness for testing software packages and similar purposes,
-in different environments.
+A universal harness tool. At the same time, a tribute to the developers of
+Linux, GNU, systemd, VirtualBox, Vagrant, Docker and all pieces in between.
+
+
+********
+Features
+********
+``postroj`` is ...
+
+- A managed runtime harness for testing software packages and similar purposes,
+  in different environments.
+
+- A lightweight wrapper around ``systemd-nspawn`` to provide container
+  environments with ``systemd``.
 
 
 
