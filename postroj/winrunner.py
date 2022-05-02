@@ -77,9 +77,7 @@ class WinRunner:
 
     def docker_context_online(self):
         """
-        Test if a host is up.
-
-        https://github.com/lovelysystems/lovely.testlayers/blob/0.7.0/src/lovely/testlayers/util.py#L6-L13
+        Test if a Docker context is online.
         """
         response = json.loads(run(f"docker context inspect {self.BOX}"))
         address = urlparse(response[0]["Endpoints"]["docker"]["Host"])
@@ -87,6 +85,11 @@ class WinRunner:
 
     @staticmethod
     def host_is_up(host, port):
+        """
+        Test if a host is up.
+
+        https://github.com/lovelysystems/lovely.testlayers/blob/0.7.0/src/lovely/testlayers/util.py#L6-L13
+        """
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ex = s.connect_ex((host, port))
         if ex == 0:
@@ -109,4 +112,4 @@ def run(command, shell=False, cwd=None):
         output = subprocess.check_output(command, shell=shell, cwd=cwd)
     else:
         output = subprocess.check_output(shlex.split(command), cwd=cwd)
-    return(output.decode())
+    return output.decode()

@@ -34,6 +34,7 @@ def boot():
     if not directory.exists():
         raise Exception(f"Image at {directory} not found")
 
+    # TODO: Why does `--ephemeral` not work?
     command = f"""
         /usr/bin/systemd-nspawn \
             --quiet --boot --link-journal=try-guest \
@@ -51,6 +52,7 @@ def shutdown():
     Shut down the container.
     """
     subprocess.check_output(["/bin/machinectl", "poweroff", machine])
+
 
 def wait():
     """

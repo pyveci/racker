@@ -13,6 +13,7 @@ from postroj.winrunner import WinRunner
 @click.argument('command', nargs=-1, type=str)
 @click.pass_context
 def main(ctx, system, cpus, memory, mount, command):
+    # TODO: Propagate and implement `cpus`, `memory` and `mount`. See
     command = " ".join(command)
     if system == "windows-1809":
         runner = WinRunner()
