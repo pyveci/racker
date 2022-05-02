@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import click
 
 from postroj import runner

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 """
 A convenience wrapper around Windows Docker Machine.
 
