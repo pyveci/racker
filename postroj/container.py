@@ -1,9 +1,15 @@
-# Manage `systemd-nspawn` containers.
+# -*- coding: utf-8 -*-
+# (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+"""
+About
+=====
+
+Manage `systemd-nspawn` containers.
+"""
 import os
 from pathlib import Path
 import shlex
 import subprocess
-import sys
 import time
 
 
@@ -13,16 +19,6 @@ machine = "postroj-ubuntu-focal"
 
 # TOOD: Remove global variable.
 process = None
-
-
-def install():
-    """
-    Install a container image suitable for running with `systemd-nspawn`.
-
-    TODO: Provide implementation for image download and setup.
-          It is around the corner, see `doc/images.rst`.
-    """
-    pass
 
 
 def boot():

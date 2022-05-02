@@ -18,11 +18,6 @@ Main
 - Optionally install more software into machine image by default.
   ``apt-get install --yes procps iputils-ping netcat telnet iproute2 openssh-client wget curl``
 - Check if and how ready-made Vagrant images can be used for providing rootfs.
-- Check minimal Cloud images, like
-
-  - https://cloud-images.ubuntu.com/minimal/releases/bionic/release/ubuntu-18.04-minimal-cloudimg-amd64-root.tar.xz
-  - https://cloud-images.ubuntu.com/minimal/releases/focal/release/ubuntu-20.04-minimal-cloudimg-amd64-root.tar.xz
-
 - Use ``CacheDirectory=`` directive to cache download artefacts
 
 - Check non-x64 architectures
