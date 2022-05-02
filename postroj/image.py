@@ -28,7 +28,6 @@ class ImageProvider:
 
     def __init__(self, distribution: LinuxDistribution):
         self.distribution = distribution
-        print("Providing image for distribution:", self.distribution)
         archive_directory.mkdir(parents=True, exist_ok=True)
         image_directory.mkdir(parents=True, exist_ok=True)
 
@@ -36,6 +35,7 @@ class ImageProvider:
         """
         Provision rootfs image per operating system family.
         """
+        print(f"Provisioning container image for {self.distribution}")
         if self.distribution.family == OperatingSystemFamily.DEBIAN.value:
             self.setup_debian()
         elif self.distribution.family == OperatingSystemFamily.UBUNTU.value:
@@ -99,22 +99,33 @@ class ImageProvider:
         - https://github.com/systemd/systemd/issues/2277
         """
 
+        # Designate the minimum version of systemd needed.
+        systemd_version_minimal = 225
+
         # Acquire image.
         rootfs = self.acquire_from_docker()
 
-        # Prepare image by upgrading systemd from v219 to v225.
-        upgrade_systemd_program = dedent("""
+        # Skip installing systemd when already satisfied.
+        response = cmd(f"systemd-nspawn --directory={rootfs} --pipe systemctl --version")
+        systemd_version_installed = int(response.splitlines()[0].split(maxsplit=1)[1])
+        if systemd_version_installed >= systemd_version_minimal:
+            print(f"Found systemd version {systemd_version_installed}")
+            return
+
+        # Prepare image by upgrading systemd.
+        upgrade_systemd_program = dedent(f"""
+            set -x
             systemctl --version
             yum install -y wget gcc make libtool intltool gperf glib2-devel libcap-devel xz-devel libgcrypt-devel libmount-devel
-            wget https://github.com/systemd/systemd/archive/refs/tags/v225.tar.gz -O systemd-225.tar.gz
-            tar -xzf systemd-225.tar.gz
-            cd systemd-225
+            wget https://github.com/systemd/systemd/archive/refs/tags/v{systemd_version_minimal}.tar.gz -O systemd-{systemd_version_minimal}.tar.gz
+            tar -xzf systemd-{systemd_version_minimal}.tar.gz
+            cd systemd-{systemd_version_minimal}
             ./autogen.sh
             ./configure CFLAGS="-g -O0 -ftrapv" --enable-compat-libs --enable-kdbus --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib64 --disable-manpages
             make -j8
             make install
             systemctl --version
-        """).strip()
+        """.strip()).strip()
 
         upgrade_systemd_command = dedent(f"""
         systemd-nspawn --directory={rootfs} --pipe /bin/sh << EOF
@@ -122,6 +133,8 @@ class ImageProvider:
         EOF
         """).strip()
         print(upgrade_systemd_command)
+
+        print(f"Installing systemd version {systemd_version_minimal}")
         os.system(upgrade_systemd_command)
 
         # Activate image.
@@ -161,13 +174,25 @@ class ImageProvider:
         """
         if not is_dir_empty(rootfs):
             target_path = image_directory / self.distribution.fullname
-            target_path.symlink_to(rootfs)
+            target_path.unlink(missing_ok=True)
+            target_path.symlink_to(rootfs, target_is_directory=True)
             return target_path
         else:
             raise ValueError(f"Unable to activate image at {rootfs}")
 
 
 if __name__ == "__main__":
-    # ip = ImageProvider(distribution=OperatingSystem.DEBIAN_BUSTER.value)
-    ip = ImageProvider(distribution=OperatingSystem.CENTOS_7.value)
-    ip.setup()
+    """
+    Provisioning rootfs images for all listed operating systems takes about
+    four minutes from scratch.
+    """
+    all_distributions = [
+        OperatingSystem.DEBIAN_BUSTER.value,
+        OperatingSystem.DEBIAN_BULLSEYE.value,
+        OperatingSystem.UBUNTU_FOCAL.value,
+        OperatingSystem.UBUNTU_JAMMY.value,
+        OperatingSystem.CENTOS_7.value,
+    ]
+    for distribution in all_distributions:
+        ip = ImageProvider(distribution=distribution)
+        ip.setup()
