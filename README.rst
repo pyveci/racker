@@ -15,6 +15,7 @@ Linux, GNU, systemd, VirtualBox, Vagrant, Docker and all pieces in between.
 ********
 Features
 ********
+
 ``postroj`` is ...
 
 - A managed runtime harness for testing software packages and similar purposes,
@@ -26,6 +27,16 @@ Features
 - A lightweight wrapper around ``systemd-nspawn`` to provide container
   environments with ``systemd``.
 
+
+********
+Synopsis
+********
+
+::
+
+    python -m postroj.image
+    python -m postroj.container
+    python -m postroj.probe
 
 
 **********
@@ -43,23 +54,21 @@ bundling* and *sandboxing*. Parts of ``postroj`` might fill some gaps on the
 *delivery* aspects.
 
 
-
-********
-Synopsis
-********
+***********
+Performance
+***********
 
 A SuT which just uses a dummy probe ``/bin/systemctl is-active systemd-journald``
-cycles quite fast, essentially demonstrating that the overhead of environment
-setup/teardown is insignificant.
+on Debian 10 "buster" cycles quite fast, essentially demonstrating that the
+overhead of environment setup/teardown is insignificant.
 
 ::
 
-    time python3 postroj/container.py
+    time python3 postroj.container
 
-    real    0m0.913s
-    user    0m0.707s
-    sys     0m0.844s
-
+    real    0m0.768s
+    user    0m0.082s
+    sys     0m0.043s
 
 
 *******

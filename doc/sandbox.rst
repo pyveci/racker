@@ -39,7 +39,9 @@ Install postroj
 Invoke postroj
 ==============
 
-Run image provider::
+::
 
     sudo $(command -v python) -m postroj.image
+    sudo $(command -v python) -m postroj.container
+    sudo $(command -v python) -m postroj.probe
 
