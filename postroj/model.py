@@ -55,3 +55,9 @@ class OperatingSystem(Enum):
         release="7",
         image="docker://docker.io/centos:7",
     )
+    CENTOS_8 = LinuxDistribution(
+        family="centos",
+        name="8",
+        release="8",
+        image="docker://docker.io/centos:8",
+    )

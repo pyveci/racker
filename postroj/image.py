@@ -107,7 +107,10 @@ class ImageProvider:
 
         # Skip installing systemd when already satisfied.
         response = cmd(f"systemd-nspawn --directory={rootfs} --pipe systemctl --version")
-        systemd_version_installed = int(response.splitlines()[0].split(maxsplit=1)[1])
+        try:
+            systemd_version_installed = int(response.splitlines()[0].split(" ", maxsplit=2)[1].split("-")[0])
+        except:
+            raise ValueError(f"Unable to decode systemd version from:\n{response}")
         if systemd_version_installed >= systemd_version_minimal:
             print(f"Found systemd version {systemd_version_installed}")
             return
@@ -192,6 +195,7 @@ if __name__ == "__main__":
         OperatingSystem.UBUNTU_FOCAL.value,
         OperatingSystem.UBUNTU_JAMMY.value,
         OperatingSystem.CENTOS_7.value,
+        OperatingSystem.CENTOS_8.value,
     ]
     for distribution in all_distributions:
         ip = ImageProvider(distribution=distribution)
