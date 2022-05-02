@@ -17,5 +17,12 @@ def cmd(command):
     """
     Spawn a system command in a separate process.
     """
-    print(command)
+    print(f"Running command on host system: {command}")
     return subprocess.check_output(shlex.split(command)).decode()
+
+def scmd(directory: Union[Path, str], command: str):
+    """
+    Run command within root filesystem of unspawned container.
+    """
+    return cmd(f"systemd-nspawn --directory={directory} --pipe {command}")
+

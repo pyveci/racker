@@ -7,7 +7,7 @@ from typing import Union
 
 from postroj.model import LinuxDistribution, OperatingSystem, OperatingSystemFamily
 
-from postroj.util import cmd, is_dir_empty
+from postroj.util import cmd, is_dir_empty, scmd
 
 # TODO: Make this configurable.
 archive_directory = Path("/var/lib/postroj/archive")
@@ -53,7 +53,7 @@ class ImageProvider:
         rootfs = self.acquire_from_docker()
 
         # Prepare image by installing systemd.
-        cmd(f"systemd-nspawn --directory={rootfs} sh -c 'apt-get update; apt-get install --yes systemd'")
+        scmd(directory=rootfs, command="sh -c 'apt-get update; apt-get install --yes systemd'")
 
         # Activate image.
         self.activate_image(rootfs)
@@ -80,14 +80,35 @@ class ImageProvider:
             print(cmd(f"tar --directory={archive_image} -xf {archive_file}"))
 
         # Prepare image by deactivating services which are hogging the bootstrapping.
-        cmd(f"systemd-nspawn --directory={archive_image} systemctl disable ssh systemd-networkd-wait-online")
+        scmd(directory=archive_image,
+             command="systemctl disable ssh systemd-networkd-wait-online systemd-resolved")
+        scmd(directory=archive_image, command="systemctl mask systemd-remount-fs")
+
+        # Would bring boot time from 1.2s down to 0.6s, but
+        # sometimes container does not signal readiness then.
+        # scmd(directory=archive_image, command="systemctl mask snapd snapd.socket")
 
         # Activate image.
         self.activate_image(archive_image)
 
     def setup_centos(self):
         """
-        CentOS 7 images are acquired from Docker Hub and will have to be
+        CentOS images are acquired from Docker Hub.
+        """
+
+        # Acquire image.
+        rootfs = self.acquire_from_docker()
+
+        # Upgrade systemd.
+        self.upgrade_systemd(rootfs)
+
+        # Activate image.
+        self.activate_image(rootfs)
+
+    @staticmethod
+    def upgrade_systemd(rootfs):
+        """
+        CentOS 7 images acquired from Docker Hub will have to be
         adjusted by providing a more recent version of systemd.
 
         Failed to get shell PTY: Cannot set property StandardInputFileDescriptor, or unknown property.
@@ -101,9 +122,6 @@ class ImageProvider:
 
         # Designate the minimum version of systemd needed.
         systemd_version_minimal = 225
-
-        # Acquire image.
-        rootfs = self.acquire_from_docker()
 
         # Skip installing systemd when already satisfied.
         response = cmd(f"systemd-nspawn --directory={rootfs} --pipe systemctl --version")
@@ -119,7 +137,8 @@ class ImageProvider:
         upgrade_systemd_program = dedent(f"""
             set -x
             systemctl --version
-            yum install -y wget gcc make libtool intltool gperf glib2-devel libcap-devel xz-devel libgcrypt-devel libmount-devel
+            yum upgrade -y
+            yum install -y wget gcc make file libtool intltool gperf glib2-devel libcap-devel xz-devel libgcrypt-devel libmount-devel
             wget https://github.com/systemd/systemd/archive/refs/tags/v{systemd_version_minimal}.tar.gz -O systemd-{systemd_version_minimal}.tar.gz
             tar -xzf systemd-{systemd_version_minimal}.tar.gz
             cd systemd-{systemd_version_minimal}
@@ -127,6 +146,18 @@ class ImageProvider:
             ./configure CFLAGS="-g -O0 -ftrapv" --enable-compat-libs --enable-kdbus --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib64 --disable-manpages
             make -j8
             make install
+            systemctl --version
+        """.strip()).strip()
+        upgrade_systemd_program_meson = dedent(f"""
+            set -x
+            systemctl --version
+            yum upgrade -y
+            yum install -y wget gcc make file libtool intltool gperf glib2-devel libcap-devel xz-devel libgcrypt-devel libmount-devel python3-pip
+            pip3 install "meson==0.44"
+            wget https://github.com/systemd/systemd/archive/refs/tags/v{systemd_version_minimal}.tar.gz -O systemd-{systemd_version_minimal}.tar.gz
+            tar -xzf systemd-{systemd_version_minimal}.tar.gz
+            cd systemd-{systemd_version_minimal}
+            meson build/ && ninja -C build install
             systemctl --version
         """.strip()).strip()
 
@@ -139,9 +170,6 @@ class ImageProvider:
 
         print(f"Installing systemd version {systemd_version_minimal}")
         os.system(upgrade_systemd_command)
-
-        # Activate image.
-        self.activate_image(rootfs)
 
     def acquire_from_docker(self):
         """
@@ -171,12 +199,16 @@ class ImageProvider:
 
         return archive_image / "rootfs"
 
+    @property
+    def image(self):
+        return image_directory / self.distribution.fullname
+
     def activate_image(self, rootfs: Union[Path, str]):
         """
         Activate a filesystem image to make it available for invoking it.
         """
         if not is_dir_empty(rootfs):
-            target_path = image_directory / self.distribution.fullname
+            target_path = self.image
             target_path.unlink(missing_ok=True)
             target_path.symlink_to(rootfs, target_is_directory=True)
             return target_path
@@ -187,14 +219,14 @@ class ImageProvider:
 if __name__ == "__main__":
     """
     Provisioning rootfs images for all listed operating systems takes about
-    four minutes from scratch.
+    two minutes from scratch.
     """
     all_distributions = [
         OperatingSystem.DEBIAN_BUSTER.value,
         OperatingSystem.DEBIAN_BULLSEYE.value,
         OperatingSystem.UBUNTU_FOCAL.value,
         OperatingSystem.UBUNTU_JAMMY.value,
-        OperatingSystem.CENTOS_7.value,
+        # OperatingSystem.CENTOS_7.value,
         OperatingSystem.CENTOS_8.value,
     ]
     for distribution in all_distributions:
