@@ -2,6 +2,9 @@
 postroj image building
 ######################
 
+.. note::
+
+    This is still a work in progress.
 
 
 *****
@@ -20,6 +23,15 @@ Here, we are converting Docker images to `OCI filesystem bundles`_  first.
 
 Debian
 ------
+
+Install prerequisites::
+
+    # Debian Linux
+    apt-get install skopeo umoci
+
+    # macOS
+    brew install skopeo go-md2man
+    git clone https://github.com/opencontainers/umoci; cd umoci; make -j8 && cp umoci /usr/local/bin/
 
 Acquire image::
 
@@ -110,7 +122,7 @@ Fedora
 
 CentOS
 ------
-
+Unfortunately, the size of the images are 352M compressed and >3.4G uncompressed.
 ::
 
     wget https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.raw.tar.gz

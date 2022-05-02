@@ -2,6 +2,10 @@
 postroj winrunner
 #################
 
+.. note::
+
+    This is still a work in progress.
+
 
 *****
 About
@@ -74,3 +78,4 @@ Terminate an environment::
 
     docker --context=2019-box ps
     docker --context=2019-box stop 5e2fe406ccbc
+
