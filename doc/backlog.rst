@@ -11,6 +11,9 @@ postroj backlog
 Main
 ****
 
+- Currently, ``systemd-nspawn`` needs to be invoked as user ``root``.
+  Investigate *systemd-nspawn unprivileged mode* if that can improve the situation.
+  https://www.reddit.com/r/archlinux/comments/ug1fwy/systemdnspawn_unprivileged_mode/
 - Make sure ``resolved`` is enabled on both the host and the guest.
   ``systemctl enable systemd-resolved``.
   Maybe this can get rid of bind-mounting the ``resolv.conf``, see
