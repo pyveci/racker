@@ -64,7 +64,7 @@ overhead of environment setup/teardown is insignificant.
 
 ::
 
-    time python3 postroj.container
+    time python -m postroj.container
 
     real    0m0.768s
     user    0m0.082s
@@ -75,9 +75,16 @@ overhead of environment setup/teardown is insignificant.
 Details
 *******
 
-- The managed environment used by postroj is stored within ``/var/lib/postroj``.
-  In this manner, it gets out of the way of other machine images stored at
-  ``/var/lib/machines``.
+- The managed environment used by postroj is stored at ``/var/lib/postroj``.
+  In this manner, it completely gets out of the way of any other machine images
+  located at ``/var/lib/machines``. Thus, images created by postroj images will
+  not be listed with ``machinectl list-images``.
+
+- Activated filesystem images are located at ``/var/lib/postroj/images``.
+
+- Machine names for spawned containers are assembled from the distribution's
+  ``fullname`` attribute, prefixed with ``postroj-``.
+  Examples: ``postroj-debian-buster``, ``postroj-centos-8``.
 
 
 
