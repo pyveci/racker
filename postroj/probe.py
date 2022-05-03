@@ -84,10 +84,10 @@ class ApacheProbe(ProbeBase):
         if self.is_debian:
             package_and_unit_name = "apache2"
             self.run("/usr/bin/apt-get update")
-            self.run("/usr/bin/apt-get install --yes apache2 curl")
+            self.run("/usr/bin/apt-get install --yes apache2")
         if self.is_redhat:
             package_and_unit_name = "httpd"
-            self.run("/usr/bin/yum install -y httpd curl")
+            self.run("/usr/bin/yum install -y httpd")
 
         # Enable service.
         self.run(f"/bin/systemctl enable {package_and_unit_name}")

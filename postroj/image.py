@@ -52,8 +52,8 @@ class ImageProvider:
         # Acquire image.
         rootfs = self.acquire_from_docker()
 
-        # Prepare image by installing systemd.
-        scmd(directory=rootfs, command="sh -c 'apt-get update; apt-get install --yes systemd'")
+        # Prepare image by installing systemd and additional packages.
+        scmd(directory=rootfs, command="sh -c 'apt-get update; apt-get install --yes systemd curl'")
 
         # Activate image.
         self.activate_image(rootfs)
@@ -88,6 +88,9 @@ class ImageProvider:
         # sometimes container does not signal readiness then.
         # scmd(directory=archive_image, command="systemctl mask snapd snapd.socket")
 
+        # Prepare image by adding additional packages.
+        scmd(directory=archive_image, command="apt-get install --yes curl")
+
         # Activate image.
         self.activate_image(archive_image)
 
@@ -109,6 +112,9 @@ class ImageProvider:
             #scmd(directory=rootfs, command="/usr/bin/sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/*")
             os.system(f"/usr/bin/sed -i 's/mirrorlist/#mirrorlist/g' {rootfs}/etc/yum.repos.d/*")
             os.system(f"/usr/bin/sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' {rootfs}/etc/yum.repos.d/CentOS-*")
+
+        # Prepare image by adding additional packages.
+        scmd(directory=rootfs, command="yum install -y curl")
 
         # Activate image.
         self.activate_image(rootfs)
