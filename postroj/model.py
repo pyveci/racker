@@ -74,10 +74,10 @@ ALL_DISTRIBUTIONS: List[LinuxDistribution] = [
 ]
 
 
-def find_distribution(label: str) -> LinuxDistribution:
+def find_distribution(image_label: str) -> LinuxDistribution:
 
     for distribution in ALL_DISTRIBUTIONS:
-        if distribution.fullname == label:
+        if distribution.fullname == image_label:
             return distribution
 
-    raise ValueError(f"Unknown distribution label {label}")
+    raise ValueError(f"Unknown image label {image_label}")

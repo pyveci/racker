@@ -113,9 +113,9 @@ class ApacheProbe(ProbeBase):
 
 class PackageProbe(ProbeBase):
 
-    def invoke(self, package: str, units: List[str], listen: List[str]):
+    def invoke(self, package: str, unit_names: List[str], network_addresses: List[str], network_timeout: float = 5.0):
 
-        print_header(f"Checking units {','.join(units)}")
+        print_header(f"Checking units {','.join(unit_names)}")
 
         # Download package.
         if package.startswith("http"):
@@ -133,12 +133,12 @@ class PackageProbe(ProbeBase):
             self.run(f"/usr/bin/yum install -y {package}")
 
         # Enable units.
-        for unit in units:
+        for unit in unit_names:
             self.run(f"/bin/systemctl enable {unit}")
             self.run(f"/bin/systemctl start {unit}")
 
-        # Run probe.
-        for unit in units:
+        # Run probes: The systemd unit has to be "active" and the designated ports should be available.
+        for unit in unit_names:
             self.run(f"/bin/systemctl is-active {unit}")
         for address in network_addresses:
             self.check_address(address, timeout=network_timeout)

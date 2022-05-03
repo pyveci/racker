@@ -13,10 +13,10 @@ Synopsis
 ::
 
     postroj pkgprobe \
-        --distribution=<distribution-label> \
+        --image=<image-label> \
         --package=<package-path-or-url> \
-        --unit-is-active=<systemd-unit-name> \
-        --tcp-is-listening=<host>:<port>
+        --check-unit=<systemd-unit-name> \
+        --check-network=tcp://<host>:<port>
 
 
 ********
@@ -25,16 +25,16 @@ Examples
 ::
 
     postroj pkgprobe \
-        --distribution=debian-bullseye \
+        --image=debian-bullseye \
         --package=https://dl.grafana.com/oss/release/grafana_8.5.1_amd64.deb \
-        --unit-is-active=grafana-server \
-        --tcp-is-listening=localhost:3000
+        --check-unit=grafana-server \
+        --check-network=http://localhost:3000
 
     postroj pkgprobe \
-        --distribution=centos-8 \
+        --image=centos-8 \
         --package=https://dl.grafana.com/oss/release/grafana-8.5.1-1.x86_64.rpm \
-        --unit-is-active=grafana-server \
-        --tcp-is-listening=localhost:3000
+        --check-unit=grafana-server \
+        --check-network=http://localhost:3000
 
 
 *****

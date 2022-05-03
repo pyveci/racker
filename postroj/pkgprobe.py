@@ -11,15 +11,16 @@ from postroj.probe import PackageProbe
 
 
 @click.command()
-@click.option('--distribution', type=str)
+@click.option('--image', type=str)
 @click.option('--package', type=str)
-@click.option('--unit-is-active', type=str, multiple=True)
-@click.option('--tcp-is-listening', type=str, multiple=True)
+@click.option('--check-unit', type=str, multiple=True)
+@click.option('--check-network', type=str, multiple=True)
+@click.option('--network-timeout', type=float, default=5.0)
 @click.pass_context
-def main(ctx, distribution: str, package: str, unit_is_active: List[str], tcp_is_listening: List[str]):
+def main(ctx, image: str, package: str, check_unit: List[str], check_network: List[str], network_timeout: float = 5.0):
 
-    # Figure out the distribution from the list of available ones.
-    dist = find_distribution(distribution)
+    # Figure out the image from the list of available ones.
+    dist = find_distribution(image)
 
     # Status reporting.
     print(f"Testing package {package} on distribution {dist}")
@@ -38,4 +39,4 @@ def main(ctx, distribution: str, package: str, unit_is_active: List[str], tcp_is
         pc.info()
 
         probe = PackageProbe(container=pc)
-        probe.invoke(package=package, units=unit_is_active, listen=tcp_is_listening)
+        probe.invoke(package=package, unit_names=check_unit, network_addresses=check_network, network_timeout=network_timeout)
