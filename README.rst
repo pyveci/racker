@@ -8,8 +8,9 @@ postroj
 About
 *****
 
-A universal harness tool. At the same time, a tribute to the developers of
-Linux, GNU, systemd, VirtualBox, Vagrant, Docker and all pieces in between.
+An experimental harness tool based on ``systemd-nspawn``. At the same time, a
+tribute to the authors and contributors of GNU, Linux, systemd, VirtualBox,
+Vagrant, Docker, and all pieces in between.
 
 
 ********
@@ -21,11 +22,25 @@ Features
 - A managed runtime harness for testing software packages and similar purposes,
   in different environments.
 
+- A lightweight wrapper around ``systemd-nspawn`` to provide container
+  environments with ``systemd``.
+
 - A lightweight wrapper around ``vagrant`` to provide convenient access to all
   things needing a full VM, like running Windows on Linux or macOS.
 
-- A lightweight wrapper around ``systemd-nspawn`` to provide container
-  environments with ``systemd``.
+
+
+*****
+Setup
+*****
+
+::
+
+    apt-get update
+    apt-get install --yes systemd-container skopeo umoci python3-pip python3-venv
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install postroj --upgrade
 
 
 ********
@@ -43,15 +58,23 @@ Synopsis
 Background
 **********
 
-Lennart Poettering identifies [1] three pillars of containers:
+Lennart Poettering identifies three pillars of containers [1]:
 
 - Resource bundling
 - Sandboxing
 - Delivery
 
+See also [2,3,4], where Lennart Poettering and Kai Sievers outline their vision
+of systemd as a platform for running systems and their focus on containers.
+
 ``systemd`` already provides a stack of features in the area of *resource
-bundling* and *sandboxing*. Parts of ``postroj`` might fill some gaps on the
-*delivery* aspects.
+bundling* and *sandboxing*. ``postroj`` might fill some gaps on the *delivery*
+aspects.
+
+| [1] https://invidious.fdn.fr/watch?v=sqhojVPr7xM
+| [2] https://invidious.fdn.fr/watch?v=s7LlUs5D9p4
+| [3] https://invidious.fdn.fr/watch?v=6Q_iTG6_EF4
+| [4] https://invidious.fdn.fr/watch?v=_obJr3a_2G8
 
 
 ***********
@@ -66,9 +89,9 @@ overhead of environment setup/teardown is insignificant.
 
     time python -m postroj.container
 
-    real    0m0.768s
-    user    0m0.082s
-    sys     0m0.043s
+    real    0m0.446s
+    user    0m0.060s
+    sys     0m0.034s
 
 
 *******
@@ -85,8 +108,3 @@ Details
 - Machine names for spawned containers are assembled from the distribution's
   ``fullname`` attribute, prefixed with ``postroj-``.
   Examples: ``postroj-debian-buster``, ``postroj-centos-8``.
-
-
-
-
-[1] https://www.youtube.com/watch?v=s7LlUs5D9p4
