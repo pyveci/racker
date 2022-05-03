@@ -62,9 +62,12 @@ class PostrojContainer:
     def info(self):
         print(self.run("/usr/bin/hostnamectl"))
 
-    def run(self, command, **kwargs):
-        kwargs["stderr"] = subprocess.PIPE
-        return ccmd(self.machine, command, **kwargs)
+    def run(self, command, verbose=False, **kwargs):
+        #kwargs["stderr"] = subprocess.PIPE
+        output = ccmd(self.machine, command, **kwargs)
+        if verbose:
+            print(output)
+        return output
         
     def terminate(self):
         """

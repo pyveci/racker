@@ -99,8 +99,16 @@ class ImageProvider:
         # Acquire image.
         rootfs = self.acquire_from_docker()
 
-        # Upgrade systemd.
+        # Fix CentOS 7 by upgrading systemd.
         self.upgrade_systemd(rootfs)
+
+        # Fix CentOS 8.
+        # Problem: "Failed to download metadata for repo ‘AppStream’ [CentOS]".
+        # https://techglimpse.com/failed-metadata-repo-appstream-centos-8/
+        if self.distribution.family == OperatingSystemFamily.CENTOS.value and self.distribution.release == "8":
+            #scmd(directory=rootfs, command="/usr/bin/sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/*")
+            os.system(f"/usr/bin/sed -i 's/mirrorlist/#mirrorlist/g' {rootfs}/etc/yum.repos.d/*")
+            os.system(f"/usr/bin/sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' {rootfs}/etc/yum.repos.d/CentOS-*")
 
         # Activate image.
         self.activate_image(rootfs)
@@ -221,6 +229,8 @@ if __name__ == "__main__":
     Provisioning rootfs images for all listed operating systems takes about
     two minutes from scratch.
     """
+
+    # Select operating systems.
     all_distributions = [
         OperatingSystem.DEBIAN_BUSTER.value,
         OperatingSystem.DEBIAN_BULLSEYE.value,
@@ -229,6 +239,8 @@ if __name__ == "__main__":
         # OperatingSystem.CENTOS_7.value,
         OperatingSystem.CENTOS_8.value,
     ]
+
+    # Create rootfs images for selected distributions.
     for distribution in all_distributions:
         ip = ImageProvider(distribution=distribution)
         ip.setup()
