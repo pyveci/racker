@@ -7,9 +7,22 @@ postroj backlog
     Those are just random notes about ideas and more.
 
 
-****
-Main
-****
+**********
+Actionable
+**********
+
+- [o] Naming things.
+- [o] Refactoring.
+- [o] Implement ``postroj list-images``.
+- [o] Add Debian stretch.
+- [o] Implement some software tests.
+- [o] Release 0.1.0.
+- [o] Option to force downloading and rebuilding rootfs images.
+
+
+*****
+Ideas
+*****
 
 - Currently, ``systemd-nspawn`` needs to be invoked as user ``root``.
   Investigate *systemd-nspawn unprivileged mode* if that can improve the situation.
@@ -70,9 +83,9 @@ Main
 
 
 
-****
-Misc
-****
+*************
+Miscellaneous
+*************
 
 - Others also recommend ``systemd-nspawn``.
 

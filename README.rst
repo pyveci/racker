@@ -47,11 +47,30 @@ Setup
 Synopsis
 ********
 
-::
+Some demo programs::
 
+    # Provide rootfs container filesystem images for all available distributions.
     python -m postroj.image
-    python -m postroj.container
+
+    # Demo: Invoke `hostnamectl` on a Debian buster container.
+    time python -m postroj.container
+
+    # Demo: Invoke two demo probes on all available distributions.
     python -m postroj.probe
+
+Package testing::
+
+    postroj pkgprobe \
+        --image=debian-bullseye \
+        --package=https://dl.grafana.com/oss/release/grafana_8.5.1_amd64.deb \
+        --check-unit=grafana-server \
+        --check-network=http://localhost:3000
+
+    postroj pkgprobe \
+        --image=centos-8 \
+        --package=https://dl.grafana.com/oss/release/grafana-8.5.1-1.x86_64.rpm \
+        --check-unit=grafana-server \
+        --check-network=http://localhost:3000
 
 
 **********
@@ -101,10 +120,12 @@ Details
 - The managed environment used by postroj is stored at ``/var/lib/postroj``.
   In this manner, it completely gets out of the way of any other machine images
   located at ``/var/lib/machines``. Thus, images created by postroj images will
-  not be listed with ``machinectl list-images``.
+  not be listed by ``machinectl list-images``.
 
 - Activated filesystem images are located at ``/var/lib/postroj/images``.
 
 - Machine names for spawned containers are assembled from the distribution's
   ``fullname`` attribute, prefixed with ``postroj-``.
   Examples: ``postroj-debian-buster``, ``postroj-centos-8``.
+
+- The program must be invoked with ``root`` or corresponding ``sudo`` privileges.

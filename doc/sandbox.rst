@@ -22,7 +22,6 @@ Launch Linux environment
 ::
 
     vagrant up
-    vagrant ssh
 
 
 Install postroj
@@ -30,6 +29,8 @@ Install postroj
 
 ::
 
+    vagrant ssh
+    sudo su -
     cd /usr/src/postroj
     python3 -m venv .venv_linux
     source .venv_linux/bin/activate
@@ -41,7 +42,7 @@ Invoke postroj
 
 ::
 
-    sudo $(command -v python) -m postroj.image
-    sudo $(command -v python) -m postroj.container
-    sudo $(command -v python) -m postroj.probe
+    python -m postroj.image
+    python -m postroj.container
+    python -m postroj.probe
 
