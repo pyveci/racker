@@ -59,5 +59,8 @@ setup(
             "postroj = postroj.cli:cli",
         ],
     },
-    install_requires=["click"],
+    install_requires=[
+        "click>=7,<9",
+        "furl>=2,<3",
+    ],
 )

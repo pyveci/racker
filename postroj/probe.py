@@ -8,11 +8,12 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import List
 
+from furl import furl
+
 from postroj.container import PostrojContainer, cache_directory
 from postroj.image import ImageProvider
 from postroj.model import OperatingSystem, LinuxDistribution
-from postroj.util import host_is_up, print_header, print_section_header
-
+from postroj.util import port_is_up, print_header, print_section_header, wait_for_port
 
 # TODO: Make this configurable.
 download_directory = cache_directory / "downloads"
@@ -61,16 +62,21 @@ class ProbeBase:
     def is_redhat(self):
         return (self.container.rootfs / "etc" / "redhat-release").exists()
 
-    def wait_for_port(self, host: str, port: int):
-        # TODO: Improve waiting until port is reachable.
-        timeout = 5
-        interval = 0.1
-        while timeout > 0:
-            if host_is_up(host, port):
-                break
-            time.sleep(interval)
-            timeout -= interval
-        self.run(f"/usr/bin/curl {host}:{port} --output /dev/null --dump-header -")
+    def check_address(self, address: str, timeout: float = 5.0, interval: float = 0.05):
+
+        uri = furl(address)
+        print(f"Waiting for {uri} to become available within {timeout} seconds")
+
+        if uri.scheme in ["tcp", "http", "https"]:
+            host, port = uri.host, int(uri.port)
+            if not wait_for_port(host, port, timeout=timeout, interval=interval):
+                raise TimeoutError(f"{host}:{port} did not become available within {timeout} seconds")
+        else:
+            raise ValueError(f"Unknown scheme for network address {uri}")
+
+        if uri.scheme in ["http", "https"]:
+            host, port = uri.host, int(uri.port)
+            self.run(f"/usr/bin/curl {host}:{port} --output /dev/null --dump-header -")
 
 
 class BasicProbe(ProbeBase):
@@ -102,7 +108,7 @@ class ApacheProbe(ProbeBase):
 
         # Run probe.
         self.run(f"/bin/systemctl is-active {package_and_unit_name}")
-        self.wait_for_port("localhost", 80)
+        self.check_address("http://localhost:80")
 
 
 class PackageProbe(ProbeBase):
@@ -134,9 +140,8 @@ class PackageProbe(ProbeBase):
         # Run probe.
         for unit in units:
             self.run(f"/bin/systemctl is-active {unit}")
-        for listen_item in listen:
-            host, port = listen_item.split(":")
-            self.wait_for_port(host, int(port))
+        for address in network_addresses:
+            self.check_address(address, timeout=network_timeout)
 
 
 if __name__ == "__main__":

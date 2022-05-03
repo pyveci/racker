@@ -4,6 +4,7 @@ import socket
 import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 from typing import Union
 
@@ -87,7 +88,7 @@ def stderr_forwarder(process: subprocess.Popen):
             break
 
 
-def host_is_up(host, port):
+def port_is_up(host: str, port: int):
     """
     Test if a host is up.
 
@@ -98,6 +99,17 @@ def host_is_up(host, port):
     if ex == 0:
         s.close()
         return True
+    return False
+
+
+def wait_for_port(host: str, port: int, timeout: float = 5.0, interval: float = 0.05):
+    while timeout > 0:
+        if port_is_up(host, port):
+            return True
+        time.sleep(interval)
+        timeout -= interval
+        sys.stderr.write(".")
+        sys.stderr.flush()
     return False
 
 

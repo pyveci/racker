@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 
 import click
 
-from postroj.util import host_is_up
+from postroj.util import port_is_up
 
 
 class WinRunner:
@@ -84,7 +84,7 @@ class WinRunner:
         """
         response = json.loads(run(f"docker context inspect {self.BOX}"))
         address = urlparse(response[0]["Endpoints"]["docker"]["Host"])
-        return host_is_up(address.hostname, address.port)
+        return port_is_up(address.hostname, address.port)
 
 
 def run(command, shell=False, cwd=None):
