@@ -2,6 +2,7 @@
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import dataclasses
 from enum import Enum
+from typing import List
 
 
 @dataclasses.dataclass
@@ -61,3 +62,22 @@ class OperatingSystem(Enum):
         release="8",
         image="docker://docker.io/centos:8",
     )
+
+
+ALL_DISTRIBUTIONS: List[LinuxDistribution] = [
+    OperatingSystem.DEBIAN_BUSTER.value,
+    OperatingSystem.DEBIAN_BULLSEYE.value,
+    OperatingSystem.UBUNTU_FOCAL.value,
+    OperatingSystem.UBUNTU_JAMMY.value,
+    OperatingSystem.CENTOS_7.value,
+    OperatingSystem.CENTOS_8.value,
+]
+
+
+def find_distribution(label: str) -> LinuxDistribution:
+
+    for distribution in ALL_DISTRIBUTIONS:
+        if distribution.fullname == label:
+            return distribution
+
+    raise ValueError(f"Unknown distribution label {label}")

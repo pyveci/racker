@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import json
+import os
 import subprocess
 import time
 from abc import abstractmethod
+from pathlib import Path
+from typing import List
 
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
@@ -96,6 +99,40 @@ class ApacheProbe(ProbeBase):
         # Run probe.
         self.run(f"/bin/systemctl is-active {package_and_unit_name}")
         self.wait_for_port("localhost", 80)
+
+
+class PackageProbe(ProbeBase):
+
+    def invoke(self, package: str, units: List[str], listen: List[str]):
+
+        print_header(f"Checking units {','.join(units)}")
+
+        # Download package.
+        if package.startswith("http"):
+            print(f"Downloading {package}")
+            self.run(f"/usr/bin/wget --directory-prefix=/tmp {package}")
+            package = Path("/tmp") / os.path.basename(package)
+        else:
+            raise ValueError(f"Unable to acquire package at {package}")
+
+        # Install package.
+        print(f"Install {package}")
+        if self.is_debian:
+            self.run(f"/usr/bin/dpkg -i {package}")
+        if self.is_redhat:
+            self.run(f"/usr/bin/yum install -y {package}")
+
+        # Enable units.
+        for unit in units:
+            self.run(f"/bin/systemctl enable {unit}")
+            self.run(f"/bin/systemctl start {unit}")
+
+        # Run probe.
+        for unit in units:
+            self.run(f"/bin/systemctl is-active {unit}")
+        for listen_item in listen:
+            host, port = listen_item.split(":")
+            self.wait_for_port(host, int(port))
 
 
 if __name__ == "__main__":

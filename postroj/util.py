@@ -52,7 +52,7 @@ def scmd(directory: Union[Path, str], command: str):
     """
     Run command within root filesystem of unspawned container.
     """
-    return cmd(f"systemd-nspawn --directory={directory} --pipe {command}")
+    return cmd(f"systemd-nspawn --directory={directory} --bind-ro=/etc/resolv.conf:/etc/resolv.conf --pipe {command}")
 
 
 class StoppableThread(threading.Thread):

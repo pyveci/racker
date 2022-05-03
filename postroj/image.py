@@ -26,6 +26,9 @@ class ImageProvider:
     ``/var/lib/postroj/images``.
     """
 
+    ADDITIONAL_PACKAGES = ["curl", "wget"]
+    ADDITIONAL_PACKAGES_DEBIAN = ["libfontconfig1"]
+
     def __init__(self, distribution: LinuxDistribution):
         self.distribution = distribution
         archive_directory.mkdir(parents=True, exist_ok=True)
@@ -53,7 +56,7 @@ class ImageProvider:
         rootfs = self.acquire_from_docker()
 
         # Prepare image by installing systemd and additional packages.
-        scmd(directory=rootfs, command="sh -c 'apt-get update; apt-get install --yes systemd curl'")
+        scmd(directory=rootfs, command=f"sh -c 'apt-get update; apt-get install --yes systemd {' '.join(self.ADDITIONAL_PACKAGES + self.ADDITIONAL_PACKAGES_DEBIAN)}'")
 
         # Activate image.
         self.activate_image(rootfs)
@@ -79,6 +82,9 @@ class ImageProvider:
         if is_dir_empty(archive_image):
             print(cmd(f"tar --directory={archive_image} -xf {archive_file}"))
 
+        # Prepare image by adding additional packages.
+        scmd(directory=archive_image, command=f"sh -c 'apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES + self.ADDITIONAL_PACKAGES_DEBIAN)}'")
+
         # Prepare image by deactivating services which are hogging the bootstrapping.
         scmd(directory=archive_image,
              command="systemctl disable ssh systemd-networkd-wait-online systemd-resolved")
@@ -87,9 +93,6 @@ class ImageProvider:
         # Would bring boot time from 1.2s down to 0.6s, but
         # sometimes container does not signal readiness then.
         # scmd(directory=archive_image, command="systemctl mask snapd snapd.socket")
-
-        # Prepare image by adding additional packages.
-        scmd(directory=archive_image, command="apt-get install --yes curl")
 
         # Activate image.
         self.activate_image(archive_image)
@@ -109,12 +112,11 @@ class ImageProvider:
         # Problem: "Failed to download metadata for repo ‘AppStream’ [CentOS]".
         # https://techglimpse.com/failed-metadata-repo-appstream-centos-8/
         if self.distribution.family == OperatingSystemFamily.CENTOS.value and self.distribution.release == "8":
-            #scmd(directory=rootfs, command="/usr/bin/sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/*")
             os.system(f"/usr/bin/sed -i 's/mirrorlist/#mirrorlist/g' {rootfs}/etc/yum.repos.d/*")
             os.system(f"/usr/bin/sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' {rootfs}/etc/yum.repos.d/CentOS-*")
 
         # Prepare image by adding additional packages.
-        scmd(directory=rootfs, command="yum install -y curl")
+        scmd(directory=rootfs, command=f"yum install -y {' '.join(self.ADDITIONAL_PACKAGES)}")
 
         # Activate image.
         self.activate_image(rootfs)

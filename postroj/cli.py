@@ -2,7 +2,7 @@
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import click
 
-from postroj import runner
+from postroj import runner, pkgprobe
 
 
 @click.group()
@@ -13,3 +13,4 @@ def cli(debug):
 
 
 cli.add_command(cmd=runner.main, name="run")
+cli.add_command(cmd=pkgprobe.main, name="pkgprobe")

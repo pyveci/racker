@@ -7,9 +7,43 @@ postroj pkgprobe proposal
     This is still a work in progress.
 
 
-***************
+********
+Synopsis
+********
+::
+
+    postroj pkgprobe \
+        --distribution=<distribution-label> \
+        --package=<package-path-or-url> \
+        --unit-is-active=<systemd-unit-name> \
+        --tcp-is-listening=<host>:<port>
+
+
+********
+Examples
+********
+::
+
+    postroj pkgprobe \
+        --distribution=debian-bullseye \
+        --package=https://dl.grafana.com/oss/release/grafana_8.5.1_amd64.deb \
+        --unit-is-active=grafana-server \
+        --tcp-is-listening=localhost:3000
+
+    postroj pkgprobe \
+        --distribution=centos-8 \
+        --package=https://dl.grafana.com/oss/release/grafana-8.5.1-1.x86_64.rpm \
+        --unit-is-active=grafana-server \
+        --tcp-is-listening=localhost:3000
+
+
+*****
+Notes
+*****
+
+
 Install package
-***************
+===============
 ::
 
     machinectl shell foobar
@@ -19,9 +53,8 @@ Install package
     systemctl start grafana-server
 
 
-*************
 Probe service
-*************
+=============
 ::
 
     machinectl shell foobar /bin/systemctl is-active grafana-server | grep -v inactive
@@ -39,9 +72,8 @@ Alternatively, run it on the host, like::
     systemctl --machine foobar is-active grafana-server
 
 
-***********
 Code sketch
-***********
+===========
 ::
 
     def probe_setup():
