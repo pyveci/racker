@@ -28,6 +28,9 @@ def main(ctx, distribution: str, package: str, unit_is_active: List[str], tcp_is
     ip = ImageProvider(distribution=dist)
     rootfs = ip.image
 
+    if not rootfs.exists():
+        ip.setup()
+
     # Boot container and run probe commands.
     with PostrojContainer(rootfs=rootfs) as pc:
         pc.boot()
