@@ -27,7 +27,6 @@ class ImageProvider:
     """
 
     ADDITIONAL_PACKAGES = ["curl", "wget"]
-    ADDITIONAL_PACKAGES_DEBIAN = ["libfontconfig1"]
 
     def __init__(self, distribution: LinuxDistribution):
         self.distribution = distribution
@@ -56,7 +55,7 @@ class ImageProvider:
         rootfs = self.acquire_from_docker()
 
         # Prepare image by installing systemd and additional packages.
-        scmd(directory=rootfs, command=f"sh -c 'apt-get update; apt-get install --yes systemd {' '.join(self.ADDITIONAL_PACKAGES + self.ADDITIONAL_PACKAGES_DEBIAN)}'")
+        scmd(directory=rootfs, command=f"sh -c 'apt-get update; apt-get install --yes systemd {' '.join(self.ADDITIONAL_PACKAGES)}'")
 
         # Activate image.
         self.activate_image(rootfs)
@@ -83,7 +82,7 @@ class ImageProvider:
             print(cmd(f"tar --directory={archive_image} -xf {archive_file}"))
 
         # Prepare image by adding additional packages.
-        scmd(directory=archive_image, command=f"sh -c 'apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES + self.ADDITIONAL_PACKAGES_DEBIAN)}'")
+        scmd(directory=archive_image, command=f"sh -c 'apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES)}'")
 
         # Prepare image by deactivating services which are hogging the bootstrapping.
         scmd(directory=archive_image,

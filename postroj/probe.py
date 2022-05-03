@@ -126,9 +126,9 @@ class PackageProbe(ProbeBase):
             raise ValueError(f"Unable to acquire package at {package}")
 
         # Install package.
-        print(f"Install {package}")
+        print(f"Installing package {package}")
         if self.is_debian:
-            self.run(f"/usr/bin/dpkg -i {package}")
+            self.run(f"/usr/bin/apt install --yes {package}")
         if self.is_redhat:
             self.run(f"/usr/bin/yum install -y {package}")
 
