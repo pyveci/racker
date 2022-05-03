@@ -81,3 +81,7 @@ def find_distribution(image_label: str) -> LinuxDistribution:
             return distribution
 
     raise ValueError(f"Unknown image label {image_label}")
+
+
+def list_images():
+    return [distribution.fullname for distribution in ALL_DISTRIBUTIONS]
