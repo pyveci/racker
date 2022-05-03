@@ -1,5 +1,6 @@
 import os
 import shlex
+import socket
 import subprocess
 import sys
 import threading
@@ -40,7 +41,8 @@ def ccmd(machine: str, command: str, **kwargs):
     command = f"systemd-run --machine={machine} --wait --quiet --pipe {command}"
     print(f"Effective command is: {command}")
     try:
-        return subprocess.check_output(shlex.split(command), **kwargs).decode()
+        output = subprocess.check_output(shlex.split(command), **kwargs).decode()
+        return output
     except subprocess.CalledProcessError as ex:
         print(f"Process exited with returncode {ex.returncode}. Output:\n{ex.output}")
         raise
@@ -83,3 +85,28 @@ def stderr_forwarder(process: subprocess.Popen):
             sys.stderr.flush()
         else:
             break
+
+
+def host_is_up(host, port):
+    """
+    Test if a host is up.
+
+    https://github.com/lovelysystems/lovely.testlayers/blob/0.7.0/src/lovely/testlayers/util.py#L6-L13
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    ex = s.connect_ex((host, port))
+    if ex == 0:
+        s.close()
+        return True
+    return False
+
+
+def print_header(title: str, armor: str = "-"):
+    length = len(title)
+    print(armor * length)
+    print(title)
+    print(armor * length)
+
+
+def print_section_header(title: str, armor: str = "="):
+    print_header(title=title, armor=armor)

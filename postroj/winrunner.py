@@ -9,10 +9,11 @@ import json
 import subprocess
 from pathlib import Path
 import shlex
-import socket
 from urllib.parse import urlparse
 
 import click
+
+from postroj.util import host_is_up
 
 
 class WinRunner:
@@ -83,21 +84,7 @@ class WinRunner:
         """
         response = json.loads(run(f"docker context inspect {self.BOX}"))
         address = urlparse(response[0]["Endpoints"]["docker"]["Host"])
-        return self.host_is_up(address.hostname, address.port)
-
-    @staticmethod
-    def host_is_up(host, port):
-        """
-        Test if a host is up.
-
-        https://github.com/lovelysystems/lovely.testlayers/blob/0.7.0/src/lovely/testlayers/util.py#L6-L13
-        """
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ex = s.connect_ex((host, port))
-        if ex == 0:
-            s.close()
-            return True
-        return False
+        return host_is_up(address.hostname, address.port)
 
 
 def run(command, shell=False, cwd=None):

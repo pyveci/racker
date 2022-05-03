@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from typing import Union
 
-from postroj.util import StoppableThread, ccmd, cmd_with_stderr, stderr_forwarder
+from postroj.util import StoppableThread, ccmd, cmd_with_stderr, stderr_forwarder, print_header
 
 
 class PostrojContainer:
@@ -60,6 +60,7 @@ class PostrojContainer:
             raise RuntimeError(f"Unable to spawn container {self.machine}. Reason: {stderr}. {hint}")
 
     def info(self):
+        print_header("Host information")
         print(self.run("/usr/bin/hostnamectl"))
 
     def run(self, command, verbose=False, **kwargs):
