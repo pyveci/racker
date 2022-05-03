@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import json
-import os
 import subprocess
-import time
-from abc import abstractmethod
-from pathlib import Path
-from typing import List
+from copy import copy
+from typing import Union
 
 from furl import furl
 
 from postroj.container import PostrojContainer, cache_directory
 from postroj.image import ImageProvider
-from postroj.model import OperatingSystem, LinuxDistribution
-from postroj.util import port_is_up, print_header, print_section_header, wait_for_port
+from postroj.model import OperatingSystem, ALL_DISTRIBUTIONS
+from postroj.util import print_header, print_section_header, wait_for_port
 
 # TODO: Make this configurable.
 download_directory = cache_directory / "downloads"
@@ -23,13 +20,6 @@ class ProbeBase:
 
     def __init__(self, container: PostrojContainer):
         self.container = container
-
-    @abstractmethod
-    def invoke(self):
-        """
-        Setup and run the probe.
-        """
-        raise NotImplementedError()
 
     def run(self, command: str):
         return self.container.run(command=command, verbose=True)
@@ -94,6 +84,7 @@ class ApacheProbe(ProbeBase):
 
         # Setup service.
         print("Installing Apache web server")
+        package_and_unit_name: Union[str, None] = None
         if self.is_debian:
             package_and_unit_name = "apache2"
             self.run("/usr/bin/apt-get update")
@@ -111,39 +102,6 @@ class ApacheProbe(ProbeBase):
         self.check_address("http://localhost:80")
 
 
-class PackageProbe(ProbeBase):
-
-    def invoke(self, package: str, unit_names: List[str], network_addresses: List[str], network_timeout: float = 5.0):
-
-        print_header(f"Checking units {','.join(unit_names)}")
-
-        # Download package.
-        if package.startswith("http"):
-            print(f"Downloading {package}")
-            self.run(f"/usr/bin/wget --no-clobber --directory-prefix={download_directory} {package}")
-            package = download_directory / os.path.basename(package)
-        else:
-            raise ValueError(f"Unable to acquire package at {package}")
-
-        # Install package.
-        print(f"Installing package {package}")
-        if self.is_debian:
-            self.run(f"/usr/bin/apt install --yes {package}")
-        if self.is_redhat:
-            self.run(f"/usr/bin/yum install -y {package}")
-
-        # Enable units.
-        for unit in unit_names:
-            self.run(f"/bin/systemctl enable {unit}")
-            self.run(f"/bin/systemctl start {unit}")
-
-        # Run probes: The systemd unit has to be "active" and the designated ports should be available.
-        for unit in unit_names:
-            self.run(f"/bin/systemctl is-active {unit}")
-        for address in network_addresses:
-            self.check_address(address, timeout=network_timeout)
-
-
 if __name__ == "__main__":
     """
     Spawn a container and wait until it has booted completely.
@@ -154,19 +112,11 @@ if __name__ == "__main__":
     - about one minute for the Apache probe.
     """
 
-    # Select operating systems.
-    all_distributions = [
-        OperatingSystem.DEBIAN_BUSTER.value,
-        OperatingSystem.DEBIAN_BULLSEYE.value,
-        OperatingSystem.UBUNTU_FOCAL.value,
-        OperatingSystem.UBUNTU_JAMMY.value,
-        # OperatingSystem.CENTOS_7.value,
-        OperatingSystem.CENTOS_8.value,
-    ]
+    selected_distributions = copy(ALL_DISTRIBUTIONS)
+    selected_distributions.remove(OperatingSystem.CENTOS_7.value)
 
     # Iterate selected distributions.
-    distribution: LinuxDistribution
-    for distribution in all_distributions:
+    for distribution in selected_distributions:
         print_section_header(f"Checking distribution {distribution.fullname}, release={distribution.release}")
 
         # Acquire rootfs filesystem image.
@@ -187,5 +137,5 @@ if __name__ == "__main__":
 
         print()
 
-    print(f"Successfully checked {len(all_distributions)} distributions:\n"
-          f"{json.dumps(list(map(str, all_distributions)), indent=2)}")
+    print(f"Successfully checked {len(selected_distributions)} distributions:\n"
+          f"{json.dumps(list(map(str, selected_distributions)), indent=2)}")

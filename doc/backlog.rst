@@ -11,9 +11,9 @@ postroj backlog
 Actionable
 **********
 
-- [o] Naming things.
-- [o] Refactoring.
-- [o] Implement ``postroj list-images``.
+- [x] Naming things.
+- [x] Refactoring.
+- [x] Implement ``postroj list-images``.
 - [o] Add Debian stretch.
 - [o] Implement some software tests.
 - [o] Release 0.1.0.

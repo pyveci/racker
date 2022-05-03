@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import os
 from typing import List
 
 import click
@@ -7,7 +8,8 @@ import click
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
 from postroj.model import find_distribution
-from postroj.probe import PackageProbe
+from postroj.probe import ProbeBase, download_directory
+from postroj.util import print_header
 
 
 @click.command()
@@ -39,4 +41,49 @@ def main(ctx, image: str, package: str, check_unit: List[str], check_network: Li
         pc.info()
 
         probe = PackageProbe(container=pc)
-        probe.invoke(package=package, unit_names=check_unit, network_addresses=check_network, network_timeout=network_timeout)
+        probe.setup(package=package, unit_names=check_unit)
+        probe.check(unit_names=check_unit, network_addresses=check_network, network_timeout=network_timeout)
+
+
+class PackageProbe(ProbeBase):
+    """
+    Acquire a distribution package (.deb or .rpm), install it, and verify that
+    a) a corresponding systemd unit is properly started and "active", and
+    b) the service responds to network requests on designated ports.
+    """
+
+    def setup(self, package: str, unit_names: List[str]):
+
+        print_header(f"Checking units {','.join(unit_names)}")
+
+        # Download package.
+        if package.startswith("http"):
+            print(f"Downloading {package}")
+            self.run(f"/usr/bin/wget --no-clobber --directory-prefix={download_directory} {package}")
+            package = download_directory / os.path.basename(package)
+        else:
+            raise ValueError(f"Unable to acquire package at {package}")
+
+        # Install package.
+        print(f"Installing package {package}")
+        if self.is_debian:
+            self.run(f"/usr/bin/apt install --yes {package}")
+        if self.is_redhat:
+            self.run(f"/usr/bin/yum install -y {package}")
+
+        # Enable units.
+        for unit in unit_names:
+            self.run(f"/bin/systemctl enable {unit}")
+            self.run(f"/bin/systemctl start {unit}")
+
+    def check(self, unit_names: List[str], network_addresses: List[str], network_timeout: float = 5.0):
+        """
+        Run probes.
+
+        1. The systemd unit has to be "active".
+        2. The designated ports should be available.
+        """
+        for unit in unit_names:
+            self.run(f"/bin/systemctl is-active {unit}")
+        for address in network_addresses:
+            self.check_address(address, timeout=network_timeout)

@@ -5,7 +5,7 @@ from pathlib import Path
 from textwrap import dedent, indent
 from typing import Union
 
-from postroj.model import LinuxDistribution, OperatingSystem, OperatingSystemFamily
+from postroj.model import LinuxDistribution, OperatingSystem, OperatingSystemFamily, ALL_DISTRIBUTIONS
 
 from postroj.util import cmd, is_dir_empty, scmd
 
@@ -237,17 +237,7 @@ if __name__ == "__main__":
     two minutes from scratch.
     """
 
-    # Select operating systems.
-    all_distributions = [
-        OperatingSystem.DEBIAN_BUSTER.value,
-        OperatingSystem.DEBIAN_BULLSEYE.value,
-        OperatingSystem.UBUNTU_FOCAL.value,
-        OperatingSystem.UBUNTU_JAMMY.value,
-        # OperatingSystem.CENTOS_7.value,
-        OperatingSystem.CENTOS_8.value,
-    ]
-
     # Create rootfs images for selected distributions.
-    for distribution in all_distributions:
+    for distribution in ALL_DISTRIBUTIONS:
         ip = ImageProvider(distribution=distribution)
         ip.setup()
