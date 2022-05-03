@@ -8,10 +8,14 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import List
 
-from postroj.container import PostrojContainer
+from postroj.container import PostrojContainer, cache_directory
 from postroj.image import ImageProvider
 from postroj.model import OperatingSystem, LinuxDistribution
 from postroj.util import host_is_up, print_header, print_section_header
+
+
+# TODO: Make this configurable.
+download_directory = cache_directory / "downloads"
 
 
 class ProbeBase:
@@ -110,8 +114,8 @@ class PackageProbe(ProbeBase):
         # Download package.
         if package.startswith("http"):
             print(f"Downloading {package}")
-            self.run(f"/usr/bin/wget --directory-prefix=/tmp {package}")
-            package = Path("/tmp") / os.path.basename(package)
+            self.run(f"/usr/bin/wget --no-clobber --directory-prefix={download_directory} {package}")
+            package = download_directory / os.path.basename(package)
         else:
             raise ValueError(f"Unable to acquire package at {package}")
 

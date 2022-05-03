@@ -9,6 +9,9 @@ from typing import Union
 
 from postroj.util import StoppableThread, ccmd, cmd_with_stderr, stderr_forwarder, print_header
 
+# TODO: Make this configurable.
+cache_directory = Path("/var/cache/postroj")
+
 
 class PostrojContainer:
     """
@@ -33,14 +36,20 @@ class PostrojContainer:
         if not self.rootfs.exists():
             raise Exception(f"Image at {self.rootfs} not found")
 
+        cache_directory.mkdir(parents=True, exist_ok=True)
+        print(f"INFO: Cache directory is {cache_directory}")
+
         # TODO: Why does `--ephemeral` not work?
         # TODO: Maybe use `--register=false`?
         # TODO: What about `--notify-ready=true`?
         command = f"""
             /usr/bin/systemd-nspawn \
                 --quiet --boot --link-journal=try-guest \
-                --volatile=overlay --bind-ro=/etc/resolv.conf:/etc/resolv.conf \
-                --directory={self.rootfs} --machine={self.machine}
+                --volatile=overlay \
+                --bind-ro=/etc/resolv.conf:/etc/resolv.conf \
+                --bind={cache_directory}:{cache_directory} \
+                --directory={self.rootfs} \
+                --machine={self.machine}
         """.strip()
         print(f"Spawning container with: {command}")
 
