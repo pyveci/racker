@@ -2,14 +2,13 @@
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import json
 import subprocess
-from copy import copy
 from typing import Union
 
 from furl import furl
 
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
-from postroj.model import OperatingSystem, ALL_DISTRIBUTIONS
+from postroj.model import ALL_DISTRIBUTIONS
 from postroj.util import print_header, print_section_header, wait_for_port
 
 
@@ -109,8 +108,7 @@ if __name__ == "__main__":
     - about one minute for the Apache probe.
     """
 
-    selected_distributions = copy(ALL_DISTRIBUTIONS)
-    selected_distributions.remove(OperatingSystem.CENTOS_7.value)
+    selected_distributions = ALL_DISTRIBUTIONS
 
     # Iterate selected distributions.
     for distribution in selected_distributions:

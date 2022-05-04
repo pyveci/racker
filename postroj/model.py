@@ -69,7 +69,7 @@ ALL_DISTRIBUTIONS: List[LinuxDistribution] = [
     OperatingSystem.DEBIAN_BULLSEYE.value,
     OperatingSystem.UBUNTU_FOCAL.value,
     OperatingSystem.UBUNTU_JAMMY.value,
-    OperatingSystem.CENTOS_7.value,
+    # OperatingSystem.CENTOS_7.value,
     OperatingSystem.CENTOS_8.value,
 ]
 
