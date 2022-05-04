@@ -70,12 +70,11 @@ class ImageProvider:
         """
 
         # Acquire image.
-        archive_file = archive_directory / os.path.basename(self.distribution.image)
+        archive_file = download_directory / os.path.basename(self.distribution.image)
         archive_image = archive_directory / self.distribution.fullname
-        archive_image.mkdir(parents=True, exist_ok=True)
-        if not archive_file.exists():
-            print(cmd(f"wget --directory-prefix={archive_directory} {self.distribution.image}"))
-        if is_dir_empty(archive_image):
+        print(cmd(f"wget --continue --no-clobber --directory-prefix={download_directory} {self.distribution.image}"))
+        if not archive_image.exists() or is_dir_empty(archive_image):
+            archive_image.mkdir(parents=True, exist_ok=True)
             print(cmd(f"tar --directory={archive_image} -xf {archive_file}"))
 
         # Prepare image by adding additional packages.
