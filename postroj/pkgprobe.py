@@ -21,6 +21,9 @@ from postroj.util import print_header
 @click.option('--network-timeout', type=float, default=5.0)
 @click.pass_context
 def main(ctx, image: str, package: str, check_unit: List[str], check_network: List[str], network_timeout: float = 5.0):
+    """
+    Verify a distribution package
+    """
 
     # Figure out the image from the list of available ones.
     dist = find_distribution(image)

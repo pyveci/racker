@@ -21,6 +21,9 @@ def cli(debug):
 @click.command()
 @click.pass_context
 def list_images(ctx):
+    """
+    List all available filesystem images
+    """
     print(json.dumps(postroj.model.list_images(), indent=2))
 
 
