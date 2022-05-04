@@ -24,6 +24,12 @@ class OperatingSystemFamily(Enum):
 
 
 class OperatingSystem(Enum):
+    DEBIAN_STRETCH = LinuxDistribution(
+        family="debian",
+        name="stretch",
+        release="9",
+        image="docker://docker.io/debian:stretch-slim",
+    )
     DEBIAN_BUSTER = LinuxDistribution(
         family="debian",
         name="buster",
@@ -65,6 +71,7 @@ class OperatingSystem(Enum):
 
 
 ALL_DISTRIBUTIONS: List[LinuxDistribution] = [
+    OperatingSystem.DEBIAN_STRETCH.value,
     OperatingSystem.DEBIAN_BUSTER.value,
     OperatingSystem.DEBIAN_BULLSEYE.value,
     OperatingSystem.UBUNTU_FOCAL.value,
