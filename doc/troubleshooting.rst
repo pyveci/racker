@@ -7,6 +7,19 @@ Troubleshooting
     Just some random notes.
 
 
+*******************
+machinectl pull-raw
+*******************
+
+Acquiring an image with ``pull-raw`` like::
+
+    machinectl pull-raw --verify=no \
+        https://ftp-stud.hs-esslingen.de/pub/fedora/linux/releases/35/Cloud/x86_64/images/Fedora-Cloud-Base-35-1.2.x86_64.raw.xz \
+        Fedora-Cloud-Base-35-1.2.x86-64
+
+will yield large artefacts. Is there a way around it?
+
+
 ******************************
 systemd-nspawn and OCI bundles
 ******************************

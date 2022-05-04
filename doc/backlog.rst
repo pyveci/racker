@@ -17,7 +17,10 @@ Actionable
 - [o] Add Debian stretch.
 - [o] Implement some software tests.
 - [o] Release 0.1.0.
-- [o] Option to force downloading and rebuilding rootfs images.
+- [o] Option to force downloading and rebuilding rootfs images by using ``postroj pull``.
+- [o] Improve HTTP probe request/response handling and verification
+- [o] Accept packages from filesystem by using ``copy-to``.
+  https://www.freedesktop.org/software/systemd/man/machinectl.html#copy-to%20NAME%20PATH%20%5BPATH%5D
 
 
 *****
@@ -40,6 +43,7 @@ Ideas
 
   - https://forums.raspberrypi.com/viewtopic.php?t=232417&start=100
   - https://github.com/sakaki-/raspbian-nspawn-64
+  - https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-generic-arm64.tar.xz
 
 - Use/integrate with ``mkosi``.
 
@@ -81,6 +85,21 @@ Ideas
 
 - How can postroj be combined with Packer and/or Buildah?
 
+- Look into ``casync`` and casync Bundles
+
+  - http://0pointer.net/blog/casync-a-tool-for-distributing-file-system-images.html
+  - https://github.com/systemd/casync
+  - https://moinakg.wordpress.com/2013/06/22/high-performance-content-defined-chunking/
+  - https://invidious.fdn.fr/watch?v=JnNkBJ6pr9s
+  - https://github.com/folbricht/desync
+  - https://github.com/rauc/rauc/issues/511
+  - https://rauc.readthedocs.io/en/latest/advanced.html
+  - https://archive.fosdem.org/2018/schedule/event/distributing_os_images_with_casync/
+  - https://archive.fosdem.org/2018/schedule/event/containers_casync/
+
+- Look into Kubernetes Image Builder
+
+  - https://github.com/kubernetes-sigs/image-builder
 
 
 *************
