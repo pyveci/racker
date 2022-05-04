@@ -83,7 +83,8 @@ class ImageProvider:
         # Prepare image by deactivating services which are hogging the bootstrapping.
         scmd(directory=archive_image,
              command="systemctl disable ssh systemd-networkd-wait-online systemd-resolved")
-        scmd(directory=archive_image, command="systemctl mask systemd-remount-fs")
+        scmd(directory=archive_image,
+             command="systemctl mask systemd-remount-fs systemd-timedated")
 
         # Would bring boot time from 1.2s down to 0.6s, but
         # sometimes container does not signal readiness then.
