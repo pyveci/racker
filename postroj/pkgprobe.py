@@ -60,7 +60,7 @@ class PackageProbe(ProbeBase):
         # Download package.
         if package.startswith("http"):
             print(f"Downloading {package}")
-            self.run(f"/usr/bin/wget --no-clobber --directory-prefix={download_directory} {package}")
+            self.run(f"/usr/bin/wget --continue --no-clobber --directory-prefix={download_directory} {package}")
             package = download_directory / os.path.basename(package)
         else:
             raise ValueError(f"Unable to acquire package at {package}")
