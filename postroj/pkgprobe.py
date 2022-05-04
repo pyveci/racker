@@ -8,7 +8,8 @@ import click
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
 from postroj.model import find_distribution
-from postroj.probe import ProbeBase, download_directory
+from postroj.probe import ProbeBase
+from postroj.settings import download_directory
 from postroj.util import print_header
 
 

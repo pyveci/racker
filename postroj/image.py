@@ -6,12 +6,9 @@ from textwrap import dedent, indent
 from typing import Union
 
 from postroj.model import LinuxDistribution, OperatingSystem, OperatingSystemFamily, ALL_DISTRIBUTIONS
+from postroj.settings import archive_directory, image_directory, download_directory
 
 from postroj.util import cmd, is_dir_empty, scmd
-
-# TODO: Make this configurable.
-archive_directory = Path("/var/lib/postroj/archive")
-image_directory = Path("/var/lib/postroj/images")
 
 
 class ImageProvider:

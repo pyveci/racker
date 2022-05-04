@@ -7,10 +7,8 @@ import time
 from pathlib import Path
 from typing import Union
 
+from postroj.settings import cache_directory
 from postroj.util import StoppableThread, ccmd, cmd_with_stderr, stderr_forwarder, print_header
-
-# TODO: Make this configurable.
-cache_directory = Path("/var/cache/postroj")
 
 
 class PostrojContainer:

@@ -7,13 +7,10 @@ from typing import Union
 
 from furl import furl
 
-from postroj.container import PostrojContainer, cache_directory
+from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
 from postroj.model import OperatingSystem, ALL_DISTRIBUTIONS
 from postroj.util import print_header, print_section_header, wait_for_port
-
-# TODO: Make this configurable.
-download_directory = cache_directory / "downloads"
 
 
 class ProbeBase:
