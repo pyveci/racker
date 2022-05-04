@@ -3,6 +3,7 @@
 import os
 import shlex
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Union
@@ -15,6 +16,8 @@ class PostrojContainer:
     """
     A lightweight wrapper to manage `systemd-nspawn` containers.
     """
+
+    WAIT_TIMEOUT_SECONDS = 15.0
 
     def __init__(self, rootfs: Union[Path, str], machine: str = None):
         self.rootfs = Path(rootfs)
@@ -71,7 +74,6 @@ class PostrojContainer:
         print(self.run("/usr/bin/hostnamectl"))
 
     def run(self, command, verbose=False, **kwargs):
-        #kwargs["stderr"] = subprocess.PIPE
         output = ccmd(self.machine, command, **kwargs)
         if verbose:
             print(output)
@@ -79,17 +81,21 @@ class PostrojContainer:
         
     def terminate(self):
         """
-        Shut down the container.
+        Terminate the container.
+
+        Immediately terminates a virtual machine or container, without cleanly shutting it down.
+        This kills all processes of the virtual machine or container and deallocates all resources
+        attached to that instance. Use `poweroff` to issue a clean shutdown request.
+
+        -- https://www.freedesktop.org/software/systemd/man/machinectl.html#terminate%20NAME%E2%80%A6
         """
 
         if self.is_down():
+            print(f"Container {self.machine} not running, skipping termination")
             return
 
         print(f"Terminating container {self.machine}")
-        subprocess.check_output(["/bin/machinectl", "poweroff", self.machine])
-
-        # TODO: Appropriately wait for the container to shut down?
-        # subprocess.check_output(["/bin/machinectl", "terminate", self.machine])
+        subprocess.check_output(["/bin/machinectl", "terminate", self.machine])
 
     def is_down(self):
         command = f"/bin/systemctl is-system-running --machine={self.machine}"
@@ -98,42 +104,59 @@ class PostrojContainer:
             return True
         return False
 
-    def wait(self):
+    def wait(self, timeout=WAIT_TIMEOUT_SECONDS):
         """
         Wait for the container to have started completely.
+        Currently, this uses a quirky poll-based implementation.
 
-        Currently, this uses a quirky poll-based implementation. Maybe we can
-        find a better, event-based solution. We already played around with
-        `pystemd.run` [1], but that would increase the dependency depth
-        significantly. However, we are not completely opposed to bringing it to
-        the code base.
+        TODO: Maybe we can find a better, event-based solution.
+
+        We already played around with `pystemd.run` [1], but that would
+        increase the dependency depth significantly. However, we are not
+        completely opposed to bringing it to the code base.
 
         [1] https://github.com/facebookincubator/pystemd
         """
-        # TODO: Maybe we can find a better way to wait for the machine to boot completely.
-        command = f"""
-            /bin/systemctl is-system-running --machine={self.machine} | egrep -v "(starting|down)"
-        """.strip()
-        print(f"Waiting for container {self.machine} to boot completely")
-        # Possible values: `Failed to connect to bus: Host is down`, `starting`, `started`, `degraded`.
+
+        print(f"Waiting for container {self.machine} to become available within {timeout} seconds")
+
+        # Define the probe command to check whether the container has booted.
+        # Possible values: Failed to connect to bus: Host is down`, `starting`, `started`, `degraded`.
+        """
+        - Failed to connect to bus: Host is down
+        - Failed to connect to bus: Protocol error
+        - starting
+        - started, running, degraded
+        - stopping
+        - Failed to query system state: Connection reset by peer
+        - unknown
+        - Failed to connect to bus: Protocol error
+        - Failed to connect to bus: No such file or directory
+        - Failed to connect to bus: Host is down
+        """
         # TODO: Compensate for "starting" output. Valid "startedness" would be any of "started" or "degraded".
         #       Background: A system can be fully booted and functional but signals "degraded" if one or more
         #       units signalled errors.
-        seconds = 5
+        command = f"""
+            /bin/systemctl is-system-running --machine={self.machine} | egrep "(started|running|degraded)" > /dev/null
+        """.strip()
+
         interval = 0.1
-        count = int(1 / interval * seconds)
-        while True:
+        while timeout > 0:
+
             os.system("stty sane")
             #print("\33[3J")
-            print(command)
             p = subprocess.run(command, shell=True)
             if p.returncode == 0:
                 break
-            if count == 0:
-                self.kill()
-                raise Exception("Timeout")
-            count -= 1
+
             time.sleep(interval)
+            timeout -= interval
+            sys.stderr.write(".")
+            sys.stderr.flush()
+
+        sys.stderr.write("\n")
+        sys.stderr.flush()
 
         # The login prompt messes up the terminal, let's make things sane again.
         # https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console
@@ -148,6 +171,12 @@ class PostrojContainer:
         # print("\033[3J", end='')
         # print("\033[H\033[J", end="")
         # print("\033c\033[3J", end='')
+
+        # When the container was not able to boot completely and in time, kill
+        # it and raise an exception.
+        if timeout <= 0:
+            self.kill()
+            raise TimeoutError(f"Timeout while spawning container {self.machine}")
 
     def __enter__(self):
         return self
