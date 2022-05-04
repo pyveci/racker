@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import json
+import sys
 
 import click
 
 import postroj
 from postroj import runner, pkgprobe
-from postroj.model import list_images
+from postroj.image import ImageProvider
+from postroj.model import list_images, find_distribution
 
 
 @click.group()
@@ -22,6 +24,25 @@ def list_images(ctx):
     print(json.dumps(postroj.model.list_images(), indent=2))
 
 
+@click.command()
+@click.argument("name", type=str)
+@click.pass_context
+def pull_image(ctx, name: str):
+    """
+    Pull an image from a suitable location
+    """
+    try:
+        distribution = find_distribution(name)
+    except ValueError:
+        print(f"ERROR: Image not found: {name}")
+        sys.exit(1)
+
+    ip = ImageProvider(distribution=distribution, force=True)
+    print(f"Installing image {name} at {ip.image}")
+    ip.setup()
+
+
 cli.add_command(cmd=runner.main, name="run")
 cli.add_command(cmd=pkgprobe.main, name="pkgprobe")
 cli.add_command(cmd=list_images, name="list-images")
+cli.add_command(cmd=pull_image, name="pull")

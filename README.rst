@@ -68,6 +68,14 @@ Setup
 Usage
 *****
 
+::
+
+    # List available distribution images
+    postroj list-images
+
+    # Acquire specific distribution image
+    postroj pull debian-bullseye
+
 Some demo programs::
 
     # Provide rootfs container filesystem images for all available distributions.

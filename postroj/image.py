@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import os.path
+import shutil
 from pathlib import Path
 from textwrap import dedent, indent
 from typing import Union
@@ -25,8 +26,9 @@ class ImageProvider:
 
     ADDITIONAL_PACKAGES = ["curl", "wget"]
 
-    def __init__(self, distribution: LinuxDistribution):
+    def __init__(self, distribution: LinuxDistribution, force: bool = True):
         self.distribution = distribution
+        self.force = force
         archive_directory.mkdir(parents=True, exist_ok=True)
         image_directory.mkdir(parents=True, exist_ok=True)
 
@@ -70,28 +72,32 @@ class ImageProvider:
         """
 
         # Acquire image.
-        archive_file = download_directory / os.path.basename(self.distribution.image)
-        archive_image = archive_directory / self.distribution.fullname
+        image_tarball = download_directory / os.path.basename(self.distribution.image)
+        rootfs = archive_directory / self.distribution.fullname
+
+        if self.force:
+            shutil.rmtree(rootfs)
+
         print(cmd(f"wget --continue --no-clobber --directory-prefix={download_directory} {self.distribution.image}"))
-        if not archive_image.exists() or is_dir_empty(archive_image):
-            archive_image.mkdir(parents=True, exist_ok=True)
-            print(cmd(f"tar --directory={archive_image} -xf {archive_file}"))
+        if not rootfs.exists() or is_dir_empty(rootfs):
+            rootfs.mkdir(parents=True, exist_ok=True)
+            print(cmd(f"tar --directory={rootfs} -xf {image_tarball}"))
 
         # Prepare image by adding additional packages.
-        scmd(directory=archive_image, command=f"sh -c 'apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES)}'")
+        scmd(directory=rootfs, command=f"sh -c 'apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES)}'")
 
         # Prepare image by deactivating services which are hogging the bootstrapping.
-        scmd(directory=archive_image,
+        scmd(directory=rootfs,
              command="systemctl disable ssh systemd-networkd-wait-online systemd-resolved")
-        scmd(directory=archive_image,
+        scmd(directory=rootfs,
              command="systemctl mask systemd-remount-fs systemd-timedated")
 
         # Would bring boot time from 1.2s down to 0.6s, but
         # sometimes container does not signal readiness then.
-        # scmd(directory=archive_image, command="systemctl mask snapd snapd.socket")
+        # scmd(directory=rootfs, command="systemctl mask snapd snapd.socket")
 
         # Activate image.
-        self.activate_image(archive_image)
+        self.activate_image(rootfs)
 
     def setup_centos(self):
         """
@@ -204,6 +210,11 @@ class ImageProvider:
         # Download and extract image.
         archive_oci = archive_directory / f"{self.distribution.fullname}.oci"
         archive_image = archive_directory / f"{self.distribution.fullname}.img"
+
+        if self.force:
+            shutil.rmtree(archive_oci)
+            shutil.rmtree(archive_image)
+
         if not archive_oci.exists():
             cmd(f"skopeo copy --override-os=linux {self.distribution.image} oci:{archive_oci}:{self.distribution.fullname}")
         if not archive_image.exists() or is_dir_empty(archive_image):
