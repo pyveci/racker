@@ -187,19 +187,3 @@ class PostrojContainer:
             self.thread.stop()
             del self.thread
             self.thread = None
-
-
-if __name__ == "__main__":
-    """
-    Spawn a container and wait until it has booted completely.
-    Then, display host information about the container.
-    """
-    # TODO: Make this configurable.
-    rootfs_paths = [
-        Path("/var/lib/postroj/images/debian-buster"),
-    ]
-    for rootfs_path in rootfs_paths:
-        with PostrojContainer(rootfs=rootfs_path) as pc:
-            pc.boot()
-            pc.wait()
-            pc.info()

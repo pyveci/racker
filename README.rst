@@ -14,8 +14,8 @@ systemd, VirtualBox, Vagrant, Docker, Python and more.
 
 ``postroj`` is ...
 
-- A managed runtime harness for testing software packages and similar purposes,
-  in different environments.
+- A runtime harness for testing software packages and similar purposes, in
+  different environments.
 
 - A lightweight wrapper around ``systemd-nspawn`` to provide container
   environments with ``systemd``.
@@ -90,14 +90,12 @@ Basic commands::
     # Acquire rootfs images for all available distributions.
     postroj pull --all
 
-Some demo programs::
-
-    # Demo: Invoke `hostnamectl` on a Debian buster container.
-    time python -m postroj.container
+    # Run a self test procedure, invoking `hostnamectl` on all containers.
+    postroj selftest hostnamectl
 
 Package testing::
 
-    # Run a self test procedure.
+    # Run a self test procedure, invoking example probes on all containers.
     postroj selftest pkgprobe
 
     # Run two basic probes on different operating systems.

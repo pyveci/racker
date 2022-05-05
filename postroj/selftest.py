@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import json
 from copy import copy
 from typing import Union
@@ -30,9 +32,7 @@ def selftest_pkgprobe():
     - Run two probe actions on the container.
     """
 
-    selected_distributions = copy(ALL_DISTRIBUTIONS)
-    selected_distributions.remove(OperatingSystem.FEDORA_35.value)
-    selected_distributions.remove(OperatingSystem.CENTOS_7.value)
+    selected_distributions = get_selftest_distributions()
 
     # Iterate selected distributions.
     for distribution in selected_distributions:
@@ -93,4 +93,38 @@ class ApacheProbe(ProbeBase):
         self.check_address("http://localhost:80")
 
 
+@click.command()
+def selftest_hostnamectl():
+    """
+    Spawn a container and wait until it has booted completely.
+    Then, display host information about the container, using `hostnamectl`.
+    """
+    selected_distributions = get_selftest_distributions()
+
+    # Iterate all suitable operating systems.
+    for distribution in selected_distributions:
+        print_section_header(f"Spawning {distribution.fullname}")
+
+        # Acquire path to rootfs filesystem image.
+        ip = ImageProvider(distribution=distribution)
+        rootfs_path = ip.image
+
+        # Invoke `hostnamectl` on each container.
+        with PostrojContainer(rootfs=rootfs_path) as pc:
+            pc.boot()
+            pc.wait()
+            pc.info()
+
+
+def get_selftest_distributions():
+    selected_distributions = copy(ALL_DISTRIBUTIONS)
+
+    # Mask two distributions which show unstable cycling behavior.
+    selected_distributions.remove(OperatingSystem.FEDORA_35.value)
+    selected_distributions.remove(OperatingSystem.CENTOS_7.value)
+
+    return selected_distributions
+
+
 selftest_main.add_command(cmd=selftest_pkgprobe, name="pkgprobe")
+selftest_main.add_command(cmd=selftest_hostnamectl, name="hostnamectl")
