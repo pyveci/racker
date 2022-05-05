@@ -261,15 +261,3 @@ class ImageProvider:
             return target_path
         else:
             raise ValueError(f"Unable to activate image at {rootfs}")
-
-
-if __name__ == "__main__":
-    """
-    Provisioning rootfs images for all listed operating systems takes about
-    two minutes from scratch.
-    """
-
-    # Create rootfs images for selected distributions.
-    for distribution in ALL_DISTRIBUTIONS:
-        ip = ImageProvider(distribution=distribution)
-        ip.setup()

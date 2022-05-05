@@ -87,10 +87,10 @@ Basic commands::
     # Acquire rootfs image.
     postroj pull debian-bullseye
 
-Some demo programs::
+    # Acquire rootfs images for all available distributions.
+    postroj pull --all
 
-    # Provide rootfs container filesystem images for all available distributions.
-    python -m postroj.image
+Some demo programs::
 
     # Demo: Invoke `hostnamectl` on a Debian buster container.
     time python -m postroj.container

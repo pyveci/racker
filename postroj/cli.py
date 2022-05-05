@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import json
-import sys
 
 import click
 
-import postroj
 from postroj import runner, pkgprobe, selftest
-from postroj.image import ImageProvider
-from postroj.model import list_images, find_distribution
+from postroj.api import pull_single_image, pull_multiple_images
+from postroj.model import list_images
 
 
 @click.group()
@@ -20,32 +18,33 @@ def cli(debug):
 
 @click.command()
 @click.pass_context
-def list_images(ctx):
+def cli_list_images(ctx):
     """
     List all available filesystem images
     """
-    print(json.dumps(postroj.model.list_images(), indent=2))
+    print(json.dumps(list_images(), indent=2))
 
 
 @click.command()
-@click.argument("name", type=str)
+@click.argument("name", type=str, required=False)
+@click.option("--all", "pull_all", is_flag=True, required=False)
 @click.pass_context
-def pull_image(ctx, name: str):
+def cli_pull_image(ctx, name: str, pull_all: bool):
     """
-    Pull an image from a suitable location
+    Pull rootfs images from suitable locations
     """
-    try:
-        distribution = find_distribution(name)
-    except ValueError:
-        print(f"ERROR: Image not found: {name}")
-        sys.exit(1)
+    if not name and not pull_all:
+        raise click.BadOptionUsage(option_name="name", message="Need image name or `--all`")
 
-    ip = ImageProvider(distribution=distribution, force=True)
-    ip.setup()
+    if pull_all:
+        names = list_images()
+        pull_multiple_images(names)
+    else:
+        pull_single_image(name)
 
 
-cli.add_command(cmd=list_images, name="list-images")
-cli.add_command(cmd=pull_image, name="pull")
+cli.add_command(cmd=cli_list_images, name="list-images")
+cli.add_command(cmd=cli_pull_image, name="pull")
 cli.add_command(cmd=pkgprobe.main, name="pkgprobe")
 cli.add_command(cmd=selftest.selftest_main, name="selftest")
 # cli.add_command(cmd=runner.main, name="run")
