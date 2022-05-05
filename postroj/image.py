@@ -43,8 +43,12 @@ class ImageProvider:
             self.setup_debian()
         elif self.distribution.family == OperatingSystemFamily.UBUNTU.value:
             self.setup_ubuntu()
+        elif self.distribution.family == OperatingSystemFamily.FEDORA.value:
+            self.setup_fedora()
         elif self.distribution.family == OperatingSystemFamily.CENTOS.value:
             self.setup_centos()
+        else:
+            raise ValueError(f"Unknown operating system family: {self.distribution.family}")
 
     def setup_debian(self):
         """
@@ -97,6 +101,20 @@ class ImageProvider:
         # Would bring boot time from 1.2s down to 0.6s, but
         # sometimes container does not signal readiness then.
         # scmd(directory=rootfs, command="systemctl mask snapd snapd.socket")
+
+        # Activate image.
+        self.activate_image(rootfs)
+
+    def setup_fedora(self):
+        """
+        Fedora images are acquired from Docker Hub.
+        """
+
+        # Acquire image.
+        rootfs = self.acquire_from_docker()
+
+        # Prepare image by installing systemd and additional packages.
+        scmd(directory=rootfs, command=f"dnf install -y systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
 
         # Activate image.
         self.activate_image(rootfs)

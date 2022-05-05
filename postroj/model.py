@@ -20,6 +20,7 @@ class LinuxDistribution:
 class OperatingSystemFamily(Enum):
     DEBIAN = "debian"
     UBUNTU = "ubuntu"
+    FEDORA = "fedora"
     CENTOS = "centos"
 
 
@@ -68,6 +69,24 @@ class OperatingSystem(Enum):
         release="22",
         image="https://cloud-images.ubuntu.com/minimal/daily/jammy/current/jammy-minimal-cloudimg-amd64-root.tar.xz",
     )
+    FEDORA_35 = LinuxDistribution(
+        family="fedora",
+        name="35",
+        release="35",
+        image="docker://docker.io/fedora:35",
+    )
+    FEDORA_36 = LinuxDistribution(
+        family="fedora",
+        name="36",
+        release="36",
+        image="docker://docker.io/fedora:36",
+    )
+    FEDORA_37 = LinuxDistribution(
+        family="fedora",
+        name="37",
+        release="37",
+        image="docker://docker.io/fedora:37",
+    )
     CENTOS_7 = LinuxDistribution(
         family="centos",
         name="7",
@@ -90,6 +109,9 @@ ALL_DISTRIBUTIONS: List[LinuxDistribution] = [
     OperatingSystem.DEBIAN_SID.value,
     OperatingSystem.UBUNTU_FOCAL.value,
     OperatingSystem.UBUNTU_JAMMY.value,
+    OperatingSystem.FEDORA_35.value,
+    OperatingSystem.FEDORA_36.value,
+    OperatingSystem.FEDORA_37.value,
     OperatingSystem.CENTOS_7.value,
     OperatingSystem.CENTOS_8.value,
 ]
