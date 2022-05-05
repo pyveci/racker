@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import asyncio
 import os
 import shlex
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Union
+
+import subprocess_tee
 
 from postroj.settings import cache_directory
 from postroj.util import StoppableThread, ccmd, print_header, hcmd, fix_tty
@@ -26,6 +30,7 @@ class PostrojContainer:
         self.machine = machine
         self.process: subprocess.Popen = None
         self.thread: StoppableThread = None
+        self.destroy_after_use: bool = True
 
     def boot(self):
         """
@@ -41,6 +46,13 @@ class PostrojContainer:
         print(f"INFO: Cache directory is {cache_directory}")
 
         print_header(f"Spawning container {self.machine}")
+
+        """
+        if not self.is_down():
+            self.destroy_after_use = False
+            hint = f"Hint: Please run `machinectl terminate {self.machine}` and try again."
+            raise RuntimeError(f"Container {self.machine} already running. {hint}")
+        """
 
         # TODO: Why does `--ephemeral` not work?
         # TODO: Maybe use `--register=false`?
@@ -58,19 +70,41 @@ class PostrojContainer:
 
         # Invoke command in background.
         # TODO: Add option to suppress output, unless `--verbose` is selected.
+        abort_signal = threading.Event()
+        thread_exception = None
+
         def spawn():
-            self.process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
+            """
+            Thread which is  running the `systemd-nspawn` command to launch the
+            container instance.
+            """
+            nonlocal thread_exception
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            self.process = subprocess_tee.run(shlex.split(command))
+            try:
+                self.process.check_returncode()
+            except subprocess.CalledProcessError:
+                self.destroy_after_use = False
+                thread_exception = self.handle_nspawn_error()
+                abort_signal.set()
+
         self.thread = StoppableThread(target=spawn)
         self.thread.start()
 
-    def check_process_returncode(self):
-        if self.process.returncode != 0:
-            stderr = self.process.stderr.read().decode().strip()
-            print("self.process.stderr:", stderr)
-            hint = ""
-            if "already exists" in stderr:
-                hint = f"Hint: Please run `machinectl terminate {self.machine}` and try again."
-            raise RuntimeError(f"Unable to spawn container {self.machine}. Reason: {stderr}. {hint}")
+        if abort_signal.wait(0.25):
+            if thread_exception:
+                raise thread_exception[1].with_traceback(thread_exception[2])
+
+    def handle_nspawn_error(self):
+        exc_info = sys.exc_info()
+        exc = exc_info[1]
+        stderr = exc.stderr.strip()
+        if "already exists" in stderr:
+            hint = f"Please run `machinectl terminate {self.machine}` and try again."
+            surrogate_exception = RuntimeError(f"Unable to spawn container {self.machine}. Reason: {stderr}. {hint}")
+            exc_info = (exc_info[0], surrogate_exception, exc_info[2])
+        return exc_info
 
     def info(self):
         print_header("Host information")
@@ -165,19 +199,22 @@ class PostrojContainer:
         # When the container was not able to boot completely and in time, kill
         # it and raise an exception.
         if timeout <= 0:
-            self.kill()
+            self.destroy()
             raise TimeoutError(f"Timeout while spawning container {self.machine}")
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.kill()
+        self.destroy()
         fix_tty()
 
-    def kill(self):
-        self.terminate()
-        if self.process is not None:
+    def destroy(self):
+        if self.destroy_after_use:
+            self.terminate()
+        else:
+            print("DEBUG: Skipping container destruction")
+        if self.process is not None and not isinstance(self.process, subprocess_tee.CompletedProcess):
             self.process.kill()
             # time.sleep(0.1)
             self.process.terminate()
