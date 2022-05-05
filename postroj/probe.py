@@ -31,15 +31,15 @@ class ProbeBase:
         print_header(f"Probing unit {name}")
         try:
             process = self.run(f"/bin/systemctl is-active {name}", capture=True)
-            print(f"INFO: Status of unit {name}: {process.stdout.strip()}")
+            print(f"INFO: Status of unit '{name}': {process.stdout.strip()}")
         except subprocess.CalledProcessError as ex:
             unit_status = ex.stdout.strip()
-            print(f"INFO: Status of unit {name}: {unit_status}")
+            print(f"INFO: Status of unit '{name}': {unit_status}")
             if unit_status in ["inactive"]:
-                print(f"ERROR: Probe failed, unit {name} is not active")
+                print(f"ERROR: Probe failed, unit '{name}' is not active")
                 raise SystemExit(ex.returncode)
             else:
-                print(f"ERROR: Unit {name} has unknown status: {unit_status}")
+                print(f"ERROR: Unit '{name}' has unknown status: {unit_status}")
                 raise
 
     def check_address(self, address: str, timeout: float = 5.0, interval: float = 0.05):

@@ -15,7 +15,7 @@ systemd, VirtualBox, Vagrant, Docker, Python and more.
 ``postroj`` is ...
 
 - A runtime harness for testing software packages and similar purposes, in
-  different environments.
+  different environments, mostly run headless and non-interactive.
 
 - A lightweight wrapper around ``systemd-nspawn`` to provide container
   environments with ``systemd``.

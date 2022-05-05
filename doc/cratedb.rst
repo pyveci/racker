@@ -23,10 +23,10 @@ Test package on Debian bullseye::
         --check-network=tcp://localhost:5432 \
         --network-timeout=30
 
-Test package on CentOS 8::
+Test package on Fedora 36::
 
     postroj pkgprobe \
-        --image=centos-8 \
+        --image=fedora-36 \
         --package=https://cdn.crate.io/downloads/yum/testing/7/x86_64/crate-4.7.2-1.x86_64.rpm \
         --check-unit=crate \
         --check-network=http://localhost:4200 \

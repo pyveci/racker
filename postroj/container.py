@@ -90,11 +90,12 @@ class PostrojContainer:
         -- https://www.freedesktop.org/software/systemd/man/machinectl.html#terminate%20NAME%E2%80%A6
         """
 
+        print_header(f"Shutting down container {self.machine}")
+
         if self.is_down():
             print(f"Container {self.machine} not running, skipping termination")
             return
 
-        print_header(f"Terminating container {self.machine}")
         hcmd(f"/bin/machinectl terminate {self.machine}")
 
     def is_down(self):

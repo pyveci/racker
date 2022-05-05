@@ -7,48 +7,44 @@ postroj backlog
     Those are just random notes about ideas and more.
 
 
-**********
-Actionable
-**********
+************
+Actionable I
+************
 
 - [x] Naming things.
 - [x] Refactoring.
 - [x] Implement ``postroj list-images``.
-- [o] Add more Linux distributions.
-- [o] Improve robustness and convenience.
+- [x] Improve robustness and convenience.
+- [x] Add more Linux distributions.
+- [o] Improve convenience of Vagrant sandbox with autosetup and sudo permissions
 - [o] Implement ``postroj run``.
-- [o] Implement some software tests.
+- [o] Improve textual output of probe reporting. Colors?
+- [o] Add logging.
+- [o] Add some software tests.
 - [o] Release 0.1.0.
-- [o] Option to force downloading and rebuilding rootfs images by using ``postroj pull``.
+
+
+*************
+Actionable II
+*************
+- [o] Optionally force downloading and rebuilding rootfs images by using
+  ``postroj pull --force``, re-triggering the ``skopeo`` and ``umoci`` steps.
 - [o] Improve HTTP probe request/response handling and verification.
-  Q: Would it be possible to implement it in Python?
+  Q: Would it be possible to implement it completely in Python?
 - [o] Accept packages from filesystem by using ``copy-to``.
   https://www.freedesktop.org/software/systemd/man/machinectl.html#copy-to%20NAME%20PATH%20%5BPATH%5D
-- [o] Vagrant sandbox with autosetup and sudo
-- [o] Network isolation
+- [o] What about network isolation?
+- [o] Check non-x64 architectures, maybe using Qemu and/or binfmt
+
+  - https://forums.raspberrypi.com/viewtopic.php?t=232417&start=100
+  - https://github.com/sakaki-/raspbian-nspawn-64
+  - https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-generic-arm64.tar.xz
+
 
 
 *****
 Ideas
 *****
-
-- Currently, ``systemd-nspawn`` needs to be invoked as user ``root``.
-  Investigate *systemd-nspawn unprivileged mode* if that can improve the situation.
-  https://www.reddit.com/r/archlinux/comments/ug1fwy/systemdnspawn_unprivileged_mode/
-- Make sure ``resolved`` is enabled on both the host and the guest.
-  ``systemctl enable systemd-resolved``.
-  Maybe this can get rid of bind-mounting the ``resolv.conf``, see
-  ``--bind-ro=/etc/resolv.conf:/etc/resolv.conf``.
-- Optionally install more software into machine image by default.
-  ``apt-get install --yes procps iputils-ping netcat telnet iproute2 openssh-client wget curl``
-- Check if and how ready-made Vagrant images can be used for providing rootfs.
-- Use ``CacheDirectory=`` directive to cache download artefacts
-
-- Check non-x64 architectures
-
-  - https://forums.raspberrypi.com/viewtopic.php?t=232417&start=100
-  - https://github.com/sakaki-/raspbian-nspawn-64
-  - https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-generic-arm64.tar.xz
 
 - Use/integrate with ``mkosi``.
 
@@ -56,17 +52,33 @@ Ideas
   - http://0pointer.net/blog/mkosi-a-tool-for-generating-os-images.html
   - https://lwn.net/Articles/726655/
 
+- Currently, ``systemd-nspawn`` needs to be invoked as user ``root``.
+
+  - Investigate *systemd-nspawn unprivileged mode* if that can improve the situation.
+    https://www.reddit.com/r/archlinux/comments/ug1fwy/systemdnspawn_unprivileged_mode/
+  - Check options ``--user`` / ``-U``.
+
+- Make sure ``resolved`` is enabled on both the host and the guest.
+  ``systemctl enable systemd-resolved``.
+  Maybe this can get rid of bind-mounting the ``resolv.conf``, see
+  ``--bind-ro=/etc/resolv.conf:/etc/resolv.conf``.
+
+- Optionally install more software into machine image by default.
+  ``apt-get install --yes procps iputils-ping netcat telnet iproute2 openssh-client wget curl``
+
+- Use ``CacheDirectory=`` directive to cache download artefacts
 - Build ``RootImage=``-compatible images, with GPT
 - Integrate packaging code from Kotori
 - Proposal: ``postroj create image`` vs. ``postroj create package``
 - Check if "login prompt" unit can be deactivated when running with ``--boot``
 - Check ``systemd-dissect``
-- Check unprivileged mode / ``--user`` / ``-U``
 
 
 ********
 Research
 ********
+
+- Check if and how ready-made Vagrant images can be used for providing rootfs.
 
 - Check KIWI
 
