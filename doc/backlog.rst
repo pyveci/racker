@@ -14,13 +14,17 @@ Actionable
 - [x] Naming things.
 - [x] Refactoring.
 - [x] Implement ``postroj list-images``.
-- [o] Add Debian stretch.
+- [o] Add more Linux distributions.
+- [o] Improve robustness and convenience.
+- [o] Implement ``postroj run``.
 - [o] Implement some software tests.
 - [o] Release 0.1.0.
 - [o] Option to force downloading and rebuilding rootfs images by using ``postroj pull``.
-- [o] Improve HTTP probe request/response handling and verification
+- [o] Improve HTTP probe request/response handling and verification.
+  Q: Would it be possible to implement it in Python?
 - [o] Accept packages from filesystem by using ``copy-to``.
   https://www.freedesktop.org/software/systemd/man/machinectl.html#copy-to%20NAME%20PATH%20%5BPATH%5D
+- [o] Vagrant sandbox with autosetup and sudo
 
 
 *****
@@ -51,10 +55,6 @@ Ideas
   - http://0pointer.net/blog/mkosi-a-tool-for-generating-os-images.html
   - https://lwn.net/Articles/726655/
 
-- Check KIWI
-
-  - https://github.com/OSInside/kiwi
-
 - Build ``RootImage=``-compatible images, with GPT
 - Integrate packaging code from Kotori
 - Proposal: ``postroj create image`` vs. ``postroj create package``
@@ -62,12 +62,14 @@ Ideas
 - Check ``systemd-dissect``
 - Check unprivileged mode / ``--user`` / ``-U``
 
-- Fedora 35 does not work
 
-  - https://www.spinics.net/lists/fedora-devel/msg296987.html
-  - https://bugzilla.redhat.com/show_bug.cgi?id=2048033
-  - https://pagure.io/ContainerSIG/container-sig/issue/55
-  - https://pagure.io/cloud-sig/issue/367
+********
+Research
+********
+
+- Check KIWI
+
+  - https://github.com/OSInside/kiwi
 
 - Look into Kata Containers
 

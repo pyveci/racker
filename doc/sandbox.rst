@@ -40,9 +40,7 @@ Install postroj
 Invoke postroj
 ==============
 
-::
+See `postroj usage`_ documentation.
 
-    python -m postroj.image
-    python -m postroj.container
-    python -m postroj.probe
 
+.. _postroj usage: https://github.com/cicerops/postroj/blob/main/README.rst#usage

@@ -94,3 +94,15 @@ Upgrade systemd.
 
     systemd 225
     -PAM -AUDIT -SELINUX +IMA -APPARMOR +SMACK +SYSVINIT +UTMP -LIBCRYPTSETUP +GCRYPT -GNUTLS -ACL +XZ -LZ4 -SECCOMP -BLKID -ELFUTILS -KMOD -IDN
+
+
+***********************
+Fedora 35 does not work
+***********************
+
+Q: Maybe it does not terminate appropriately?
+
+- https://www.spinics.net/lists/fedora-devel/msg296987.html
+- https://bugzilla.redhat.com/show_bug.cgi?id=2048033
+- https://pagure.io/ContainerSIG/container-sig/issue/55
+- https://pagure.io/cloud-sig/issue/367

@@ -42,26 +42,37 @@ bundling* and *sandboxing* [1]. ``postroj`` might fill some gaps on the
 *delivery* aspects.
 
 [3] outlines how systemd-nspawn was conceived to aid in testing and debugging
-systemd and [4] is the latest overview of systemd in 2018.
+systemd and [4] is the latest overview of systemd in 2018. From a user's
+perspective, `Running containers with systemd-nspawn`_ has a concise walkthrough.
 
 | [1] `Containers without a Container Manager, with systemd`_ (2018)
 | [2] `Lennart Poettering und Kay Sievers über Systemd`_ (2014)
 | [3] `Systemd-Nspawn is Chroot on Steroids`_ (2013)
 | [4] `NYLUG Presents - Lennart Poettering on Systemd in 2018`_
-
+| [5] `Running containers with systemd-nspawn`_
 
 
 *****
 Setup
 *****
 
-::
+Install prerequisites::
 
     apt-get update
     apt-get install --yes systemd-container skopeo umoci python3-pip python3-venv
+
+
+Install postroj::
+
     python3 -m venv .venv
     source .venv/bin/activate
-    pip install postroj --upgrade
+    pip install git+https://github.com/cicerops/postroj --upgrade
+
+.. note::
+
+    If you are not running Linux on your workstation, the `postroj sandbox
+    installation`_ documentation outlines how to run this program within
+    a virtual machine using Vagrant.
 
 
 *****
@@ -89,6 +100,9 @@ Some demo programs::
 
 Package testing::
 
+    postroj pkgprobe --image=debian-bullseye --check-unit=systemd-journald
+    postroj pkgprobe --image=fedora-37 --check-unit=systemd-journald
+
     postroj pkgprobe \
         --image=debian-bullseye \
         --package=https://dl.grafana.com/oss/release/grafana_8.5.1_amd64.deb \
@@ -112,11 +126,20 @@ overhead of environment setup/teardown is insignificant.
 
 ::
 
-    time python -m postroj.container
+    time postroj pkgprobe --image=debian-buster --check-unit=systemd-journald
 
-    real    0m0.446s
-    user    0m0.060s
-    sys     0m0.034s
+    real    0m0.610s
+    user    0m0.161s
+    sys     0m0.065s
+
+On a cold system, where the filesystem image would need to be acquired before
+spawning the container, it's still fast enough::
+
+    time postroj pkgprobe --image=debian-bookworm --check-unit=systemd-journald
+
+    real    0m22.582s
+    user    0m8.572s
+    sys     0m3.136s
 
 
 *********************
@@ -155,10 +178,21 @@ Questions and answers
        prefixed with ``postroj-``.
        Examples: ``postroj-debian-buster``, ``postroj-centos-8``.
 
+- | Q: How large are filesystem images?
+  | A: postroj prefers to use "slim" variants of filesystem images, aiming to
+       only use artefacts with download sizes < 100 MB.
+
+- | Q: Are container disks ephemeral?
+  | A: Yes, by default, all container images will be ephemeral, i.e. all changes to
+       them are volatile.
+
 
 .. _machinectl: https://www.freedesktop.org/software/systemd/man/machinectl.html
 .. _systemd-nspawn: https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html
 .. _systemd-run: https://www.freedesktop.org/software/systemd/man/systemd-run.html
+
+.. _postroj sandbox installation: https://github.com/cicerops/postroj/blob/main/doc/sandbox.rst
+.. _Running containers with systemd-nspawn: https://janma.tk/2019-10-13/systemd-nspawn/
 
 .. _Containers without a Container Manager, with systemd: https://invidious.fdn.fr/watch?v=sqhojVPr7xM
 .. _Systemd-Nspawn is Chroot on Steroids: https://invidious.fdn.fr/watch?v=s7LlUs5D9p4
