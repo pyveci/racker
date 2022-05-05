@@ -9,7 +9,7 @@ from typing import Union
 from postroj.model import LinuxDistribution, OperatingSystemFamily, ALL_DISTRIBUTIONS
 from postroj.settings import archive_directory, image_directory, download_directory
 
-from postroj.util import cmd, is_dir_empty, scmd
+from postroj.util import is_dir_empty, scmd, hcmd, print_header, print_section_header
 
 
 class ImageProvider:
@@ -36,7 +36,9 @@ class ImageProvider:
         """
         Provision rootfs image per operating system family.
         """
-        print(f"Provisioning container image for {self.distribution}")
+        print_section_header(f"Provisioning container image {self.distribution.fullname}")
+        print(f"Using distribution {self.distribution}")
+        print(f"Installing image at {self.image}")
         if self.distribution.family == OperatingSystemFamily.DEBIAN.value:
             self.setup_debian()
         elif self.distribution.family == OperatingSystemFamily.UBUNTU.value:
@@ -78,10 +80,10 @@ class ImageProvider:
         if self.force:
             shutil.rmtree(rootfs)
 
-        print(cmd(f"wget --continue --no-clobber --directory-prefix={download_directory} {self.distribution.image}"))
+        hcmd(f"wget --continue --no-clobber --directory-prefix={download_directory} {self.distribution.image}")
         if not rootfs.exists() or is_dir_empty(rootfs):
             rootfs.mkdir(parents=True, exist_ok=True)
-            print(cmd(f"tar --directory={rootfs} -xf {image_tarball}"))
+            hcmd(f"tar --directory={rootfs} -xf {image_tarball}")
 
         # Prepare image by adding additional packages.
         scmd(directory=rootfs, command=f"sh -c 'apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES)}'")
@@ -142,14 +144,18 @@ class ImageProvider:
         systemd_version_minimal = 225
 
         # Skip installing systemd when already satisfied.
-        response = cmd(f"systemd-nspawn --directory={rootfs} --pipe systemctl --version")
+        process = hcmd(f"systemd-nspawn --directory={rootfs} --pipe systemctl --version", capture=True)
+        response = process.stdout.strip()
         try:
             systemd_version_installed = int(response.splitlines()[0].split(" ", maxsplit=2)[1].split("-")[0])
         except:
             raise ValueError(f"Unable to decode systemd version from:\n{response}")
         if systemd_version_installed >= systemd_version_minimal:
-            print(f"Found systemd version {systemd_version_installed}")
+            print(f"Found systemd version {systemd_version_installed}, "
+                  f"which satisfies minimum version {systemd_version_minimal}")
             return
+
+        print_header(f"Upgrading systemd to version {systemd_version_minimal}")
 
         # Prepare image by upgrading systemd.
         upgrade_systemd_program = dedent(f"""
@@ -212,13 +218,13 @@ class ImageProvider:
         archive_image = archive_directory / f"{self.distribution.fullname}.img"
 
         if self.force:
-            shutil.rmtree(archive_oci)
-            shutil.rmtree(archive_image)
+            shutil.rmtree(archive_oci, ignore_errors=True)
+            shutil.rmtree(archive_image, ignore_errors=True)
 
         if not archive_oci.exists():
-            cmd(f"skopeo copy --override-os=linux {self.distribution.image} oci:{archive_oci}:{self.distribution.fullname}")
+            hcmd(f"skopeo copy --override-os=linux {self.distribution.image} oci:{archive_oci}:{self.distribution.fullname}")
         if not archive_image.exists() or is_dir_empty(archive_image):
-            cmd(f"umoci unpack --rootless --image={archive_oci}:{self.distribution.fullname} {archive_image}")
+            hcmd(f"umoci unpack --rootless --image={archive_oci}:{self.distribution.fullname} {archive_image}")
 
         return archive_image / "rootfs"
 

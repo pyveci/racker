@@ -1,5 +1,5 @@
-from postroj.util import cmd
+from postroj.util import hcmd
 
 
 def info():
-    print(cmd("/usr/bin/hostnamectl"))
+    hcmd("/usr/bin/hostnamectl")

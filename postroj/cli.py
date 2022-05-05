@@ -41,7 +41,6 @@ def pull_image(ctx, name: str):
         sys.exit(1)
 
     ip = ImageProvider(distribution=distribution, force=True)
-    print(f"Installing image {name} at {ip.image}")
     ip.setup()
 
 

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Union
 
 from postroj.settings import cache_directory
-from postroj.util import StoppableThread, ccmd, cmd_with_stderr, stderr_forwarder, print_header
+from postroj.util import StoppableThread, ccmd, print_header, hcmd, fix_tty
 
 
 class PostrojContainer:
@@ -40,6 +40,8 @@ class PostrojContainer:
         cache_directory.mkdir(parents=True, exist_ok=True)
         print(f"INFO: Cache directory is {cache_directory}")
 
+        print_header(f"Spawning container {self.machine}")
+
         # TODO: Why does `--ephemeral` not work?
         # TODO: Maybe use `--register=false`?
         # TODO: What about `--notify-ready=true`?
@@ -56,8 +58,9 @@ class PostrojContainer:
 
         # Invoke command in background.
         # TODO: Add option to suppress output, unless `--verbose` is selected.
-        self.process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
-        self.thread = StoppableThread(target=stderr_forwarder, args=(self.process,))
+        def spawn():
+            self.process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE)
+        self.thread = StoppableThread(target=spawn)
         self.thread.start()
 
     def check_process_returncode(self):
@@ -71,14 +74,11 @@ class PostrojContainer:
 
     def info(self):
         print_header("Host information")
-        print(self.run("/usr/bin/hostnamectl"))
+        self.run("/usr/bin/hostnamectl")
 
-    def run(self, command, verbose=False, **kwargs):
-        output = ccmd(self.machine, command, **kwargs)
-        if verbose:
-            print(output)
-        return output
-        
+    def run(self, command, capture: bool = False):
+        return ccmd(self.machine, command, capture=capture)
+
     def terminate(self):
         """
         Terminate the container.
@@ -94,13 +94,14 @@ class PostrojContainer:
             print(f"Container {self.machine} not running, skipping termination")
             return
 
-        print(f"Terminating container {self.machine}")
-        subprocess.check_output(["/bin/machinectl", "terminate", self.machine])
+        print_header(f"Terminating container {self.machine}")
+        hcmd(f"/bin/machinectl terminate {self.machine}")
 
     def is_down(self):
-        command = f"/bin/systemctl is-system-running --machine={self.machine}"
-        stderr = cmd_with_stderr(command)
-        if "Host is down" in stderr:
+        process = hcmd(f"/bin/systemctl is-system-running --machine={self.machine}", capture=True, check=False)
+        status = process.stdout.strip()
+        print(f"INFO: Container status is: {status}")
+        if "Host is down" in process.stderr:
             return True
         return False
 
@@ -141,11 +142,11 @@ class PostrojContainer:
             /bin/systemctl is-system-running --machine={self.machine} | egrep "(started|running|degraded)" > /dev/null
         """.strip()
 
+        sys.stderr.write("\n")
         interval = 0.1
         while timeout > 0:
 
-            os.system("stty sane")
-            #print("\33[3J")
+            fix_tty()
             p = subprocess.run(command, shell=True)
             if p.returncode == 0:
                 break
@@ -158,19 +159,7 @@ class PostrojContainer:
         sys.stderr.write("\n")
         sys.stderr.flush()
 
-        # The login prompt messes up the terminal, let's make things sane again.
-        # https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console
-        # https://superuser.com/questions/122911/what-commands-can-i-use-to-reset-and-clear-my-terminal
-        # TODO: Figure out what `stty sane` does and implement it natively.
-        os.system("stty sane")
-
-        # Clears the whole screen.
-        # os.system("tput reset")
-
-        # Some trial & error.
-        # print("\033[3J", end='')
-        # print("\033[H\033[J", end="")
-        # print("\033c\033[3J", end='')
+        fix_tty()
 
         # When the container was not able to boot completely and in time, kill
         # it and raise an exception.
@@ -183,12 +172,13 @@ class PostrojContainer:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.kill()
+        fix_tty()
 
     def kill(self):
         self.terminate()
         if self.process is not None:
             self.process.kill()
-            time.sleep(0.1)
+            # time.sleep(0.1)
             self.process.terminate()
             self.process.wait()
             del self.process

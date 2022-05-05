@@ -62,5 +62,6 @@ setup(
     install_requires=[
         "click>=7,<9",
         "furl>=2,<3",
+        "subprocess-tee>=0.3,<1",
     ],
 )

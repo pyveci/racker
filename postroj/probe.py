@@ -17,27 +17,25 @@ class ProbeBase:
     def __init__(self, container: PostrojContainer):
         self.container = container
 
-    def run(self, command: str):
-        return self.container.run(command=command, verbose=True)
+    def run(self, command: str, capture: bool = False):
+        return self.container.run(command=command, capture=capture)
 
     def check_unit(self, name):
         """
         Check unit for being `active`.
         """
-        print(f"INFO: Probing unit {name}")
+        print_header(f"Probing unit {name}")
         try:
-            outcome = self.run(f"/bin/systemctl is-active {name}")
-            print(f"INFO: Status of unit {name}: {outcome}")
+            process = self.run(f"/bin/systemctl is-active {name}", capture=True)
+            print(f"INFO: Status of unit {name}: {process.stdout.strip()}")
         except subprocess.CalledProcessError as ex:
-            outcome = ex.output.decode().strip()
-            print(f"INFO: Status of unit {name}: {outcome}")
-            if outcome == "inactive":
-                msg = f"ERROR: Probe failed, unit {name} is not active"
-                print(msg)
+            unit_status = ex.stdout.strip()
+            print(f"INFO: Status of unit {name}: {unit_status}")
+            if unit_status in ["inactive"]:
+                print(f"ERROR: Probe failed, unit {name} is not active")
                 raise SystemExit(ex.returncode)
             else:
-                print(f"ERROR: Unable to check unit {name}. "
-                      f"Process exited with returncode {ex.returncode}. Output:\n{ex.output}")
+                print(f"ERROR: Unit {name} has unknown status: {unit_status}")
                 raise
 
     @property
@@ -49,6 +47,8 @@ class ProbeBase:
         return (self.container.rootfs / "etc" / "redhat-release").exists()
 
     def check_address(self, address: str, timeout: float = 5.0, interval: float = 0.05):
+
+        print_header(f"Probing network address {address}")
 
         uri = furl(address)
         print(f"Waiting for {uri} to become available within {timeout} seconds")
@@ -68,7 +68,6 @@ class ProbeBase:
 class BasicProbe(ProbeBase):
 
     def invoke(self):
-        print_header("Checking unit systemd-journald")
         self.check_unit(name="systemd-journald")
 
 
@@ -94,7 +93,7 @@ class ApacheProbe(ProbeBase):
         self.run(f"/bin/systemctl start {package_and_unit_name}")
 
         # Run probe.
-        self.run(f"/bin/systemctl is-active {package_and_unit_name}")
+        self.check_unit(package_and_unit_name)
         self.check_address("http://localhost:80")
 
 
