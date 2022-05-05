@@ -81,8 +81,10 @@ class PackageProbe(ProbeBase):
         print(f"Installing package {package}")
         if self.is_debian:
             self.run(f"/usr/bin/apt install --yes {package}")
-        if self.is_redhat:
+        elif self.is_redhat:
             self.run(f"/usr/bin/yum install -y {package}")
+        else:
+            print(f"WARNING: Unable to install package. Reason: Unsupported operating system.")
 
     def start(self, unit: str):
         if unit not in ["systemd-journald"]:

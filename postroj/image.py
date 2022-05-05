@@ -49,6 +49,8 @@ class ImageProvider:
             self.setup_centos()
         elif self.distribution.family == OperatingSystemFamily.ROCKYLINUX.value:
             self.setup_rockylinux()
+        elif self.distribution.family == OperatingSystemFamily.ARCHLINUX.value:
+            self.setup_archlinux()
         else:
             raise ValueError(f"Unknown operating system family: {self.distribution.family}")
 
@@ -159,6 +161,20 @@ class ImageProvider:
         # Activate image.
         self.activate_image(rootfs)
 
+    def setup_archlinux(self):
+        """
+        Arch Linux images are acquired from Docker Hub.
+        """
+
+        # Acquire image.
+        rootfs = self.acquire_from_docker()
+
+        # Prepare image by installing systemd and additional packages.
+        scmd(directory=rootfs, command=f"pacman -Syu --noconfirm systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
+
+        # Activate image.
+        self.activate_image(rootfs)
+
     @staticmethod
     def upgrade_systemd(rootfs):
         """
@@ -250,6 +266,7 @@ class ImageProvider:
         # Download and extract image.
         archive_oci = archive_directory / f"{self.distribution.fullname}.oci"
         archive_image = archive_directory / f"{self.distribution.fullname}.img"
+        return archive_image / "rootfs"
 
         if self.force:
             shutil.rmtree(archive_oci, ignore_errors=True)

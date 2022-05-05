@@ -75,21 +75,27 @@ class ApacheProbe(ProbeBase):
 
         # Setup service.
         print("Installing Apache web server")
-        package_and_unit_name: Union[str, None] = None
         if self.is_debian:
-            package_and_unit_name = "apache2"
-            self.run("/usr/bin/apt-get update")
-            self.run("/usr/bin/apt-get install --yes apache2")
-        if self.is_redhat:
-            package_and_unit_name = "httpd"
-            self.run("/usr/bin/yum install -y httpd")
+            package_name = unit_name = "apache2"
+            self.run(f"/usr/bin/apt-get update")
+            self.run(f"/usr/bin/apt-get install --yes {package_name}")
+        elif self.is_redhat:
+            package_name = unit_name = "httpd"
+            self.run(f"/usr/bin/yum install -y {package_name}")
+        elif self.is_archlinux:
+            package_name = "apache"
+            unit_name = "httpd"
+            self.run(f"/usr/sbin/pacman -Syu --noconfirm {package_name}")
+        else:
+            print(f"WARNING: Unable to invoke ApacheProbe. Reason: Unsupported operating system.")
+            return
 
         # Enable service.
-        self.run(f"/bin/systemctl enable {package_and_unit_name}")
-        self.run(f"/bin/systemctl start {package_and_unit_name}")
+        self.run(f"/bin/systemctl enable {unit_name}")
+        self.run(f"/bin/systemctl start {unit_name}")
 
         # Run probe.
-        self.check_unit(package_and_unit_name)
+        self.check_unit(unit_name)
         self.check_address("http://localhost:80")
 
 
@@ -117,11 +123,16 @@ def selftest_hostnamectl():
 
 
 def get_selftest_distributions():
+
+    # Select all distributions.
     selected_distributions = copy(ALL_DISTRIBUTIONS)
 
     # Mask two distributions which show unstable cycling behavior.
     selected_distributions.remove(OperatingSystem.FEDORA_35.value)
     selected_distributions.remove(OperatingSystem.CENTOS_7.value)
+
+    # On demand, select only specific items.
+    # selected_distributions = [OperatingSystem.ARCHLINUX_20220501.value]
 
     return selected_distributions
 

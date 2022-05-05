@@ -24,6 +24,10 @@ class ProbeBase:
     def is_redhat(self):
         return (self.container.rootfs / "etc" / "redhat-release").exists()
 
+    @property
+    def is_archlinux(self):
+        return (self.container.rootfs / "etc" / "arch-release").exists()
+
     def check_unit(self, name):
         """
         Check unit for being `active`.

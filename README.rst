@@ -101,6 +101,7 @@ Package testing::
     # Run two basic probes on different operating systems.
     postroj pkgprobe --image=debian-bullseye --check-unit=systemd-journald
     postroj pkgprobe --image=fedora-37 --check-unit=systemd-journald
+    postroj pkgprobe --image=archlinux-20220501 --check-unit=systemd-journald
 
     # Run two probes that need installing a 3rd party package beforehand.
 

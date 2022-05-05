@@ -23,6 +23,7 @@ class OperatingSystemFamily(Enum):
     FEDORA = "fedora"
     CENTOS = "centos"
     ROCKYLINUX = "rockylinux"
+    ARCHLINUX = "archlinux"
 
 
 class OperatingSystem(Enum):
@@ -106,6 +107,12 @@ class OperatingSystem(Enum):
         release="8",
         image="docker://docker.io/rockylinux:8",
     )
+    ARCHLINUX_20220501 = LinuxDistribution(
+        family="archlinux",
+        name="20220501",
+        release="20220501",
+        image="docker://docker.io/archlinux:base-20220501.0.54834",
+    )
 
 
 ALL_DISTRIBUTIONS: List[LinuxDistribution] = [
@@ -122,6 +129,7 @@ ALL_DISTRIBUTIONS: List[LinuxDistribution] = [
     OperatingSystem.CENTOS_7.value,
     OperatingSystem.CENTOS_8.value,
     OperatingSystem.ROCKYLINUX_8.value,
+    OperatingSystem.ARCHLINUX_20220501.value,
 ]
 
 
