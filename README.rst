@@ -95,11 +95,10 @@ Some demo programs::
     # Demo: Invoke `hostnamectl` on a Debian buster container.
     time python -m postroj.container
 
-    # Demo: Invoke two demo probes on all available distributions.
-    python -m postroj.probe
-
 Package testing::
 
+    # Run a self test procedure.
+    postroj selftest pkgprobe
     postroj pkgprobe --image=debian-bullseye --check-unit=systemd-journald
     postroj pkgprobe --image=fedora-37 --check-unit=systemd-journald
 
