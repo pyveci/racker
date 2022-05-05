@@ -44,8 +44,8 @@ def pull_image(ctx, name: str):
     ip.setup()
 
 
-cli.add_command(cmd=runner.main, name="run")
-cli.add_command(cmd=pkgprobe.main, name="pkgprobe")
 cli.add_command(cmd=list_images, name="list-images")
 cli.add_command(cmd=pull_image, name="pull")
+cli.add_command(cmd=pkgprobe.main, name="pkgprobe")
 cli.add_command(cmd=selftest.selftest_main, name="selftest")
+# cli.add_command(cmd=runner.main, name="run")

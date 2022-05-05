@@ -79,12 +79,12 @@ Install postroj::
 Usage
 *****
 
-::
+Basic commands::
 
-    # List available distribution images
+    # List available images.
     postroj list-images
 
-    # Acquire specific distribution image
+    # Acquire rootfs image.
     postroj pull debian-bullseye
 
 Some demo programs::
@@ -99,8 +99,12 @@ Package testing::
 
     # Run a self test procedure.
     postroj selftest pkgprobe
+
+    # Run two basic probes on different operating systems.
     postroj pkgprobe --image=debian-bullseye --check-unit=systemd-journald
     postroj pkgprobe --image=fedora-37 --check-unit=systemd-journald
+
+    # Run two probes that need installing a 3rd party package beforehand.
 
     postroj pkgprobe \
         --image=debian-bullseye \

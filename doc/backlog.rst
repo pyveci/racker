@@ -25,6 +25,7 @@ Actionable
 - [o] Accept packages from filesystem by using ``copy-to``.
   https://www.freedesktop.org/software/systemd/man/machinectl.html#copy-to%20NAME%20PATH%20%5BPATH%5D
 - [o] Vagrant sandbox with autosetup and sudo
+- [o] Network isolation
 
 
 *****
