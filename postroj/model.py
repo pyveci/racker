@@ -44,6 +44,18 @@ class OperatingSystem(Enum):
         #image="https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.tar.xz",
         image="docker://docker.io/debian:bullseye-slim",
     )
+    DEBIAN_BOOKWORM = LinuxDistribution(
+        family="debian",
+        name="bookworm",
+        release="12",
+        image="docker://docker.io/debian:bookworm-slim",
+    )
+    DEBIAN_SID = LinuxDistribution(
+        family="debian",
+        name="sid",
+        release="unstable",
+        image="docker://docker.io/debian:sid-slim",
+    )
     UBUNTU_FOCAL = LinuxDistribution(
         family="ubuntu",
         name="focal",
@@ -74,6 +86,8 @@ ALL_DISTRIBUTIONS: List[LinuxDistribution] = [
     OperatingSystem.DEBIAN_STRETCH.value,
     OperatingSystem.DEBIAN_BUSTER.value,
     OperatingSystem.DEBIAN_BULLSEYE.value,
+    OperatingSystem.DEBIAN_BOOKWORM.value,
+    OperatingSystem.DEBIAN_SID.value,
     OperatingSystem.UBUNTU_FOCAL.value,
     OperatingSystem.UBUNTU_JAMMY.value,
     OperatingSystem.CENTOS_7.value,
