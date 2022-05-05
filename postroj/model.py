@@ -22,6 +22,7 @@ class OperatingSystemFamily(Enum):
     UBUNTU = "ubuntu"
     FEDORA = "fedora"
     CENTOS = "centos"
+    ROCKYLINUX = "rockylinux"
 
 
 class OperatingSystem(Enum):
@@ -99,6 +100,12 @@ class OperatingSystem(Enum):
         release="8",
         image="docker://docker.io/centos:8",
     )
+    ROCKYLINUX_8 = LinuxDistribution(
+        family="rockylinux",
+        name="8",
+        release="8",
+        image="docker://docker.io/rockylinux:8",
+    )
 
 
 ALL_DISTRIBUTIONS: List[LinuxDistribution] = [
@@ -114,6 +121,7 @@ ALL_DISTRIBUTIONS: List[LinuxDistribution] = [
     OperatingSystem.FEDORA_37.value,
     OperatingSystem.CENTOS_7.value,
     OperatingSystem.CENTOS_8.value,
+    OperatingSystem.ROCKYLINUX_8.value,
 ]
 
 

@@ -47,6 +47,8 @@ class ImageProvider:
             self.setup_fedora()
         elif self.distribution.family == OperatingSystemFamily.CENTOS.value:
             self.setup_centos()
+        elif self.distribution.family == OperatingSystemFamily.ROCKYLINUX.value:
+            self.setup_rockylinux()
         else:
             raise ValueError(f"Unknown operating system family: {self.distribution.family}")
 
@@ -108,6 +110,20 @@ class ImageProvider:
     def setup_fedora(self):
         """
         Fedora images are acquired from Docker Hub.
+        """
+
+        # Acquire image.
+        rootfs = self.acquire_from_docker()
+
+        # Prepare image by installing systemd and additional packages.
+        scmd(directory=rootfs, command=f"dnf install -y systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
+
+        # Activate image.
+        self.activate_image(rootfs)
+
+    def setup_rockylinux(self):
+        """
+        Rocky Linux images are acquired from Docker Hub.
         """
 
         # Acquire image.
