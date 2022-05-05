@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import json
+import time
 from copy import copy
 from typing import Union
 
@@ -55,10 +56,7 @@ def selftest_pkgprobe():
             probe.invoke()
 
         print()
-
-    print_section_header("Report")
-    print(f"Successfully checked {len(selected_distributions)} distributions:\n"
-          f"{json.dumps(list(map(str, selected_distributions)), indent=2)}")
+        print_report(selected_distributions)
 
 
 class BasicProbe(ProbeBase):
@@ -121,6 +119,10 @@ def selftest_hostnamectl():
             pc.wait()
             pc.info()
 
+    time.sleep(0.33)
+    print()
+    print_report(selected_distributions)
+
 
 def get_selftest_distributions():
 
@@ -135,6 +137,12 @@ def get_selftest_distributions():
     # selected_distributions = [OperatingSystem.ARCHLINUX_20220501.value]
 
     return selected_distributions
+
+
+def print_report(distributions):
+    print_section_header("Report")
+    print(f"Successfully checked {len(distributions)} distributions:\n"
+          f"{json.dumps(list(map(str, distributions)), indent=2)}")
 
 
 selftest_main.add_command(cmd=selftest_pkgprobe, name="pkgprobe")
