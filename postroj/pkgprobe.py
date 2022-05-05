@@ -58,7 +58,16 @@ class PackageProbe(ProbeBase):
 
     def setup(self, package: str, unit_names: List[str]):
 
-        print_header(f"Checking units {','.join(unit_names)}")
+        self.install(package)
+        for unit in unit_names:
+            self.start(unit)
+
+    def install(self, package: str):
+
+        if package is None:
+            return
+
+        print_header(f"Installing package {package}")
 
         # Download package.
         if package.startswith("http"):
@@ -75,10 +84,10 @@ class PackageProbe(ProbeBase):
         if self.is_redhat:
             self.run(f"/usr/bin/yum install -y {package}")
 
-        # Enable units.
-        for unit in unit_names:
+    def start(self, unit: str):
+        if unit not in ["systemd-journald"]:
             self.run(f"/bin/systemctl enable {unit}")
-            self.run(f"/bin/systemctl start {unit}")
+        self.run(f"/bin/systemctl start {unit}")
 
     def check(self, unit_names: List[str], network_addresses: List[str], network_timeout: float = 5.0):
         """
@@ -88,6 +97,6 @@ class PackageProbe(ProbeBase):
         2. The designated ports should be available.
         """
         for unit in unit_names:
-            self.run(f"/bin/systemctl is-active {unit}")
+            self.check_unit(unit)
         for address in network_addresses:
             self.check_address(address, timeout=network_timeout)

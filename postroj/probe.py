@@ -2,13 +2,14 @@
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import json
 import subprocess
+from copy import copy
 from typing import Union
 
 from furl import furl
 
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
-from postroj.model import ALL_DISTRIBUTIONS
+from postroj.model import OperatingSystem, ALL_DISTRIBUTIONS
 from postroj.util import print_header, print_section_header, wait_for_port
 
 
@@ -99,15 +100,21 @@ class ApacheProbe(ProbeBase):
 
 if __name__ == "__main__":
     """
-    Spawn a container and wait until it has booted completely.
-    Then, run a probe command on the container.
+    An example program to demonstrate the framework.
     
-    Probing all listed operating systems takes
-    - about four seconds for the Basic probe.
-    - about one minute for the Apache probe.
+    - Iterate all available filesystem images.
+    - Spawn a container.
+    - Wait until it has booted completely.
+    - Run a probe command on the container.
+    
+    Probing all listed 10 operating systems, takes, in total,
+    - about ten seconds for the Basic probe.
+    - about 1.5 minutes for the Basic+Apache probes.
     """
 
-    selected_distributions = ALL_DISTRIBUTIONS
+    selected_distributions = copy(ALL_DISTRIBUTIONS)
+    selected_distributions.remove(OperatingSystem.FEDORA_35.value)
+    selected_distributions.remove(OperatingSystem.CENTOS_7.value)
 
     # Iterate selected distributions.
     for distribution in selected_distributions:
@@ -131,5 +138,6 @@ if __name__ == "__main__":
 
         print()
 
+    print_section_header("Report")
     print(f"Successfully checked {len(selected_distributions)} distributions:\n"
           f"{json.dumps(list(map(str, selected_distributions)), indent=2)}")
