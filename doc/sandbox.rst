@@ -3,44 +3,39 @@ postroj sandbox installation
 ############################
 
 
-The postroj sandbox installation described in this document is based on
-Vagrant. You can also install it on any other Linux system.
+*****
+About
+*****
+
+In order to use ``postroj``, when not working on Linux, it is recommended
+to use a sandbox installation based on Vagrant. The ``Vagrantfile`` has all the
+needed provisioning recipes to provide ``postroj`` installed within the virtual
+machine.
 
 
-Acquire sources
-===============
+***************
+Getting started
+***************
 
 ::
 
+    # Acquire sources.
     git clone https://github.com/cicerops/postroj
     cd postroj
 
+    # Launch Linux environment.
+    vagrant up && vagrant ssh
 
-Launch Linux environment
-========================
-
-::
-
-    vagrant up
+    # Test drive postroj.
+    sudo postroj selftest hostnamectl
 
 
-Install postroj
-===============
+*****
+Usage
+*****
 
-::
-
-    vagrant ssh
-    sudo su -
-    cd /usr/src/postroj
-    python3 -m venv .venv_linux
-    source .venv_linux/bin/activate
-    pip install --editable=.
-
-
-Invoke postroj
-==============
-
-See `postroj usage`_ documentation.
+``postroj`` can now be used regularly like outlined in the `postroj usage`_
+documentation. In order to satisfy privileges, please invoke it with ``sudo``.
 
 
 .. _postroj usage: https://github.com/cicerops/postroj/blob/main/README.rst#usage

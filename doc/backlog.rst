@@ -16,7 +16,7 @@ Actionable I
 - [x] Implement ``postroj list-images``.
 - [x] Improve robustness and convenience.
 - [x] Add more Linux distributions.
-- [o] Improve convenience of Vagrant sandbox with autosetup and sudo permissions
+- [x] Improve convenience of Vagrant sandbox with autosetup and sudo permissions
 - [o] Implement ``postroj run``.
 - [o] Improve textual output of probe reporting. Colors?
 - [o] Add logging.

@@ -11,6 +11,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Always use Vagrant's default insecure key
   config.ssh.insert_key = false
 
+  # Mount source code directory
+  config.vm.synced_folder ".", "/usr/src/postroj"
+
   config.vm.define "postroj-debian11" do |machine|
 
     # Don't check for box updates
@@ -35,15 +38,32 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       v.customize ["modifyvm", :id, "--name", "postroj-debian11"]
     end
 
-    # Install required packages
     machine.vm.provision :shell, inline: <<-SHELL
+        echo "Installing required packages"
+        set -x
         sudo apt-get update
         sudo apt-get install --yes systemd-container skopeo umoci python3-pip python3-venv
     SHELL
 
-  end
+    # Setup postroj sandbox
+    machine.vm.provision :shell, privileged: true, inline: <<-SHELL
+        SOURCE=/usr/src/postroj
+        TARGET=/opt/postroj
+        PROGRAM=/usr/local/bin/postroj
+        echo "Installing postroj package from ${SOURCE} to virtualenv at ${TARGET}"
+        echo "Installing postroj program to ${PROGRAM}"
+        set -x
+        whoami
+        python3 -m venv ${TARGET}
+        set +x
+        source ${TARGET}/bin/activate
+        set -x
+        python -V
+        pip install --editable=${SOURCE}[test]
+        postroj --version
+        ln -sf ${TARGET}/bin/postroj ${PROGRAM}
+    SHELL
 
-  # Mount source code directory
-  config.vm.synced_folder ".", "/usr/src/postroj"
+  end
 
 end # Vagrant.configure
