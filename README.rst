@@ -8,7 +8,7 @@ postroj
 About
 *****
 
-An experimental harness tool based on `systemd-nspawn`_ and `machinectl`_.
+An experimental harness tool based on `systemd-nspawn`_  containers.
 At the same time, a tribute to the authors and contributors of GNU, Linux,
 systemd, VirtualBox, Vagrant, Docker, Python and more.
 

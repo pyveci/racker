@@ -12,7 +12,7 @@ setup(
     author="Andreas Motl",
     author_email="andreas.motl@cicerops.de",
     url="https://github.com/cicerops/postroj",
-    description="An experimental harness tool based on systemd-nspawn",
+    description="An experimental harness tool based on systemd-nspawn containers",
     long_description=README,
     download_url="https://pypi.org/project/postroj/",
     packages=["postroj"],

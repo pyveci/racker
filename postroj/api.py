@@ -22,5 +22,5 @@ def pull_multiple_images(names: List[str]):
     for name in names:
         try:
             pull_single_image(name)
-        except:
-            print(f"ERROR: Failed pulling image {name}")
+        except Exception as ex:
+            print(f"ERROR: Failed pulling image {name}. Reason: {ex}")
