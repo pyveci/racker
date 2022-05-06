@@ -21,6 +21,7 @@ Actionable I
 - [o] Improve textual output of probe reporting. Colors?
 - [o] Add logging.
 - [o] Add some software tests.
+- [o] Provide more advanced and generic image (label) resolution, from docker.io, ghcr.io, etc.
 - [o] Release 0.1.0.
 
 
@@ -40,6 +41,38 @@ Actionable II
   - https://github.com/sakaki-/raspbian-nspawn-64
   - https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-generic-arm64.tar.xz
 
+********
+Problems
+********
+
+No way to disable /etc/issue?
+=============================
+
+- https://www.linuxquestions.org/questions/linux-newbie-8/disable-etc-issue-net-775967/
+- https://bugzilla.redhat.com/show_bug.cgi?id=1663812
+- https://unix.stackexchange.com/questions/107138/i-want-to-print-a-line-when-a-user-login
+- https://unix.stackexchange.com/questions/84280/is-etc-issue-common-for-all-linux-distributions
+- Use ``agetty``'s ``--noissue`` option?
+
+  - https://sleeplessbeastie.eu/2019/09/18/how-to-modify-system-identification-message/
+  - /usr/lib/systemd/system/console-getty.service
+  - /usr/lib/systemd/system/container-getty@.service
+  - /usr/lib/systemd/system/getty@.service
+  - /usr/lib/systemd/system/serial-getty@.service
+
+
+Inappropriate ioctl for device
+==============================
+::
+
+    echo "hello world" | sudo postroj run -it --rm fedora-37 cat -
+
+::
+
+    stty: 'standard input': Inappropriate ioctl for device
+
+
+https://www.pyinvoke.org/faq.html#i-m-getting-ioerror-inappropriate-ioctl-for-device-when-i-run-commands
 
 
 *****

@@ -1,19 +1,27 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import json
+import logging
 
 import click
 
 from postroj import runner, pkgprobe, selftest
 from postroj.api import pull_single_image, pull_multiple_images
 from postroj.model import list_images
+from postroj.util import setup_logging
 
 
 @click.group()
 @click.version_option()
-@click.option('--debug', required=False)
-def cli(debug):
+@click.option('--verbose', is_flag=True, required=False)
+@click.option('--debug', is_flag=True, required=False)
+def cli(verbose: bool, debug: bool):
+    click.echo(f"Verbose mode is {'on' if verbose else 'off'}", err=True)
     click.echo(f"Debug mode is {'on' if debug else 'off'}", err=True)
+    log_level = logging.INFO
+    if debug:
+        log_level = logging.DEBUG
+    setup_logging(level=log_level)
 
 
 @click.command()
@@ -47,4 +55,4 @@ cli.add_command(cmd=cli_list_images, name="list-images")
 cli.add_command(cmd=cli_pull_image, name="pull")
 cli.add_command(cmd=pkgprobe.main, name="pkgprobe")
 cli.add_command(cmd=selftest.selftest_main, name="selftest")
-# cli.add_command(cmd=runner.main, name="run")
+cli.add_command(cmd=runner.main, name="run")

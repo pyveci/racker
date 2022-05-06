@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import logging
 import os
 import subprocess
 import sys
@@ -11,6 +12,9 @@ import subprocess_tee
 
 from postroj.settings import cache_directory
 from postroj.util import ccmd, print_header, hcmd, fix_tty, LongRunningProcess, _SysExcInfoType
+
+
+logger = logging.getLogger(__name__)
 
 
 class NspawnLauncher(LongRunningProcess):
@@ -81,7 +85,7 @@ class PostrojContainer:
             raise Exception(f"Image at {self.rootfs} not found")
 
         cache_directory.mkdir(parents=True, exist_ok=True)
-        print(f"INFO: Cache directory is {cache_directory}")
+        logger.info(f"Cache directory is {cache_directory}")
 
         print_header(f"Spawning container {self.machine}")
 
@@ -105,7 +109,7 @@ class PostrojContainer:
                 --directory={self.rootfs} \
                 --machine={self.machine}
         """.strip()
-        print(f"Launch command is: {command}")
+        logger.info(f"Launch command is: {command}")
 
         self.launcher = NspawnLauncher(container=self)
         self.launcher.start(command=command)
@@ -118,11 +122,11 @@ class PostrojContainer:
         print_header("Host information")
         self.run("/usr/bin/hostnamectl")
 
-    def run(self, command, capture: bool = False):
+    def run(self, command, use_pty: bool = False, capture: bool = False):
         """
         Run command on spawned container.
         """
-        return ccmd(self.machine, command, capture=capture)
+        return ccmd(self.machine, command, use_pty=use_pty, capture=capture)
 
     def terminate(self):
         """
@@ -138,7 +142,7 @@ class PostrojContainer:
         print_header(f"Shutting down container {self.machine}")
 
         if self.is_down():
-            print(f"Container {self.machine} not running, skipping termination")
+            logger.info(f"Container {self.machine} not running, skipping termination")
             return
 
         hcmd(f"/bin/machinectl terminate {self.machine}")
@@ -155,9 +159,10 @@ class PostrojContainer:
 
             Failed to connect to bus: Host is down
         """
-        process = hcmd(f"/bin/systemctl is-system-running --machine={self.machine}", capture=True, check=False)
+        process = hcmd(f"/bin/systemctl is-system-running --machine={self.machine}",
+                       check=False, passthrough=False, capture=True)
         status = process.stdout.strip()
-        print(f"INFO: Container status is: {status}")
+        logger.info(f"Container status is: {status}")
         if "Host is down" in process.stderr:
             return True
         return False
@@ -176,7 +181,7 @@ class PostrojContainer:
         [1] https://github.com/facebookincubator/pystemd
         """
 
-        print(f"Waiting for container {self.machine} to become available within {timeout} seconds")
+        logger.info(f"Waiting for container {self.machine} to become available within {timeout} seconds")
 
         # Define the probe command to check whether the container has booted.
         # Possible values: Failed to connect to bus: Host is down`, `starting`, `started`, `degraded`.
@@ -192,9 +197,11 @@ class PostrojContainer:
         - Failed to connect to bus: No such file or directory
         - Failed to connect to bus: Host is down
         """
+
         # TODO: Compensate for "starting" output. Valid "startedness" would be any of "started" or "degraded".
         #       Background: A system can be fully booted and functional but signals "degraded" if one or more
         #       units signalled errors.
+        # TODO: Use `hcmd` here?
         command = f"""
             /bin/systemctl is-system-running --machine={self.machine} | egrep "(started|running|degraded)" > /dev/null
         """.strip()
@@ -244,7 +251,7 @@ class PostrojContainer:
         if self.destroy_after_use:
             self.terminate()
         else:
-            print("DEBUG: Skipping container destruction")
+            logger.info("Skipping container destruction")
 
         if self.launcher:
             self.launcher.stop()

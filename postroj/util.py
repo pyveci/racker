@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import asyncio
+import io
+import logging
 import os
 import shlex
 import socket
@@ -10,11 +12,17 @@ import threading
 import time
 from abc import abstractmethod
 from asyncio import AbstractEventLoop
+from contextlib import redirect_stdout
 from pathlib import Path
 from types import TracebackType
 from typing import Union, Optional, Tuple
 
 import subprocess_tee
+
+
+logger = logging.getLogger(__name__)
+
+USE_LOGGING = True
 
 
 def is_dir_empty(path):
@@ -27,45 +35,54 @@ def is_dir_empty(path):
         return next(scan, None) is None
 
 
-def cmd(command, capture: bool = False, check: bool = True):
+def cmd(command, check: bool = True, passthrough: bool = True, capture: bool = False):
     """
     Run command in a separate process.
     """
     try:
         if capture:
-            p = subprocess_tee.run(shlex.split(command))
+            p = subprocess_tee.run(shlex.split(command), tee=passthrough)
         else:
-            p = subprocess.run(shlex.split(command), stdout=sys.stdout, stderr=sys.stderr)
+            if passthrough:
+                stdout = sys.stdout
+                stderr = sys.stderr
+            else:
+                stdout = subprocess.DEVNULL
+                stderr = subprocess.DEVNULL
+            p = subprocess.run(shlex.split(command), stdout=stdout, stderr=stderr)
         if check:
             p.check_returncode()
         return p
     except subprocess.CalledProcessError as ex:
-        print(f"ERROR: Process exited with returncode {ex.returncode}. Output:\n{ex.output}")
+        logger.exception(f"Process exited with returncode {ex.returncode}. Output:\n{ex.output}")
         raise
 
 
-def hcmd(command, capture: bool = False, check: bool = True):
+def hcmd(command, check: bool = True, passthrough: bool = True, capture: bool = False):
     """
     Run command on host system.
     """
-    print(f"Running command on host system: {command}")
-    return cmd(command, capture=capture, check=check)
+    logger.info(f"Running command on host system: {command}")
+    return cmd(command, check=check, passthrough=passthrough, capture=capture)
 
 
 def scmd(directory: Union[Path, str], command: str):
     """
     Run command within root filesystem.
     """
-    print(f"Running command within rootfs at {directory}: {command}")
+    logger.info(f"Running command within rootfs at {directory}: {command}")
     return cmd(f"systemd-nspawn --directory={directory} --bind-ro=/etc/resolv.conf:/etc/resolv.conf --pipe {command}")
 
 
-def ccmd(machine: str, command: str, capture: bool = False):
+def ccmd(machine: str, command: str, use_pty: bool = False, capture: bool = False):
     """
     Run command on spawned container.
     """
-    print(f"Running command on container machine {machine}: {command}")
-    command = f"systemd-run --machine={machine} --wait --quiet --pipe {command}"
+    logger.info(f"Running command on container machine {machine}: {command}")
+    pty = ""
+    if use_pty:
+        pty = "--pty"
+    command = f"systemd-run --machine={machine} --wait --quiet --pipe {pty} {command}"
     # log.debug(f"Effective command is: {command}")
     return cmd(command, capture=capture)
 
@@ -154,11 +171,20 @@ def wait_for_port(host: str, port: int, timeout: float = 5.0, interval: float = 
 
 
 def print_header(title: str, armor: str = "-"):
+
+    if USE_LOGGING:
+        logger.info(title)
+        return
+
     length = len(title)
-    print()
-    print(armor * length)
-    print(title)
-    print(armor * length)
+    buffer = io.StringIO()
+    with redirect_stdout(buffer):
+        print()
+        print(armor * length)
+        print(title)
+        print(armor * length)
+    buffer.seek(0)
+    print(buffer.read().rstrip())
 
 
 def print_section_header(title: str, armor: str = "="):
@@ -275,3 +301,11 @@ class LongRunningProcess:
         It can be used to augment the exception information.
         """
         return exc_info
+
+
+def setup_logging(level=logging.INFO):
+    log_format = '%(asctime)-15s [%(name)-18s] %(levelname)-7s: %(message)s'
+    logging.basicConfig(
+        format=log_format,
+        stream=sys.stderr,
+        level=level)

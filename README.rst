@@ -81,11 +81,26 @@ Usage
 
 Basic commands::
 
+
+    # Acquire rootfs images.
+    postroj pull debian-bullseye
+    postroj pull fedora-37
+
+    # Launch an interactive shell.
+    postroj run -it --rm debian-bullseye bash
+    postroj run -it --rm fedora-37 bash
+
+    # Verbose mode.
+    postroj --verbose run -it --rm fedora-37 hostnamectl
+
+    # Use stdin and stdout.
+    echo "hello world" | postroj run -it --rm fedora-37 cat - > hello
+    cat hello
+
+More commands::
+
     # List available images.
     postroj list-images
-
-    # Acquire rootfs image.
-    postroj pull debian-bullseye
 
     # Acquire rootfs images for all available distributions.
     postroj pull --all
