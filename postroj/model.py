@@ -24,6 +24,7 @@ class OperatingSystemFamily(Enum):
     CENTOS = "centos"
     ROCKYLINUX = "rockylinux"
     ARCHLINUX = "archlinux"
+    SUSE = "suse"
 
 
 class OperatingSystem(Enum):
@@ -107,6 +108,18 @@ class OperatingSystem(Enum):
         release="8",
         image="docker://docker.io/rockylinux:8",
     )
+    OPENSUSE_LEAP_15 = LinuxDistribution(
+        family="suse",
+        name="leap",
+        release="15",
+        image="docker://docker.io/opensuse/leap:15",
+    )
+    OPENSUSE_TUMBLEWEED = LinuxDistribution(
+        family="suse",
+        name="tumbleweed",
+        release="latest",
+        image="docker://docker.io/opensuse/tumbleweed:latest",
+    )
     ARCHLINUX_20220501 = LinuxDistribution(
         family="archlinux",
         name="20220501",
@@ -129,6 +142,8 @@ ALL_DISTRIBUTIONS: List[LinuxDistribution] = [
     OperatingSystem.CENTOS_7.value,
     OperatingSystem.CENTOS_8.value,
     OperatingSystem.ROCKYLINUX_8.value,
+    OperatingSystem.OPENSUSE_LEAP_15.value,
+    OperatingSystem.OPENSUSE_TUMBLEWEED.value,
     OperatingSystem.ARCHLINUX_20220501.value,
 ]
 

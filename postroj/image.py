@@ -49,6 +49,8 @@ class ImageProvider:
             self.setup_centos()
         elif self.distribution.family == OperatingSystemFamily.ROCKYLINUX.value:
             self.setup_rockylinux()
+        elif self.distribution.family == OperatingSystemFamily.SUSE.value:
+            self.setup_suse()
         elif self.distribution.family == OperatingSystemFamily.ARCHLINUX.value:
             self.setup_archlinux()
         else:
@@ -133,6 +135,20 @@ class ImageProvider:
 
         # Prepare image by installing systemd and additional packages.
         scmd(directory=rootfs, command=f"dnf install -y systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
+
+        # Activate image.
+        self.activate_image(rootfs)
+
+    def setup_suse(self):
+        """
+        openSUSE images are acquired from Docker Hub.
+        """
+
+        # Acquire image.
+        rootfs = self.acquire_from_docker()
+
+        # Prepare image by installing systemd and additional packages.
+        scmd(directory=rootfs, command=f"zypper install -y systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
 
         # Activate image.
         self.activate_image(rootfs)
