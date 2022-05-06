@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import asyncio
 import os
 import shlex
 import socket
@@ -5,8 +8,11 @@ import subprocess
 import sys
 import threading
 import time
+from abc import abstractmethod
+from asyncio import AbstractEventLoop
 from pathlib import Path
-from typing import Union
+from types import TracebackType
+from typing import Union, Optional, Tuple
 
 import subprocess_tee
 
@@ -157,3 +163,115 @@ def print_header(title: str, armor: str = "-"):
 
 def print_section_header(title: str, armor: str = "="):
     print_header(title=title, armor=armor)
+
+
+# https://github.com/python/mypy/issues/4676
+_SysExcInfoType = Union[Tuple[type, BaseException, TracebackType],
+                        Tuple[None, None, None]]
+
+
+class LongRunningProcess:
+    """
+    Invoke command in separate thread, suitable for running `systemd-nspawn --boot`.
+
+    TODO: Add option to suppress output, unless `--verbose` is selected.
+    """
+    def __init__(self):
+
+        # A handle to the subprocess running the command.
+        self.process: Optional[subprocess.Popen] = None
+
+        # A reference to the thread wrapping the command invocation.
+        self.thread: Optional[StoppableThread] = None
+
+        # When an exception occurs within a thread, this will propagate the
+        # exception info to the main thread.
+        self.thread_exc_info: Optional[_SysExcInfoType] = None
+
+        # An `asyncio` event loop for the wrapper thread.
+        self.loop: Optional[AbstractEventLoop] = None
+
+        # When the process invocation croaks, it will get signalled.
+        self.abort_signal: threading.Event = threading.Event()
+
+    def start(self, command: str):
+        """
+        Launch command within dedicated thread.
+        """
+        self.thread = StoppableThread(target=self.launch, args=(command,))
+        self.thread.start()
+
+    def stop(self):
+        """
+        Terminate and clean up process and thread wrapper objects.
+        """
+        if self.process is not None and not isinstance(self.process, subprocess_tee.CompletedProcess):
+            self.process.kill()
+            # time.sleep(0.1)
+            self.process.terminate()
+            self.process.wait()
+            del self.process
+            self.process = None
+        if self.thread is not None:
+            self.thread.stop()
+            del self.thread
+            self.thread = None
+
+    def launch(self, command: str):
+        """
+        Thread which is invoking the command in a subprocess.
+        It will block until the command has terminated.
+        """
+
+        # Create a dedicated `asyncio` event loop.
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+
+        # Launch command in subprocess.
+        self.process = subprocess_tee.run(shlex.split(command))
+
+        # When the invocation was successful, return early.
+        try:
+            self.process.check_returncode()
+            return self.process
+
+        # When the invocation failed, propagate the exception to the main thread.
+        except subprocess.CalledProcessError:
+            self.thread_exc_info = sys.exc_info()
+            # raise
+            # logger.exception()
+
+        # Signal the invocation failed, for whatever reason.
+        # That means, don't run any teardown code on the container.
+        # Instead, leave it completely untouched.
+        self.abort_signal.set()
+
+    def check(self):
+        """
+        Check the abort signal for a little while after the process was launched.
+
+        When there was an exception, propagate it to the abort handler and the
+        error handler, optionally augmenting the exception information by passing
+        it through a callback handler.
+        """
+        if self.abort_signal.wait(0.25):
+            self.abort_handler()
+            if self.thread_exc_info:
+                exc_info = self.thread_exc_info
+                exc_info = self.error_handler(exc_info)
+                raise exc_info[1].with_traceback(exc_info[2])
+
+    @abstractmethod
+    def abort_handler(self):
+        """
+        Will be called immediately after an exception happened while launching the process.
+        """
+        pass
+
+    @abstractmethod
+    def error_handler(self, exc_info: _SysExcInfoType):
+        """
+        Will be called when `exc_info` data is being propagated from a secondary thread.
+        It can be used to augment the exception information.
+        """
+        return exc_info

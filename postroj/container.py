@@ -1,19 +1,46 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
-import asyncio
 import os
-import shlex
 import subprocess
 import sys
-import threading
 import time
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
 
 import subprocess_tee
 
 from postroj.settings import cache_directory
-from postroj.util import StoppableThread, ccmd, print_header, hcmd, fix_tty
+from postroj.util import ccmd, print_header, hcmd, fix_tty, LongRunningProcess, _SysExcInfoType
+
+
+class NspawnLauncher(LongRunningProcess):
+
+    def __init__(self, container):
+        super(NspawnLauncher, self).__init__()
+        self.container: PostrojContainer = container
+
+    def abort_handler(self):
+        """
+        Propagate signal when machinery croaked while invoking the
+        `systemd-nspawn` process.
+
+        In this case, the teardown procedure will be skipped.
+        """
+        self.container.destroy_after_use = False
+
+    def error_handler(self, exc_info: _SysExcInfoType):
+        """
+        When machine already exists, modify exception from `CalledProcessError` to `RuntimeError`.
+        """
+        exc: subprocess_tee.CompletedProcess = exc_info[1]
+        stderr = exc.stderr.strip()
+        if "already exists" in stderr:
+            machine = self.container.machine
+            hint = f"Please run `machinectl terminate {machine}` and try again."
+            surrogate_exception = RuntimeError(
+                f"Unable to spawn container {machine}. Reason: {stderr}. {hint}")
+            exc_info = (exc_info[0], surrogate_exception, exc_info[2])
+        return exc_info
 
 
 class PostrojContainer:
@@ -24,13 +51,24 @@ class PostrojContainer:
     WAIT_TIMEOUT_SECONDS = 15.0
 
     def __init__(self, rootfs: Union[Path, str], machine: str = None):
-        self.rootfs = Path(rootfs)
+        """
+        Initialize container wrapper infrastructure and machine name.
+        """
+
+        # The path to the rootfs filesystem image.
+        self.rootfs: Path = Path(rootfs)
+
+        # Augment the machine name.
         if machine is None:
             machine = f"postroj-{os.path.basename(self.rootfs)}"
-        self.machine = machine
-        self.process: subprocess.Popen = None
-        self.thread: StoppableThread = None
+        self.machine: str = machine
+
+        # Flag to suppress destroying the container on teardown.
+        # Needed when detecting the container is already running.
         self.destroy_after_use: bool = True
+
+        # Process wrapper for invoking `systemd-nspawn --boot`.
+        self.launcher: Optional[NspawnLauncher] = None
 
     def boot(self):
         """
@@ -54,6 +92,7 @@ class PostrojContainer:
             raise RuntimeError(f"Container {self.machine} already running. {hint}")
         """
 
+        # Define the command to spawn the container.
         # TODO: Why does `--ephemeral` not work?
         # TODO: Maybe use `--register=false`?
         # TODO: What about `--notify-ready=true`?
@@ -66,51 +105,23 @@ class PostrojContainer:
                 --directory={self.rootfs} \
                 --machine={self.machine}
         """.strip()
-        print(f"Spawning container with: {command}")
+        print(f"Launch command is: {command}")
 
-        # Invoke command in background.
-        # TODO: Add option to suppress output, unless `--verbose` is selected.
-        abort_signal = threading.Event()
-        thread_exception = None
-
-        def spawn():
-            """
-            Thread which is  running the `systemd-nspawn` command to launch the
-            container instance.
-            """
-            nonlocal thread_exception
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            self.process = subprocess_tee.run(shlex.split(command))
-            try:
-                self.process.check_returncode()
-            except subprocess.CalledProcessError:
-                self.destroy_after_use = False
-                thread_exception = self.handle_nspawn_error()
-                abort_signal.set()
-
-        self.thread = StoppableThread(target=spawn)
-        self.thread.start()
-
-        if abort_signal.wait(0.25):
-            if thread_exception:
-                raise thread_exception[1].with_traceback(thread_exception[2])
-
-    def handle_nspawn_error(self):
-        exc_info = sys.exc_info()
-        exc = exc_info[1]
-        stderr = exc.stderr.strip()
-        if "already exists" in stderr:
-            hint = f"Please run `machinectl terminate {self.machine}` and try again."
-            surrogate_exception = RuntimeError(f"Unable to spawn container {self.machine}. Reason: {stderr}. {hint}")
-            exc_info = (exc_info[0], surrogate_exception, exc_info[2])
-        return exc_info
+        self.launcher = NspawnLauncher(container=self)
+        self.launcher.start(command=command)
+        self.launcher.check()
 
     def info(self):
+        """
+        Display host information about spawned container.
+        """
         print_header("Host information")
         self.run("/usr/bin/hostnamectl")
 
     def run(self, command, capture: bool = False):
+        """
+        Run command on spawned container.
+        """
         return ccmd(self.machine, command, capture=capture)
 
     def terminate(self):
@@ -132,7 +143,18 @@ class PostrojContainer:
 
         hcmd(f"/bin/machinectl terminate {self.machine}")
 
-    def is_down(self):
+    def is_down(self) -> bool:
+        """
+        Determine if the container is down.
+
+        This is, when::
+
+            systemctl is-system-running --machine=<machine>
+
+        prints this message to stderr::
+
+            Failed to connect to bus: Host is down
+        """
         process = hcmd(f"/bin/systemctl is-system-running --machine={self.machine}", capture=True, check=False)
         status = process.stdout.strip()
         print(f"INFO: Container status is: {status}")
@@ -203,25 +225,24 @@ class PostrojContainer:
             raise TimeoutError(f"Timeout while spawning container {self.machine}")
 
     def __enter__(self):
+        """
+        When entering the context manager, nothing special has to be initialized.
+        """
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Destroy the container when exiting the context manager.
+        """
         self.destroy()
         fix_tty()
 
     def destroy(self):
+        """
+        Destroy container and its management/launcher machinery.
+        """
         if self.destroy_after_use:
             self.terminate()
         else:
             print("DEBUG: Skipping container destruction")
-        if self.process is not None and not isinstance(self.process, subprocess_tee.CompletedProcess):
-            self.process.kill()
-            # time.sleep(0.1)
-            self.process.terminate()
-            self.process.wait()
-            del self.process
-            self.process = None
-        if self.thread is not None:
-            self.thread.stop()
-            del self.thread
-            self.thread = None
+        self.launcher.stop()

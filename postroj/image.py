@@ -266,7 +266,6 @@ class ImageProvider:
         # Download and extract image.
         archive_oci = archive_directory / f"{self.distribution.fullname}.oci"
         archive_image = archive_directory / f"{self.distribution.fullname}.img"
-        return archive_image / "rootfs"
 
         if self.force:
             shutil.rmtree(archive_oci, ignore_errors=True)
