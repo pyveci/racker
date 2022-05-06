@@ -96,6 +96,11 @@ def fix_tty():
 
     TODO: Figure out what `stty sane` does and implement it natively.
     """
+
+    # Fix `stty: 'standard input': Inappropriate ioctl for device`.
+    if not sys.stdin.isatty():
+        return
+
     os.system("stty sane")
 
     # Clears the whole screen.

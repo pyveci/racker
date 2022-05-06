@@ -61,19 +61,6 @@ No way to disable /etc/issue?
   - /usr/lib/systemd/system/serial-getty@.service
 
 
-Inappropriate ioctl for device
-==============================
-::
-
-    echo "hello world" | sudo postroj run -it --rm fedora-37 cat -
-
-::
-
-    stty: 'standard input': Inappropriate ioctl for device
-
-
-https://www.pyinvoke.org/faq.html#i-m-getting-ioerror-inappropriate-ioctl-for-device-when-i-run-commands
-
 
 *****
 Ideas

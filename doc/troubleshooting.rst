@@ -106,3 +106,21 @@ Q: Maybe it does not terminate appropriately?
 - https://bugzilla.redhat.com/show_bug.cgi?id=2048033
 - https://pagure.io/ContainerSIG/container-sig/issue/55
 - https://pagure.io/cloud-sig/issue/367
+
+
+*************************************
+STDIN: Inappropriate ioctl for device
+*************************************
+::
+
+    echo "hello world" | sudo postroj run -it --rm fedora-37 cat -
+
+::
+
+    stty: 'standard input': Inappropriate ioctl for device
+
+
+- https://www.pyinvoke.org/faq.html#i-m-getting-ioerror-inappropriate-ioctl-for-device-when-i-run-commands
+- https://stackoverflow.com/questions/66090902/how-to-supress-the-stty-standard-input-inappropriate-ioctl-for-device-erro
+- https://stackoverflow.com/questions/19880190/interactive-input-output-using-python
+- https://bitbucket.org/gehrmann/pyguibot/src/ea1ceed3029a3460949910e0d4b19ca9a3bf6227/pyguibot/controllers/qt_gui.py#lines-671
