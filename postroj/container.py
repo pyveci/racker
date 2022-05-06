@@ -245,4 +245,6 @@ class PostrojContainer:
             self.terminate()
         else:
             print("DEBUG: Skipping container destruction")
-        self.launcher.stop()
+
+        if self.launcher:
+            self.launcher.stop()

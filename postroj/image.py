@@ -26,11 +26,15 @@ class ImageProvider:
 
     ADDITIONAL_PACKAGES = ["curl", "wget"]
 
-    def __init__(self, distribution: LinuxDistribution, force: bool = True):
+    def __init__(self, distribution: LinuxDistribution, autosetup: bool = True, force: bool = False):
         self.distribution = distribution
+        self.autosetup = autosetup
         self.force = force
         archive_directory.mkdir(parents=True, exist_ok=True)
         image_directory.mkdir(parents=True, exist_ok=True)
+
+        if self.autosetup and not self.image.exists():
+            self.setup()
 
     def setup(self):
         """
@@ -87,7 +91,7 @@ class ImageProvider:
         image_tarball = download_directory / os.path.basename(self.distribution.image)
         rootfs = archive_directory / self.distribution.fullname
 
-        if self.force:
+        if self.force and rootfs.exists():
             shutil.rmtree(rootfs)
 
         hcmd(f"wget --continue --no-clobber --directory-prefix={download_directory} {self.distribution.image}")
