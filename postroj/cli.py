@@ -59,6 +59,7 @@ def cli_pull_image(ctx, name: str, pull_all: bool = False):
     if not name and not pull_all:
         raise click.BadOptionUsage(option_name="name", message="Need image name or `--all`")
 
+    # TODO: Move to `postroj pull --all` because it is incompatible with `docker pull`.
     if pull_all:
         names = list_images()
         pull_multiple_images(names)

@@ -81,6 +81,9 @@ Usage
 
 Basic commands::
 
+    # Invoke the vanilla Docker `hello-world` image.
+    # FIXME: Does not work yet.
+    # postroj run -it --rm hello-world
 
     # Acquire rootfs images.
     postroj pull debian-bullseye
@@ -90,11 +93,14 @@ Basic commands::
     postroj run -it --rm debian-bullseye bash
     postroj run -it --rm fedora-37 bash
 
+    # Launch a single command.
+    postroj run -it --rm suse-tumbleweed hostnamectl
+
     # Verbose mode.
     postroj --verbose run -it --rm fedora-37 hostnamectl
 
-    # Use stdin and stdout.
-    echo "hello world" | postroj run -it --rm fedora-37 cat - > hello
+    # Use stdin and stdout, with timing.
+    time echo "hello world" | postroj run -it --rm fedora-37 cat /dev/stdin > hello
     cat hello
 
 More commands::

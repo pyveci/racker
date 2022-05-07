@@ -62,3 +62,35 @@ Purpose: Invoke programs within a Windows/Java/OpenJDK environment.
         --environment=windows-1809 --cpus=8 --memory=8192M \
         --repository=https://github.com/crate/crate \
         --command="gradlew :server:test -Dtests.crate.run-windows-incompatible=false"
+
+
+***************
+Troubleshooting
+***************
+
+CrateDB on openSUSE fails
+=========================
+
+A: Workaround applied by running ``rpm --install --nodeps``.
+TODO: Maybe adjust the RPM dependencies?
+
+::
+
+    zypper --non-interactive install crate-4.7.2-1.x86_64.rpm
+    Loading repository data...
+    Reading installed packages...
+    Resolving package dependencies...
+
+    Problem: nothing provides 'systemd-units' needed by the to be installed crate-4.7.2-1.x86_64
+     Solution 1: do not install crate-4.7.2-1.x86_64
+     Solution 2: break crate-4.7.2-1.x86_64 by ignoring some of its dependencies
+
+    Choose from above solutions by number or cancel [1/2/c/d/?] (c): c
+
+::
+
+    rpm -i crate-4.7.2-1.x86_64.rpm
+    warning: crate-4.7.2-1.x86_64.rpm: Header V4 RSA/SHA1 Signature, key ID 06f6eaeb: NOKEY
+    error: Failed dependencies:
+        shadow-utils is needed by crate-4.7.2-1.x86_64
+        systemd-units is needed by crate-4.7.2-1.x86_64
