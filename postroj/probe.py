@@ -2,6 +2,7 @@
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import logging
 import subprocess
+from abc import abstractmethod
 
 from furl import furl
 
@@ -16,6 +17,10 @@ class ProbeBase:
     def __init__(self, container: PostrojContainer):
         self.container = container
 
+    @abstractmethod
+    def invoke(self):
+        raise NotImplementedError()
+
     def run(self, command: str, capture: bool = False):
         return self.container.run(command=command, capture=capture)
 
@@ -26,6 +31,11 @@ class ProbeBase:
     @property
     def is_redhat(self):
         return (self.container.rootfs / "etc" / "redhat-release").exists()
+
+    @property
+    def is_suse(self):
+        os_release_file = self.container.rootfs / "etc" / "os-release"
+        return os_release_file.exists() and "suse" in os_release_file.read_text().lower()
 
     @property
     def is_archlinux(self):

@@ -83,6 +83,23 @@ class PackageProbe(ProbeBase):
             self.run(f"/usr/bin/apt install --yes {package}")
         elif self.is_redhat:
             self.run(f"/usr/bin/yum install -y {package}")
+        elif self.is_suse:
+            """
+            Problem
+            =======
+
+            zypper install says::
+
+                nothing provides 'systemd-units' needed by the to be installed
+
+            rpm --install says::
+
+                error: Failed dependencies:
+                    shadow-utils is needed by crate-4.7.2-1.x86_64
+                    systemd-units is needed by crate-4.7.2-1.x86_64
+            """
+            # self.run(f"/usr/bin/zypper --non-interactive install {package}")
+            self.run(f"/usr/bin/rpm --install --nodeps {package}")
         else:
             raise ValueError(f"Unable to install package {package}. Reason: Unsupported operating system.")
 
