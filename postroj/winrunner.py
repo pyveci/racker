@@ -6,9 +6,9 @@ A convenience wrapper around Windows Docker Machine.
 https://github.com/StefanScherer/windows-docker-machine
 """
 import json
+import shlex
 import subprocess
 from pathlib import Path
-import shlex
 from urllib.parse import urlparse
 
 import click
@@ -62,7 +62,7 @@ class WinRunner:
 
     def run(self, command, strip_armor=True, translate_newlines=True):
         click.echo(f"Running command: {command}")
-        command = f'docker --context={self.BOX} run -it --rm openjdk:17-windowsservercore-1809 {command}'
+        command = f"docker --context={self.BOX} run -it --rm openjdk:17-windowsservercore-1809 {command}"
         outcome = run(command)
         if strip_armor:
             """
@@ -75,7 +75,7 @@ class WinRunner:
             outcome = outcome[cutoff_left:cutoff_right]
         if translate_newlines:
             outcome = outcome.replace("\r\n", "\n")
-        #print(outcome.encode())
+        # print(outcome.encode())
         return outcome
 
     def docker_context_online(self):
@@ -93,10 +93,10 @@ def run(command, shell=False, cwd=None):
 
     STDERR will be displayed, STDOUT will be captured.
     """
-    #print(f"Running command: {command}")
-    #command = f"""
+    # print(f"Running command: {command}")
+    # command = f"""
     #    systemd-run --machine={machine} --wait --quiet --pipe {command}
-    #"""
+    # """
     if shell:
         output = subprocess.check_output(command, shell=shell, cwd=cwd)
     else:

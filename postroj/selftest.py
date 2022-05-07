@@ -6,13 +6,13 @@ import sys
 import time
 from contextlib import redirect_stdout
 from copy import copy
-from typing import List, Dict, Type
+from typing import Dict, List, Type
 
 import click
 
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
-from postroj.model import ALL_DISTRIBUTIONS, OperatingSystem, LinuxDistribution
+from postroj.model import ALL_DISTRIBUTIONS, LinuxDistribution, OperatingSystem
 from postroj.probe import ProbeBase
 from postroj.util import dataclass_to_json
 
@@ -128,6 +128,7 @@ class SelftestResult:
     """
     Capture information about probe outcomes.
     """
+
     distribution: LinuxDistribution
     probes: Dict[str, bool] = dataclasses.field(default_factory=dict)
 
@@ -155,7 +156,7 @@ def selftest_multiple(distributions: List[LinuxDistribution], probes: List[Type]
             with redirect_stdout(sys.stderr):
                 pc.boot()
                 pc.wait()
-                #pc.info()
+                # pc.info()
 
             for probe_class in probes:
                 probe_name = probe_class.__name__
@@ -186,8 +187,8 @@ def get_selftest_distributions():
     selected_distributions.remove(OperatingSystem.CENTOS_7.value)
 
     # On demand, select only specific items.
-    #selected_distributions = [OperatingSystem.ARCHLINUX_20220501.value]
-    #selected_distributions = [OperatingSystem.OPENSUSE_TUMBLEWEED.value]
+    # selected_distributions = [OperatingSystem.ARCHLINUX_20220501.value]
+    # selected_distributions = [OperatingSystem.OPENSUSE_TUMBLEWEED.value]
 
     return selected_distributions
 

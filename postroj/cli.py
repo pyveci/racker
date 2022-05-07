@@ -5,16 +5,16 @@ import logging
 
 import click
 
-from postroj import runner, pkgprobe, selftest
-from postroj.api import pull_single_image, pull_multiple_images
+from postroj import pkgprobe, runner, selftest
+from postroj.api import pull_multiple_images, pull_single_image
 from postroj.model import list_images
 from postroj.util import setup_logging
 
 
 @click.group()
 @click.version_option()
-@click.option('--verbose', is_flag=True, required=False)
-@click.option('--debug', is_flag=True, required=False)
+@click.option("--verbose", is_flag=True, required=False)
+@click.option("--debug", is_flag=True, required=False)
 @click.pass_context
 def cli(ctx: click.Context, verbose: bool, debug: bool):
 

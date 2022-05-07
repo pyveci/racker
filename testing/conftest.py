@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
-
 from _pytest.monkeypatch import MonkeyPatch
 
 import postroj.model

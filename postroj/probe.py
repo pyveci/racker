@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class ProbeBase:
-
     def __init__(self, container: PostrojContainer):
         self.container = container
 

@@ -16,11 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 @click.command()
-@click.option('--image', type=str)
-@click.option('--package', type=str)
-@click.option('--check-unit', type=str, multiple=True)
-@click.option('--check-network', type=str, multiple=True)
-@click.option('--network-timeout', type=float, default=5.0)
+@click.option("--image", type=str)
+@click.option("--package", type=str)
+@click.option("--check-unit", type=str, multiple=True)
+@click.option("--check-network", type=str, multiple=True)
+@click.option("--network-timeout", type=float, default=5.0)
 @click.pass_context
 def main(ctx, image: str, package: str, check_unit: List[str], check_network: List[str], network_timeout: float = 5.0):
     """
@@ -73,7 +73,9 @@ class PackageProbe(ProbeBase):
         # Download package.
         if package.startswith("http"):
             logger.info(f"Downloading {package}")
-            self.run(f"/usr/bin/wget --continue --no-clobber --directory-prefix={settings.download_directory} {package}")
+            self.run(
+                f"/usr/bin/wget --continue --no-clobber --directory-prefix={settings.download_directory} {package}"
+            )
             package = settings.download_directory / os.path.basename(package)
         else:
             raise ValueError(f"Unable to acquire package at {package}")

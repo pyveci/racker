@@ -50,14 +50,14 @@ class OperatingSystem(Enum):
         family="debian",
         name="buster",
         release="10",
-        #image="https://cloud.debian.org/images/cloud/buster/latest/debian-10-genericcloud-amd64.tar.xz",
+        # image="https://cloud.debian.org/images/cloud/buster/latest/debian-10-genericcloud-amd64.tar.xz",
         image="docker://docker.io/debian:buster-slim",
     )
     DEBIAN_BULLSEYE = LinuxDistribution(
         family="debian",
         name="bullseye",
         release="11",
-        #image="https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.tar.xz",
+        # image="https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.tar.xz",
         image="docker://docker.io/debian:bullseye-slim",
     )
     DEBIAN_BOOKWORM = LinuxDistribution(

@@ -6,7 +6,6 @@ from typing import List
 from postroj.image import ImageProvider
 from postroj.model import find_distribution
 
-
 logger = logging.getLogger(__name__)
 
 

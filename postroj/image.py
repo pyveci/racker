@@ -7,10 +7,9 @@ from pathlib import Path
 from textwrap import dedent, indent
 from typing import Union
 
-from postroj.model import LinuxDistribution, OperatingSystemFamily, ConfigurationOptions
+from postroj.model import ConfigurationOptions, LinuxDistribution, OperatingSystemFamily
 from postroj.settings import get_appsettings
-
-from postroj.util import is_dir_empty, scmd, hcmd, stdout_to_stderr
+from postroj.util import hcmd, is_dir_empty, scmd, stdout_to_stderr
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +78,10 @@ class ImageProvider:
         rootfs = self.acquire_from_docker()
 
         # Prepare image by installing systemd and additional packages.
-        scmd(directory=rootfs, command=f"sh -c 'apt-get update; apt-get install --yes systemd {' '.join(self.ADDITIONAL_PACKAGES)}'")
+        scmd(
+            directory=rootfs,
+            command=f"sh -c 'apt-get update; apt-get install --yes systemd {' '.join(self.ADDITIONAL_PACKAGES)}'",
+        )
 
         # Activate image.
         self.activate_image(rootfs)
@@ -112,13 +114,14 @@ class ImageProvider:
             hcmd(f"tar --directory={rootfs} -xf {image_tarball}")
 
         # Prepare image by adding additional packages.
-        scmd(directory=rootfs, command=f"sh -c 'apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES)}'")
+        scmd(
+            directory=rootfs,
+            command=f"sh -c 'apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES)}'",
+        )
 
         # Prepare image by deactivating services which are hogging the bootstrapping.
-        scmd(directory=rootfs,
-             command="systemctl disable ssh systemd-networkd-wait-online systemd-resolved")
-        scmd(directory=rootfs,
-             command="systemctl mask systemd-remount-fs systemd-timedated")
+        scmd(directory=rootfs, command="systemctl disable ssh systemd-networkd-wait-online systemd-resolved")
+        scmd(directory=rootfs, command="systemctl mask systemd-remount-fs systemd-timedated")
 
         # Would bring boot time from 1.2s down to 0.6s, but
         # sometimes container does not signal readiness then.
@@ -186,7 +189,9 @@ class ImageProvider:
         # https://techglimpse.com/failed-metadata-repo-appstream-centos-8/
         if self.distribution.family == OperatingSystemFamily.CENTOS.value and self.distribution.release == "8":
             os.system(f"/usr/bin/sed -i 's/mirrorlist/#mirrorlist/g' {rootfs}/etc/yum.repos.d/*")
-            os.system(f"/usr/bin/sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' {rootfs}/etc/yum.repos.d/CentOS-*")
+            os.system(
+                f"/usr/bin/sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' {rootfs}/etc/yum.repos.d/CentOS-*"
+            )
 
         # Prepare image by adding additional packages.
         scmd(directory=rootfs, command=f"yum install -y {' '.join(self.ADDITIONAL_PACKAGES)}")
@@ -234,14 +239,17 @@ class ImageProvider:
         except:
             raise ValueError(f"Unable to decode systemd version from:\n{response}")
         if systemd_version_installed >= systemd_version_minimal:
-            logger.info(f"Found systemd version {systemd_version_installed}, "
-                        f"which satisfies minimum version {systemd_version_minimal}")
+            logger.info(
+                f"Found systemd version {systemd_version_installed}, "
+                f"which satisfies minimum version {systemd_version_minimal}"
+            )
             return
 
         logger.info(f"Upgrading systemd to version {systemd_version_minimal}")
 
         # Prepare image by upgrading systemd.
-        upgrade_systemd_program = dedent(f"""
+        upgrade_systemd_program = dedent(
+            f"""
             set -x
             systemctl --version
             yum upgrade -y
@@ -254,8 +262,10 @@ class ImageProvider:
             make -j8
             make install
             systemctl --version
-        """.strip()).strip()
-        upgrade_systemd_program_meson = dedent(f"""
+        """.strip()
+        ).strip()
+        upgrade_systemd_program_meson = dedent(
+            f"""
             set -x
             systemctl --version
             yum upgrade -y
@@ -266,13 +276,16 @@ class ImageProvider:
             cd systemd-{systemd_version_minimal}
             meson build/ && ninja -C build install
             systemctl --version
-        """.strip()).strip()
+        """.strip()
+        ).strip()
 
-        upgrade_systemd_command = dedent(f"""
+        upgrade_systemd_command = dedent(
+            f"""
         systemd-nspawn --directory={rootfs} --pipe /bin/sh << EOF
         {indent(upgrade_systemd_program, "  ")}
         EOF
-        """).strip()
+        """
+        ).strip()
         logger.info(upgrade_systemd_command)
 
         logger.info(f"Installing systemd version {systemd_version_minimal}")
@@ -307,7 +320,9 @@ class ImageProvider:
             shutil.rmtree(archive_image, ignore_errors=True)
 
         if not archive_oci.exists() or not (archive_oci / "index.json").exists():
-            hcmd(f"skopeo copy --override-os=linux {self.distribution.image} oci:{archive_oci}:{self.distribution.fullname}")
+            hcmd(
+                f"skopeo copy --override-os=linux {self.distribution.image} oci:{archive_oci}:{self.distribution.fullname}"
+            )
         if not archive_image.exists() or is_dir_empty(archive_image) or is_dir_empty(archive_image / "rootfs"):
             hcmd(f"umoci unpack --rootless --image={archive_oci}:{self.distribution.fullname} {archive_image}")
 

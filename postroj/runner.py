@@ -3,7 +3,7 @@
 import io
 import logging
 import sys
-from contextlib import redirect_stdout, redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 
 import click
 
@@ -11,7 +11,6 @@ from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
 from postroj.model import find_distribution
 from postroj.winrunner import WinRunner
-
 
 logger = logging.getLogger(__name__)
 
@@ -88,11 +87,11 @@ def main(ctx, interactive: bool, tty: bool, rm: bool, image: str, command: str):
 
 
 @click.command()
-@click.option('--system', type=str)
-@click.option('--cpus', type=int)
-@click.option('--memory', type=str)
-@click.option('--mount', type=str)
-@click.argument('command', nargs=-1, type=str)
+@click.option("--system", type=str)
+@click.option("--cpus", type=int)
+@click.option("--memory", type=str)
+@click.option("--mount", type=str)
+@click.argument("command", nargs=-1, type=str)
 @click.pass_context
 def winrunner(ctx, system, cpus, memory, mount, command):
     """

@@ -4,7 +4,6 @@ from pathlib import Path
 
 from postroj.model import ConfigurationOptions
 
-
 appsettings = ConfigurationOptions(
     archive_directory=Path("/var/lib/postroj/archive"),
     image_directory=Path("/var/lib/postroj/images"),

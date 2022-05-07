@@ -5,19 +5,17 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Union, Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import subprocess_tee
 
 from postroj.settings import appsettings
-from postroj.util import ccmd, print_header, hcmd, fix_tty, LongRunningProcess, _SysExcInfoType, mask_logging, \
-    noop
+from postroj.util import LongRunningProcess, _SysExcInfoType, ccmd, fix_tty, hcmd, mask_logging, noop, print_header
 
 logger = logging.getLogger(__name__)
 
 
 class NspawnLauncher(LongRunningProcess):
-
     def __init__(self, container):
         super(NspawnLauncher, self).__init__()
         self.container: PostrojContainer = container
@@ -40,8 +38,7 @@ class NspawnLauncher(LongRunningProcess):
         if "already exists" in stderr:
             machine = self.container.machine
             hint = f"Please run `machinectl terminate {machine}` and try again."
-            surrogate_exception = RuntimeError(
-                f"Unable to spawn container {machine}. Reason: {stderr}. {hint}")
+            surrogate_exception = RuntimeError(f"Unable to spawn container {machine}. Reason: {stderr}. {hint}")
             exc_info = (exc_info[0], surrogate_exception, exc_info[2])
         return exc_info
 
@@ -209,8 +206,9 @@ class PostrojContainer:
         """
         Get status of system.
         """
-        process = hcmd(f"/bin/systemctl is-system-running --machine={self.machine}",
-                       check=False, passthrough=False, capture=True)
+        process = hcmd(
+            f"/bin/systemctl is-system-running --machine={self.machine}", check=False, passthrough=False, capture=True
+        )
         status = process.stdout.strip()
         errors = process.stderr
         logger.info(f"Container status is: {status or '<unknown>'}")

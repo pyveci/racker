@@ -14,13 +14,12 @@ import threading
 import time
 from abc import abstractmethod
 from asyncio import AbstractEventLoop
-from contextlib import redirect_stdout, contextmanager
+from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
 from types import TracebackType
-from typing import Union, Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import subprocess_tee
-
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +134,7 @@ class StoppableThread(threading.Thread):
     https://stackoverflow.com/a/325528
     """
 
-    def __init__(self,  *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(StoppableThread, self).__init__(*args, **kwargs)
         self._stop_event = threading.Event()
 
@@ -211,8 +210,7 @@ def print_section_header(title: str, armor: str = "="):
 
 
 # https://github.com/python/mypy/issues/4676
-_SysExcInfoType = Union[Tuple[type, BaseException, TracebackType],
-                        Tuple[None, None, None]]
+_SysExcInfoType = Union[Tuple[type, BaseException, TracebackType], Tuple[None, None, None]]
 
 
 class LongRunningProcess:
@@ -221,6 +219,7 @@ class LongRunningProcess:
 
     TODO: Add option to suppress output, unless `--verbose` is selected.
     """
+
     def __init__(self):
 
         # A handle to the subprocess running the command.
@@ -323,11 +322,8 @@ class LongRunningProcess:
 
 
 def setup_logging(level=logging.INFO):
-    log_format = '%(asctime)-15s [%(name)-18s] %(levelname)-7s: %(message)s'
-    logging.basicConfig(
-        format=log_format,
-        stream=sys.stderr,
-        level=level)
+    log_format = "%(asctime)-15s [%(name)-18s] %(levelname)-7s: %(message)s"
+    logging.basicConfig(format=log_format, stream=sys.stderr, level=level)
 
 
 @contextmanager
@@ -389,6 +385,7 @@ class DataclassJsonEncoder(json.JSONEncoder):
     - https://docs.python.org/3/library/json.html#json.JSONEncoder
     - https://docs.python.org/3/library/dataclasses.html
     """
+
     def default(self, obj):
         if dataclasses.is_dataclass(obj):
             return dataclasses.asdict(obj)
