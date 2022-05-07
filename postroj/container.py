@@ -9,7 +9,7 @@ from typing import Union, Optional, Tuple
 
 import subprocess_tee
 
-from postroj.settings import cache_directory
+from postroj.settings import appsettings
 from postroj.util import ccmd, print_header, hcmd, fix_tty, LongRunningProcess, _SysExcInfoType, mask_logging, \
     noop
 
@@ -79,6 +79,8 @@ class PostrojContainer:
         All operations on the container image will be ephemeral/volatile
         to ensure reproducible actions.
         """
+
+        cache_directory = appsettings.cache_directory
 
         if not self.rootfs.exists():
             raise Exception(f"Image at {self.rootfs} not found")

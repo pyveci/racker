@@ -7,8 +7,8 @@ from pathlib import Path
 from textwrap import dedent, indent
 from typing import Union
 
-from postroj.model import LinuxDistribution, OperatingSystemFamily
-from postroj.settings import archive_directory, image_directory, download_directory
+from postroj.model import LinuxDistribution, OperatingSystemFamily, ConfigurationOptions
+from postroj.settings import get_appsettings
 
 from postroj.util import is_dir_empty, scmd, hcmd, stdout_to_stderr
 
@@ -30,12 +30,16 @@ class ImageProvider:
     ADDITIONAL_PACKAGES = ["curl", "wget"]
 
     def __init__(self, distribution: LinuxDistribution, autosetup: bool = True, force: bool = False):
+
         self.distribution = distribution
         self.autosetup = autosetup
         # TODO: Discriminate `force` vs. `update`.
         self.force = force
-        archive_directory.mkdir(parents=True, exist_ok=True)
-        image_directory.mkdir(parents=True, exist_ok=True)
+
+        self.settings: ConfigurationOptions = get_appsettings()
+
+        self.settings.archive_directory.mkdir(parents=True, exist_ok=True)
+        self.settings.image_directory.mkdir(parents=True, exist_ok=True)
 
         if self.autosetup and (not self.image.exists() or self.force):
             with stdout_to_stderr():
@@ -91,6 +95,9 @@ class ImageProvider:
         - https://askubuntu.com/questions/1090631/start-job-is-running-for-wait-for-network-to-be-configured-ubuntu-server-18-04
         - https://github.com/systemd/systemd/issues/12313
         """
+
+        download_directory = self.settings.download_directory
+        archive_directory = self.settings.archive_directory
 
         # Acquire image.
         image_tarball = download_directory / os.path.basename(self.distribution.image)
@@ -289,6 +296,8 @@ class ImageProvider:
         - https://github.com/opencontainers/runtime-spec/blob/main/bundle.md
         """
 
+        archive_directory = self.settings.archive_directory
+
         # Download and extract image.
         archive_oci = archive_directory / f"{self.distribution.fullname}.oci"
         archive_image = archive_directory / f"{self.distribution.fullname}.img"
@@ -306,7 +315,7 @@ class ImageProvider:
 
     @property
     def image(self):
-        return image_directory / self.distribution.fullname
+        return self.settings.image_directory / self.distribution.fullname
 
     def activate_image(self, rootfs: Union[Path, str]):
         """

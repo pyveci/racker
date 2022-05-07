@@ -2,7 +2,19 @@
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import dataclasses
 from enum import Enum
+from pathlib import Path
 from typing import List
+
+
+@dataclasses.dataclass
+class ConfigurationOptions:
+    archive_directory: Path = None
+    image_directory: Path = None
+    cache_directory: Path = None
+
+    @property
+    def download_directory(self) -> Path:
+        return self.cache_directory / "downloads"
 
 
 @dataclasses.dataclass

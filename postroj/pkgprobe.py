@@ -10,8 +10,7 @@ from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
 from postroj.model import find_distribution
 from postroj.probe import ProbeBase
-from postroj.settings import download_directory
-
+from postroj.settings import get_appsettings
 
 logger = logging.getLogger(__name__)
 
@@ -67,13 +66,15 @@ class PackageProbe(ProbeBase):
         if package is None:
             return
 
+        settings = get_appsettings()
+
         logger.info(f"Setting up package {package}")
 
         # Download package.
         if package.startswith("http"):
             logger.info(f"Downloading {package}")
-            self.run(f"/usr/bin/wget --continue --no-clobber --directory-prefix={download_directory} {package}")
-            package = download_directory / os.path.basename(package)
+            self.run(f"/usr/bin/wget --continue --no-clobber --directory-prefix={settings.download_directory} {package}")
+            package = settings.download_directory / os.path.basename(package)
         else:
             raise ValueError(f"Unable to acquire package at {package}")
 
