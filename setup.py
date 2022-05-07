@@ -64,4 +64,9 @@ setup(
         "furl>=2,<3",
         "subprocess-tee>=0.3,<1",
     ],
+    extras_require={
+        "test": [
+            "pytest>=6,<8",
+        ]
+    },
 )

@@ -51,6 +51,18 @@ def cmd(command, check: bool = True, passthrough: bool = True, capture: bool = F
             else:
                 stdout = subprocess.DEVNULL
                 stderr = subprocess.DEVNULL
+
+            # FIXME: Work around `io.UnsupportedOperation: fileno` under `pytest`.
+            if "PYTEST_CURRENT_TEST" in os.environ:
+                try:
+                    stdout.fileno()
+                except io.UnsupportedOperation:
+                    stdout = None
+                try:
+                    stderr.fileno()
+                except io.UnsupportedOperation:
+                    stderr = None
+
             p = subprocess.run(shlex.split(command), stdout=stdout, stderr=stderr)
         if check:
             p.check_returncode()
