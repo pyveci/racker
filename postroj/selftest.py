@@ -1,31 +1,52 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
-import json
+import dataclasses
+import logging
+import sys
 import time
+from contextlib import redirect_stdout
 from copy import copy
-from typing import Union
+from typing import List, Dict, Type
 
 import click
 
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
-from postroj.model import ALL_DISTRIBUTIONS, OperatingSystem
+from postroj.model import ALL_DISTRIBUTIONS, OperatingSystem, LinuxDistribution
 from postroj.probe import ProbeBase
-from postroj.util import print_section_header, print_header
+from postroj.util import dataclass_to_json
+
+logger = logging.getLogger(__name__)
 
 
 @click.group()
 def selftest_main():
     """
-    Run self tests
+    Run different kinds of self tests
     """
     pass
 
 
 @click.command()
+def selftest_hostnamectl():
+    """
+    Run example command on all curated containers.
+
+    - Iterate all available filesystem images.
+    - Spawn a container.
+    - Wait until container has booted completely.
+    - Display host information about the container, using `hostnamectl`.
+    """
+    selected_distributions = get_selftest_distributions()
+    success = selftest_multiple(selected_distributions, probes=[HostinfoProbe])
+    if not success:
+        sys.exit(5)
+
+
+@click.command()
 def selftest_pkgprobe():
     """
-    Run example probes on all available images/containers.
+    Run example package/service probes on all curated containers.
 
     - Iterate all available filesystem images.
     - Spawn a container.
@@ -34,45 +55,48 @@ def selftest_pkgprobe():
     """
 
     selected_distributions = get_selftest_distributions()
-
-    # Iterate selected distributions.
-    for distribution in selected_distributions:
-        print_section_header(f"Checking distribution {distribution.fullname}, release={distribution.release}")
-
-        # Acquire rootfs filesystem image.
-        ip = ImageProvider(distribution=distribution)
-        rootfs = ip.image
-
-        # Boot container and run probe commands.
-        with PostrojContainer(rootfs=rootfs) as pc:
-            pc.boot()
-            pc.wait()
-            pc.info()
-
-            probe = BasicProbe(container=pc)
-            probe.invoke()
-
-            probe = ApacheProbe(container=pc)
-            probe.invoke()
-
-        print()
-        print_report(selected_distributions)
+    success = selftest_multiple(selected_distributions, probes=[JournaldProbe, ApacheProbe])
+    if not success:
+        sys.exit(5)
 
 
-class BasicProbe(ProbeBase):
+class HostinfoProbe(ProbeBase):
+    """
+    A very basic probe which just invokes `hostnamectl` on a container.
+    """
+
+    def invoke(self):
+        self.container.info()
+
+
+class JournaldProbe(ProbeBase):
+    """
+    Another basic probe which asserts the `systemd-journald` unit is active.
+    """
 
     def invoke(self):
         self.check_unit(name="systemd-journald")
 
 
 class ApacheProbe(ProbeBase):
+    """
+    A slightly more advanced probe which installs a distribution package,
+    checks the unit state and also tests the server port for availability.
+
+    In this case, the Apache daemon is installed and enabled. Afterwards,
+    `localhost:80` is checked for availability.
+
+    The special thing, other than dispatching for different operating systems,
+    is that the routine also accounts for different unit names.
+    """
 
     def invoke(self):
 
-        print_header("Checking Apache web server")
+        logger.info("Checking Apache web server")
 
         # Setup service.
-        print("Installing Apache web server")
+        # TODO: Refactor to generic package installer.
+        logger.info("Installing Apache web server")
         if self.is_debian:
             package_name = unit_name = "apache2"
             self.run(f"/usr/bin/apt-get update")
@@ -84,9 +108,11 @@ class ApacheProbe(ProbeBase):
             package_name = "apache"
             unit_name = "httpd"
             self.run(f"/usr/sbin/pacman -Syu --noconfirm {package_name}")
+        elif self.is_suse:
+            package_name = unit_name = "apache2"
+            self.run(f"/usr/bin/zypper install -y {package_name}")
         else:
-            print(f"WARNING: Unable to invoke ApacheProbe. Reason: Unsupported operating system.")
-            return
+            raise ValueError(f"Unable to invoke ApacheProbe. Reason: Unsupported operating system.")
 
         # Enable service.
         self.run(f"/bin/systemctl enable {unit_name}")
@@ -97,17 +123,28 @@ class ApacheProbe(ProbeBase):
         self.check_address("http://localhost:80")
 
 
-@click.command()
-def selftest_hostnamectl():
+@dataclasses.dataclass
+class SelftestResult:
     """
-    Spawn a container and wait until it has booted completely.
-    Then, display host information about the container, using `hostnamectl`.
+    Capture information about probe outcomes.
     """
-    selected_distributions = get_selftest_distributions()
+    distribution: LinuxDistribution
+    probes: Dict[str, bool] = dataclasses.field(default_factory=dict)
+
+
+def selftest_multiple(distributions: List[LinuxDistribution], probes: List[Type] = None):
+    """
+    Run a list of probes on a list of selected operating systems.
+    """
+
+    probes = probes or []
+    results = []
+    success = True
 
     # Iterate all suitable operating systems.
-    for distribution in selected_distributions:
-        print_section_header(f"Spawning {distribution.fullname}")
+    for distribution in distributions:
+        logger.info(f"Probing distribution {distribution}")
+        result = SelftestResult(distribution=distribution)
 
         # Acquire path to rootfs filesystem image.
         ip = ImageProvider(distribution=distribution)
@@ -115,16 +152,31 @@ def selftest_hostnamectl():
 
         # Invoke `hostnamectl` on each container.
         with PostrojContainer(rootfs=rootfs_path) as pc:
-            pc.boot()
-            pc.wait()
-            pc.info()
+            with redirect_stdout(sys.stderr):
+                pc.boot()
+                pc.wait()
+                #pc.info()
+
+            for probe_class in probes:
+                probe_name = probe_class.__name__
+                try:
+                    probe = probe_class(container=pc)
+                    probe.invoke()
+                    result.probes[probe_name] = True
+                except:
+                    success = False
+                    logger.exception(f"Probe {probe_name} failed on {distribution}")
+        results.append(result)
 
     time.sleep(0.33)
-    print()
-    print_report(selected_distributions)
+    print_report(results)
+    return success
 
 
 def get_selftest_distributions():
+    """
+    Select list of curated distributions for self-testing.
+    """
 
     # Select all distributions.
     selected_distributions = copy(ALL_DISTRIBUTIONS)
@@ -134,15 +186,18 @@ def get_selftest_distributions():
     selected_distributions.remove(OperatingSystem.CENTOS_7.value)
 
     # On demand, select only specific items.
-    # selected_distributions = [OperatingSystem.ARCHLINUX_20220501.value]
+    #selected_distributions = [OperatingSystem.ARCHLINUX_20220501.value]
+    #selected_distributions = [OperatingSystem.OPENSUSE_TUMBLEWEED.value]
 
     return selected_distributions
 
 
-def print_report(distributions):
-    print_section_header("Report")
-    print(f"Successfully checked {len(distributions)} distributions:\n"
-          f"{json.dumps(list(map(str, distributions)), indent=2)}")
+def print_report(results):
+    """
+    Print report about self-test outcome.
+    """
+    logger.info(f"Checked {len(results)} distributions")
+    print(dataclass_to_json(results))
 
 
 selftest_main.add_command(cmd=selftest_pkgprobe, name="pkgprobe")

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import asyncio
+import dataclasses
 import io
+import json
 import logging
 import os
 import shlex
@@ -314,3 +316,26 @@ def setup_logging(level=logging.INFO):
         format=log_format,
         stream=sys.stderr,
         level=level)
+
+
+class DataclassJsonEncoder(json.JSONEncoder):
+    """
+    JSON encoder with support for serializing Data Classes.
+
+    - https://docs.python.org/3/library/json.html#json.JSONEncoder
+    - https://docs.python.org/3/library/dataclasses.html
+    """
+    def default(self, obj):
+        if dataclasses.is_dataclass(obj):
+            return dataclasses.asdict(obj)
+        return json.JSONEncoder.default(self, obj)
+
+
+def dataclass_to_json(obj, pretty=True):
+    """
+    Serialize a Data Class to JSON.
+    """
+    kwargs = {}
+    if pretty:
+        kwargs["indent"] = 2
+    return json.dumps(obj, cls=DataclassJsonEncoder, **kwargs)
