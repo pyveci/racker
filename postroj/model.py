@@ -31,6 +31,8 @@ class OperatingSystemName(Enum):
     ROCKYLINUX = "rockylinux"
     ARCHLINUX = "archlinux"
     OPENSUSE = "opensuse"
+    AMAZONLINUX = "amazonlinux"
+    ORACLELINUX = "oraclelinux"
 
 
 @dataclasses.dataclass

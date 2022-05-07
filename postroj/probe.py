@@ -29,7 +29,9 @@ class ProbeBase:
 
     @property
     def is_redhat(self):
-        return (self.container.rootfs / "etc" / "redhat-release").exists()
+        redhat_release_file = self.container.rootfs / "etc" / "redhat-release"
+        os_release_file = self.container.rootfs / "etc" / "os-release"
+        return redhat_release_file.exists() or 'ID_LIKE="fedora"' in os_release_file.read_text()
 
     @property
     def is_suse(self):

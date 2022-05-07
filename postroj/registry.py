@@ -118,6 +118,20 @@ class CuratedOperatingSystem(Enum):
         version="latest",
         image="docker://docker.io/opensuse/tumbleweed:latest",
     )
+    AMAZONLINUX_2022 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.AMAZONLINUX,
+        release="2022",
+        version="2022",
+        image="docker://docker.io/amazonlinux:2022",
+    )
+    ORACLELINUX_8 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.ORACLELINUX,
+        release="8",
+        version="8",
+        image="docker://docker.io/oraclelinux:8",
+    )
 
     # Other distributions, not based on .deb or .rpm.
     ARCHLINUX_20220501 = LinuxDistribution(
@@ -149,6 +163,8 @@ CURATED_OPERATING_SYSTEMS: List[Enum] = [
     CuratedOperatingSystem.CENTOS_7,
     CuratedOperatingSystem.CENTOS_8,
     CuratedOperatingSystem.ROCKYLINUX_8,
+    CuratedOperatingSystem.AMAZONLINUX_2022,
+    CuratedOperatingSystem.ORACLELINUX_8,
     # others
     CuratedOperatingSystem.ARCHLINUX_20220501,
 ]
