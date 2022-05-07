@@ -3,11 +3,12 @@
 import logging
 import os.path
 import shutil
+from enum import Enum
 from pathlib import Path
 from textwrap import dedent, indent
 from typing import Union
 
-from postroj.model import ConfigurationOptions, LinuxDistribution, OperatingSystemFamily
+from postroj.model import ConfigurationOptions, LinuxDistribution, OperatingSystemFamily, OperatingSystemName
 from postroj.settings import get_appsettings
 from postroj.util import hcmd, is_dir_empty, scmd, stdout_to_stderr
 
@@ -30,6 +31,8 @@ class ImageProvider:
 
     def __init__(self, distribution: LinuxDistribution, autosetup: bool = True, force: bool = False):
 
+        if isinstance(distribution, Enum):
+            distribution = distribution.value
         self.distribution = distribution
         self.autosetup = autosetup
         # TODO: Discriminate `force` vs. `update`.
@@ -51,19 +54,17 @@ class ImageProvider:
         logger.info(f"Provisioning container image {self.distribution.fullname}")
         logger.info(f"Using distribution {self.distribution}")
         logger.info(f"Installing image at {self.image}")
-        if self.distribution.family == OperatingSystemFamily.DEBIAN.value:
+        if self.distribution.name == OperatingSystemName.DEBIAN:
             self.setup_debian()
-        elif self.distribution.family == OperatingSystemFamily.UBUNTU.value:
+        elif self.distribution.name == OperatingSystemName.UBUNTU:
             self.setup_ubuntu()
-        elif self.distribution.family == OperatingSystemFamily.FEDORA.value:
-            self.setup_fedora()
-        elif self.distribution.family == OperatingSystemFamily.CENTOS.value:
+        elif self.distribution.name == OperatingSystemName.CENTOS:
             self.setup_centos()
-        elif self.distribution.family == OperatingSystemFamily.ROCKYLINUX.value:
-            self.setup_rockylinux()
-        elif self.distribution.family == OperatingSystemFamily.SUSE.value:
+        elif self.distribution.family == OperatingSystemFamily.REDHAT:
+            self.setup_redhat()
+        elif self.distribution.family == OperatingSystemFamily.SUSE:
             self.setup_suse()
-        elif self.distribution.family == OperatingSystemFamily.ARCHLINUX.value:
+        elif self.distribution.name == OperatingSystemName.ARCHLINUX:
             self.setup_archlinux()
         else:
             raise ValueError(f"Unknown operating system family: {self.distribution.family}")
@@ -130,23 +131,9 @@ class ImageProvider:
         # Activate image.
         self.activate_image(rootfs)
 
-    def setup_fedora(self):
+    def setup_redhat(self):
         """
-        Fedora images are acquired from Docker Hub.
-        """
-
-        # Acquire image.
-        rootfs = self.acquire_from_docker()
-
-        # Prepare image by installing systemd and additional packages.
-        scmd(directory=rootfs, command=f"dnf install -y systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
-
-        # Activate image.
-        self.activate_image(rootfs)
-
-    def setup_rockylinux(self):
-        """
-        Rocky Linux images are acquired from Docker Hub.
+        It works the same for all Red Hat based systems like Fedora, CentOS, Rocky Linux and Oracle Linux.
         """
 
         # Acquire image.
@@ -187,7 +174,7 @@ class ImageProvider:
         # Fix CentOS 8.
         # Problem: "Failed to download metadata for repo ‘AppStream’ [CentOS]".
         # https://techglimpse.com/failed-metadata-repo-appstream-centos-8/
-        if self.distribution.family == OperatingSystemFamily.CENTOS.value and self.distribution.release == "8":
+        if self.distribution.name == OperatingSystemName.CENTOS and self.distribution.release == "8":
             os.system(f"/usr/bin/sed -i 's/mirrorlist/#mirrorlist/g' {rootfs}/etc/yum.repos.d/*")
             os.system(
                 f"/usr/bin/sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' {rootfs}/etc/yum.repos.d/CentOS-*"

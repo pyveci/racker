@@ -7,7 +7,7 @@ import click
 
 from postroj import pkgprobe, runner, selftest
 from postroj.api import pull_multiple_images, pull_single_image
-from postroj.model import list_images
+from postroj.registry import list_images
 from postroj.util import setup_logging
 
 

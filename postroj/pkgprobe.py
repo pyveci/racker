@@ -8,8 +8,8 @@ import click
 
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
-from postroj.model import find_distribution
 from postroj.probe import ProbeBase
+from postroj.registry import find_distribution
 from postroj.settings import get_appsettings
 
 logger = logging.getLogger(__name__)

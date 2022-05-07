@@ -12,9 +12,10 @@ import click
 
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
-from postroj.model import ALL_DISTRIBUTIONS, LinuxDistribution, OperatingSystem
+from postroj.model import LinuxDistribution
 from postroj.probe import ProbeBase
-from postroj.util import dataclass_to_json
+from postroj.registry import CURATED_OPERATING_SYSTEMS, CuratedOperatingSystem
+from postroj.util import to_json
 
 logger = logging.getLogger(__name__)
 
@@ -180,15 +181,17 @@ def get_selftest_distributions():
     """
 
     # Select all distributions.
-    selected_distributions = copy(ALL_DISTRIBUTIONS)
+    selected_systems = copy(CURATED_OPERATING_SYSTEMS)
 
     # Mask two distributions which show unstable cycling behavior.
-    selected_distributions.remove(OperatingSystem.FEDORA_35.value)
-    selected_distributions.remove(OperatingSystem.CENTOS_7.value)
+    selected_systems.remove(CuratedOperatingSystem.FEDORA_35)
+    selected_systems.remove(CuratedOperatingSystem.CENTOS_7)
 
     # On demand, select only specific items.
-    # selected_distributions = [OperatingSystem.ARCHLINUX_20220501.value]
-    # selected_distributions = [OperatingSystem.OPENSUSE_TUMBLEWEED.value]
+    # selected_systems = [CuratedOperatingSystem.ARCHLINUX_20220501]
+    # selected_systems = [CuratedOperatingSystem.OPENSUSE_TUMBLEWEED]
+
+    selected_distributions = [system.value for system in selected_systems]
 
     return selected_distributions
 
@@ -198,7 +201,7 @@ def print_report(results):
     Print report about self-test outcome.
     """
     logger.info(f"Checked {len(results)} distributions")
-    print(dataclass_to_json(results))
+    print(to_json(results))
 
 
 selftest_main.add_command(cmd=selftest_pkgprobe, name="pkgprobe")

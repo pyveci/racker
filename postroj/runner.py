@@ -9,7 +9,7 @@ import click
 
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
-from postroj.model import find_distribution
+from postroj.registry import find_distribution
 from postroj.winrunner import WinRunner
 
 logger = logging.getLogger(__name__)

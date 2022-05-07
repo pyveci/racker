@@ -2,6 +2,7 @@
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import asyncio
 import dataclasses
+import enum
 import io
 import json
 import logging
@@ -378,25 +379,28 @@ def mask_logging(highest_level=logging.CRITICAL):
         logging.disable(previous_level)
 
 
-class DataclassJsonEncoder(json.JSONEncoder):
+class JsonEncoderPlus(json.JSONEncoder):
     """
-    JSON encoder with support for serializing Data Classes.
+    JSON encoder with support for serializing Enums and Data Classes.
 
     - https://docs.python.org/3/library/json.html#json.JSONEncoder
+    - https://docs.python.org/3/library/enum.html
     - https://docs.python.org/3/library/dataclasses.html
     """
 
     def default(self, obj):
-        if dataclasses.is_dataclass(obj):
+        if isinstance(obj, enum.Enum):
+            return obj.value
+        elif dataclasses.is_dataclass(obj):
             return dataclasses.asdict(obj)
         return json.JSONEncoder.default(self, obj)
 
 
-def dataclass_to_json(obj, pretty=True):
+def to_json(obj, pretty=True):
     """
-    Serialize a Data Class to JSON.
+    Serialize any object to JSON by using a custom encoder.
     """
     kwargs = {}
     if pretty:
         kwargs["indent"] = 2
-    return json.dumps(obj, cls=DataclassJsonEncoder, **kwargs)
+    return json.dumps(obj, cls=JsonEncoderPlus, **kwargs)
