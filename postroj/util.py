@@ -14,7 +14,7 @@ import threading
 import time
 from abc import abstractmethod
 from asyncio import AbstractEventLoop
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, contextmanager
 from pathlib import Path
 from types import TracebackType
 from typing import Union, Optional, Tuple
@@ -319,6 +319,17 @@ def setup_logging(level=logging.INFO):
 
 
 @contextmanager
+def noop():
+    """
+    A context manager which does nothing.
+
+    It can be used as a placeholder when the code flow needs to conditionally
+    swap another contextmanager in or out.
+    """
+    yield
+
+
+@contextmanager
 def stdout_to_stderr():
     """
     A context manager which redirects stdout to stderr for the wrapped context.
@@ -330,6 +341,33 @@ def stdout_to_stderr():
         yield
     finally:
         sys.stdout = previous
+
+
+@contextmanager
+def mask_logging(highest_level=logging.CRITICAL):
+    """
+    A context manager that will prevent any logging messages
+    triggered during the body from being processed.
+
+    :param highest_level: the maximum logging level in use.
+      This would only need to be changed if a custom level greater than CRITICAL
+      is defined.
+
+    Source: https://gist.github.com/simon-weber/7853144
+    """
+    # two kind-of hacks here:
+    #    * can't get the highest logging level in effect => delegate to the user
+    #    * can't get the current module-level override => use an undocumented
+    #       (but non-private!) interface
+
+    previous_level = logging.root.manager.disable
+
+    logging.disable(highest_level)
+
+    try:
+        yield
+    finally:
+        logging.disable(previous_level)
 
 
 class DataclassJsonEncoder(json.JSONEncoder):

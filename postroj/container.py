@@ -2,17 +2,16 @@
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import logging
 import os
-import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Union, Optional
+from typing import Union, Optional, Tuple
 
 import subprocess_tee
 
 from postroj.settings import cache_directory
-from postroj.util import ccmd, print_header, hcmd, fix_tty, LongRunningProcess, _SysExcInfoType
-
+from postroj.util import ccmd, print_header, hcmd, fix_tty, LongRunningProcess, _SysExcInfoType, mask_logging, \
+    noop
 
 logger = logging.getLogger(__name__)
 
@@ -159,13 +158,63 @@ class PostrojContainer:
 
             Failed to connect to bus: Host is down
         """
+        status, errors = self.get_status()
+        if "Host is down" in errors:
+            return True
+        return False
+
+    def is_running(self, silent: bool = False) -> bool:
+        """
+        Determine if the container is running.
+
+        This is, when::
+
+            systemctl is-system-running --machine=<machine>
+
+        prints one of those messages to stdout::
+
+            started
+            running
+            degraded
+
+        Background: A system can be fully booted and functional but signals "degraded"
+                    if one or more units signalled errors.
+
+        # Define the probe command to check whether the container has booted completely.
+
+        # Possible values: Single words on stdout, other messages on stderr.
+        - Failed to connect to bus: Host is down
+        - Failed to connect to bus: Protocol error
+        - starting
+        - started, running, degraded
+        - stopping
+        - Failed to query system state: Connection reset by peer
+        - unknown
+        - Failed to connect to bus: Protocol error
+        - Failed to connect to bus: No such file or directory
+        - Failed to connect to bus: Host is down
+        """
+
+        # When `silent` mode is requested, suppress any logging completely.
+        logging_context = silent and mask_logging or noop
+        with logging_context():
+            status, errors = self.get_status()
+            if status in ["started", "running", "degraded"]:
+                return True
+            return False
+
+    def get_status(self) -> Tuple[str, str]:
+        """
+        Get status of system.
+        """
         process = hcmd(f"/bin/systemctl is-system-running --machine={self.machine}",
                        check=False, passthrough=False, capture=True)
         status = process.stdout.strip()
-        logger.info(f"Container status is: {status}")
-        if "Host is down" in process.stderr:
-            return True
-        return False
+        errors = process.stderr
+        logger.info(f"Container status is: {status or '<unknown>'}")
+        if errors.strip():
+            logger.info(f"Container status messages:\n{errors}")
+        return status, errors
 
     def wait(self, timeout=WAIT_TIMEOUT_SECONDS):
         """
@@ -183,36 +232,12 @@ class PostrojContainer:
 
         logger.info(f"Waiting for container {self.machine} to become available within {timeout} seconds")
 
-        # Define the probe command to check whether the container has booted.
-        # Possible values: Failed to connect to bus: Host is down`, `starting`, `started`, `degraded`.
-        """
-        - Failed to connect to bus: Host is down
-        - Failed to connect to bus: Protocol error
-        - starting
-        - started, running, degraded
-        - stopping
-        - Failed to query system state: Connection reset by peer
-        - unknown
-        - Failed to connect to bus: Protocol error
-        - Failed to connect to bus: No such file or directory
-        - Failed to connect to bus: Host is down
-        """
-
-        # TODO: Compensate for "starting" output. Valid "startedness" would be any of "started" or "degraded".
-        #       Background: A system can be fully booted and functional but signals "degraded" if one or more
-        #       units signalled errors.
-        # TODO: Use `hcmd` here?
-        command = f"""
-            /bin/systemctl is-system-running --machine={self.machine} | egrep "(started|running|degraded)" > /dev/null
-        """.strip()
-
         sys.stderr.write("\n")
         interval = 0.1
         while timeout > 0:
 
             fix_tty()
-            p = subprocess.run(command, shell=True)
-            if p.returncode == 0:
+            if self.is_running(silent=True):
                 break
 
             time.sleep(interval)
