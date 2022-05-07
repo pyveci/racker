@@ -6,10 +6,11 @@ from pathlib import Path
 from textwrap import dedent, indent
 from typing import Union
 
-from postroj.model import LinuxDistribution, OperatingSystemFamily, ALL_DISTRIBUTIONS
+from postroj.model import LinuxDistribution, OperatingSystemFamily
 from postroj.settings import archive_directory, image_directory, download_directory
 
-from postroj.util import is_dir_empty, scmd, hcmd, print_header, print_section_header
+from postroj.util import is_dir_empty, scmd, hcmd, stdout_to_stderr
+
 
 
 class ImageProvider:
@@ -29,12 +30,14 @@ class ImageProvider:
     def __init__(self, distribution: LinuxDistribution, autosetup: bool = True, force: bool = False):
         self.distribution = distribution
         self.autosetup = autosetup
+        # TODO: Discriminate `force` vs. `update`.
         self.force = force
         archive_directory.mkdir(parents=True, exist_ok=True)
         image_directory.mkdir(parents=True, exist_ok=True)
 
-        if self.autosetup and not self.image.exists():
-            self.setup()
+        if self.autosetup and (not self.image.exists() or self.force):
+            with stdout_to_stderr():
+                self.setup()
 
     def setup(self):
         """
@@ -91,8 +94,8 @@ class ImageProvider:
         image_tarball = download_directory / os.path.basename(self.distribution.image)
         rootfs = archive_directory / self.distribution.fullname
 
-        if self.force and rootfs.exists():
-            shutil.rmtree(rootfs)
+        if self.force:
+            shutil.rmtree(rootfs, ignore_errors=True)
 
         hcmd(f"wget --continue --no-clobber --directory-prefix={download_directory} {self.distribution.image}")
         if not rootfs.exists() or is_dir_empty(rootfs):
@@ -152,6 +155,7 @@ class ImageProvider:
         rootfs = self.acquire_from_docker()
 
         # Prepare image by installing systemd and additional packages.
+        # TODO: Install additional packages only for `postroj pkgprobe`, only `systemd` is mandatory.
         scmd(directory=rootfs, command=f"zypper install -y systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
 
         # Activate image.
@@ -291,9 +295,9 @@ class ImageProvider:
             shutil.rmtree(archive_oci, ignore_errors=True)
             shutil.rmtree(archive_image, ignore_errors=True)
 
-        if not archive_oci.exists():
+        if not archive_oci.exists() or not (archive_oci / "index.json").exists():
             hcmd(f"skopeo copy --override-os=linux {self.distribution.image} oci:{archive_oci}:{self.distribution.fullname}")
-        if not archive_image.exists() or is_dir_empty(archive_image):
+        if not archive_image.exists() or is_dir_empty(archive_image) or is_dir_empty(archive_image / "rootfs"):
             hcmd(f"umoci unpack --rootless --image={archive_oci}:{self.distribution.fullname} {archive_image}")
 
         return archive_image / "rootfs"

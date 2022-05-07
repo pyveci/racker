@@ -318,6 +318,20 @@ def setup_logging(level=logging.INFO):
         level=level)
 
 
+@contextmanager
+def stdout_to_stderr():
+    """
+    A context manager which redirects stdout to stderr for the wrapped context.
+    Afterwards, it restores the previous assignment.
+    """
+    previous = sys.stdout
+    sys.stdout = sys.stderr
+    try:
+        yield
+    finally:
+        sys.stdout = previous
+
+
 class DataclassJsonEncoder(json.JSONEncoder):
     """
     JSON encoder with support for serializing Data Classes.
