@@ -15,12 +15,27 @@ from postroj.util import setup_logging
 @click.version_option()
 @click.option('--verbose', is_flag=True, required=False)
 @click.option('--debug', is_flag=True, required=False)
-def cli(verbose: bool, debug: bool):
-    click.echo(f"Verbose mode is {'on' if verbose else 'off'}", err=True)
-    click.echo(f"Debug mode is {'on' if debug else 'off'}", err=True)
-    log_level = logging.INFO
+@click.pass_context
+def cli(ctx: click.Context, verbose: bool, debug: bool):
+
+    # Debugging.
+    # click.echo(f"Verbose mode is {'on' if verbose else 'off'}", err=True)
+    # click.echo(f"Debug mode is {'on' if debug else 'off'}", err=True)
+
+    # Adjust log level according to subcommand.
+    # `postroj run` is more silent by default.
+    if ctx.invoked_subcommand == "run":
+        log_level = logging.WARNING
+    else:
+        log_level = logging.INFO
+
+    # Adjust log level according to `verbose` / `debug` flags.
+    if verbose:
+        log_level = logging.INFO
     if debug:
         log_level = logging.DEBUG
+
+    # Setup logging, according to `verbose` / `debug` flags.
     setup_logging(level=log_level)
 
 
@@ -37,7 +52,7 @@ def cli_list_images(ctx):
 @click.argument("name", type=str, required=False)
 @click.option("--all", "pull_all", is_flag=True, required=False)
 @click.pass_context
-def cli_pull_image(ctx, name: str, pull_all: bool):
+def cli_pull_image(ctx, name: str, pull_all: bool = False):
     """
     Pull rootfs images from suitable locations
     """

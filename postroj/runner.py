@@ -49,6 +49,7 @@ def main(ctx, interactive: bool, tty: bool, rm: bool, image: str, command: str):
     """
 
     verbose = ctx.parent.params.get("verbose", False)
+    debug = ctx.parent.params.get("debug", False)
 
     # Adjust command line arguments and options.
     command = " ".join(command)
@@ -70,7 +71,7 @@ def main(ctx, interactive: bool, tty: bool, rm: bool, image: str, command: str):
     rootfs = ip.image
 
     # TODO: Combine verbose + capturing by employing some Tee-like multiplexing.
-    if verbose:
+    if debug:
         stdout = sys.stderr
         stderr = sys.stderr
     else:

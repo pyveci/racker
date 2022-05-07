@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import logging
 import subprocess
 
 from furl import furl
 
 from postroj.container import PostrojContainer
 from postroj.util import print_header, wait_for_port
+
+logger = logging.getLogger(__name__)
 
 
 class ProbeBase:
@@ -32,18 +35,18 @@ class ProbeBase:
         """
         Check unit for being `active`.
         """
-        print_header(f"Probing unit {name}")
+        print_header(f"Probing unit '{name}'")
         try:
             process = self.run(f"/bin/systemctl is-active {name}", capture=True)
-            print(f"INFO: Status of unit '{name}': {process.stdout.strip()}")
+            logger.info(f"Status of unit '{name}': {process.stdout.strip()}")
         except subprocess.CalledProcessError as ex:
             unit_status = ex.stdout.strip()
-            print(f"INFO: Status of unit '{name}': {unit_status}")
+            logger.info(f"Status of unit '{name}': {unit_status}")
             if unit_status in ["inactive"]:
-                print(f"ERROR: Probe failed, unit '{name}' is not active")
+                logger.error(f"Probe failed, unit '{name}' is not active")
                 raise SystemExit(ex.returncode)
             else:
-                print(f"ERROR: Unit '{name}' has unknown status: {unit_status}")
+                logger.error(f"Unit '{name}' has unknown status: {unit_status}")
                 raise
 
     def check_address(self, address: str, timeout: float = 5.0, interval: float = 0.05):
@@ -51,7 +54,7 @@ class ProbeBase:
         print_header(f"Probing network address {address}")
 
         uri = furl(address)
-        print(f"Waiting for {uri} to become available within {timeout} seconds")
+        logger.info(f"Waiting for {uri} to become available within {timeout} seconds")
 
         if uri.scheme in ["tcp", "http", "https"]:
             host, port = uri.host, int(uri.port)

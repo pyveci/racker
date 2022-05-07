@@ -56,7 +56,7 @@ def cmd(command, check: bool = True, passthrough: bool = True, capture: bool = F
             p.check_returncode()
         return p
     except subprocess.CalledProcessError as ex:
-        logger.exception(f"Process exited with returncode {ex.returncode}. Output:\n{ex.output}")
+        logger.exception(f"Process exited with returncode {ex.returncode}. The output was:\n{ex.output}")
         raise
 
 

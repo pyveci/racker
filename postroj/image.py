@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import logging
 import os.path
 import shutil
 from pathlib import Path
@@ -11,6 +12,7 @@ from postroj.settings import archive_directory, image_directory, download_direct
 
 from postroj.util import is_dir_empty, scmd, hcmd, stdout_to_stderr
 
+logger = logging.getLogger(__name__)
 
 
 class ImageProvider:
@@ -43,9 +45,9 @@ class ImageProvider:
         """
         Provision rootfs image per operating system family.
         """
-        print_section_header(f"Provisioning container image {self.distribution.fullname}")
-        print(f"Using distribution {self.distribution}")
-        print(f"Installing image at {self.image}")
+        logger.info(f"Provisioning container image {self.distribution.fullname}")
+        logger.info(f"Using distribution {self.distribution}")
+        logger.info(f"Installing image at {self.image}")
         if self.distribution.family == OperatingSystemFamily.DEBIAN.value:
             self.setup_debian()
         elif self.distribution.family == OperatingSystemFamily.UBUNTU.value:
@@ -225,11 +227,11 @@ class ImageProvider:
         except:
             raise ValueError(f"Unable to decode systemd version from:\n{response}")
         if systemd_version_installed >= systemd_version_minimal:
-            print(f"Found systemd version {systemd_version_installed}, "
-                  f"which satisfies minimum version {systemd_version_minimal}")
+            logger.info(f"Found systemd version {systemd_version_installed}, "
+                        f"which satisfies minimum version {systemd_version_minimal}")
             return
 
-        print_header(f"Upgrading systemd to version {systemd_version_minimal}")
+        logger.info(f"Upgrading systemd to version {systemd_version_minimal}")
 
         # Prepare image by upgrading systemd.
         upgrade_systemd_program = dedent(f"""
@@ -264,9 +266,9 @@ class ImageProvider:
         {indent(upgrade_systemd_program, "  ")}
         EOF
         """).strip()
-        print(upgrade_systemd_command)
+        logger.info(upgrade_systemd_command)
 
-        print(f"Installing systemd version {systemd_version_minimal}")
+        logger.info(f"Installing systemd version {systemd_version_minimal}")
         os.system(upgrade_systemd_command)
 
     def acquire_from_docker(self):

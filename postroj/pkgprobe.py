@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import logging
 import os
 from typing import List
 
@@ -10,7 +11,9 @@ from postroj.image import ImageProvider
 from postroj.model import find_distribution
 from postroj.probe import ProbeBase
 from postroj.settings import download_directory
-from postroj.util import print_header
+
+
+logger = logging.getLogger(__name__)
 
 
 @click.command()
@@ -29,7 +32,7 @@ def main(ctx, image: str, package: str, check_unit: List[str], check_network: Li
     dist = find_distribution(image)
 
     # Status reporting.
-    print(f"Testing package {package} on distribution {dist}")
+    logger.info(f"Testing package {package} on distribution {dist}")
 
     # Acquire rootfs filesystem image.
     ip = ImageProvider(distribution=dist)
@@ -64,24 +67,24 @@ class PackageProbe(ProbeBase):
         if package is None:
             return
 
-        print_header(f"Installing package {package}")
+        logger.info(f"Setting up package {package}")
 
         # Download package.
         if package.startswith("http"):
-            print(f"Downloading {package}")
+            logger.info(f"Downloading {package}")
             self.run(f"/usr/bin/wget --continue --no-clobber --directory-prefix={download_directory} {package}")
             package = download_directory / os.path.basename(package)
         else:
             raise ValueError(f"Unable to acquire package at {package}")
 
         # Install package.
-        print(f"Installing package {package}")
+        logger.info(f"Installing package {package}")
         if self.is_debian:
             self.run(f"/usr/bin/apt install --yes {package}")
         elif self.is_redhat:
             self.run(f"/usr/bin/yum install -y {package}")
         else:
-            print(f"WARNING: Unable to install package. Reason: Unsupported operating system.")
+            raise ValueError(f"Unable to install package {package}. Reason: Unsupported operating system.")
 
     def start(self, unit: str):
         if unit not in ["systemd-journald"]:
