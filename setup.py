@@ -8,7 +8,7 @@ README = open(os.path.join(here, "README.rst")).read()
 
 setup(
     name="racker",
-    version="0.0.0",
+    version="0.1.0",
     author="Andreas Motl",
     author_email="andreas.motl@cicerops.de",
     url="https://github.com/cicerops/racker",
