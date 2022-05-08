@@ -6,6 +6,8 @@ Racker changelog
 in progress
 ===========
 
+- Add software tests to CI/GHA
+
 
 2022-05-08 0.1.0
 ================
