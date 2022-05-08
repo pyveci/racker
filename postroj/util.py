@@ -53,7 +53,7 @@ def cmd(command, check: bool = True, passthrough: bool = True, capture: bool = F
                 stderr = subprocess.DEVNULL
 
             # FIXME: Work around `io.UnsupportedOperation: fileno` under `pytest`.
-            if "PYTEST_CURRENT_TEST" in os.environ:
+            if "PYTEST_CURRENT_TEST" in os.environ or "TESTING" in os.environ:
                 try:
                     stdout.fileno()
                 except io.UnsupportedOperation:
