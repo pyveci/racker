@@ -115,7 +115,7 @@ Compatibility
 
 CLI interfaces
 ==============
-- ``docker {run,pull,logs}`` (implemented by ``racker``)
+- ``docker {run,ps,pull,logs}`` (implemented by ``racker``)
 - ``docker compose`` (implemented by ``racker``)
 - ``docker-py`` Python package (``import racker as docker; client = docker.from_env()``)
 - Xen CLI ``xm``/``xl`` (implemented by ``hx`` or ``kx``)
@@ -132,6 +132,15 @@ Podman
 - https://wiki.archlinux.org/title/Podman
 - https://github.com/containers/podman
 - https://podman.io/
+- Podman + Buildah => systemd-nspawn + mkosi, controlled by racker
+
+    Podman uses Buildah(1) internally to create container images. Both tools share
+    image (not container) storage, hence each can use or manipulate images (but not
+    containers) created by the other.
+
+    -- https://docs.podman.io/en/latest/markdown/podman.1.html
+    -- https://github.com/containers/buildah/blob/main/docs/buildah.1.md
+
 
 References
 ==========
@@ -244,6 +253,7 @@ Research
   - https://mkdev.me/posts/dockerless-part-3-moving-development-environment-to-containers-with-podman
   - https://github.com/kinvolk
   - https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction
+  - https://serverfault.com/questions/989509/how-can-i-change-the-oci-runtime-in-podman
 
 
 ********

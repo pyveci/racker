@@ -2,6 +2,37 @@
 Racker
 ######
 
+.. container::
+
+    *Operating system containers for humans and machines.*
+
+    - **Documentation**: https://github.com/cicerops/racker
+    - **Source code**: https://github.com/cicerops/racker
+    - **PyPI**: https://pypi.org/project/racker/
+
+----
+
+.. image:: https://img.shields.io/badge/systemd-239%20and%20newer-blue.svg
+    :target: https://github.com/systemd/systemd
+    :alt: systemd System and Service Manager
+
+.. image:: https://img.shields.io/pypi/pyversions/racker.svg
+    :target: https://pypi.org/project/racker/
+
+.. image:: https://img.shields.io/pypi/status/racker.svg
+    :target: https://pypi.org/project/racker/
+
+.. image:: https://img.shields.io/pypi/v/racker.svg
+    :target: https://pypi.org/project/racker/
+
+.. image:: https://img.shields.io/pypi/l/racker.svg
+    :alt: License
+    :target: https://pypi.org/project/racker/
+
+.. image:: https://img.shields.io/pypi/dm/racker.svg?label=PyPI%20downloads
+    :target: https://pypi.org/project/racker/
+
+----
 
 
 *****
@@ -35,22 +66,26 @@ Lennart Poettering identifies three pillars of containers [1]:
 - Sandboxing
 - Delivery
 
-See also [2], where Lennart Poettering and Kai Sievers outline their vision
-of systemd as a platform for running systems and their focus on containers.
+At [2] Lennart Poettering and Kai Sievers outline their vision of systemd as a
+*platform for running systems* and their focus on containers in 2014. Fast
+forward to 2022, and everything is pretty much there. ``systemd`` now provides
+a plethora of features for containerization, specifically for *resource
+bundling* and *sandboxing* [1].
 
-``systemd`` already provides a stack of features in the areas of *resource
-bundling* and *sandboxing* [1]. Racker might fill some gaps on the *delivery*
-aspects.
+[3] outlines how systemd-nspawn was originally conceived to aid in testing and
+debugging systemd, [4] is the latest overview of systemd in 2018.
+For approaching ``systemd-nspawn`` from a user's perspective, a concise
+introductory walkthrough can be found at [5].
 
-[3] outlines how systemd-nspawn was conceived to aid in testing and debugging
-systemd and [4] is the latest overview of systemd in 2018. From a user's
-perspective, `Running containers with systemd-nspawn`_ has a concise walkthrough.
+The most important bits being covered by the systemd software family already,
+Racker tries to fill some gaps on the *delivery* aspects.
+
 
 | [1] `Containers without a Container Manager, with systemd`_ (2018)
 | [2] `Lennart Poettering und Kay Sievers über Systemd`_ (2014)
 | [3] `Systemd-Nspawn is Chroot on Steroids`_ (2013)
 | [4] `NYLUG Presents - Lennart Poettering on Systemd in 2018`_
-| [5] `Running containers with systemd-nspawn`_
+| [5] `Running containers with systemd-nspawn`_ (2019)
 
 
 *****
@@ -214,14 +249,11 @@ Questions and answers
        prefixed with ``postroj-``.
        Examples: ``postroj-debian-buster``, ``postroj-centos-8``.
 
-- | Q: How large are curated filesystem images?
-  | A: The preference for curated filesystem images is to use their corresponding
-       "slim" variants where possible, aiming to only use artefacts with download
-       sizes < 100 MB.
-
-- | Q: Are container disks ephemeral?
-  | A: Yes, by default, all container images will be ephemeral, i.e. all changes to
-       them are volatile.
+- | Q: Does the program need root privileges?
+  | A: Yes, the program currently must be invoked with ``root`` or corresponding
+       ``sudo`` privileges. However, it would be sweet to enable unprivileged
+       operations soon. ``systemd-nspawn`` should be able to do it, using
+       ``--private-users`` or ``--user``?
 
 - | Q: Where does the program store its data?
   | A: Data is stored at ``/var/lib/postroj``.
@@ -233,11 +265,14 @@ Questions and answers
 - | Q: Where are the filesystem images stored?
   | A: Activated filesystem images are located at ``/var/lib/postroj/images``.
 
-- | Q: Does the program need root privileges?
-  | A: Yes, the program currently must be invoked with ``root`` or corresponding
-       ``sudo`` privileges. However, it would be sweet to enable unprivileged
-       operations soon. ``systemd-nspawn`` should be able to do it, using
-       ``--private-users`` or ``--user``?
+- | Q: How large are curated filesystem images?
+  | A: The preference for curated filesystem images is to use their corresponding
+       "slim" variants where possible, aiming to only use artefacts with download
+       sizes < 100 MB.
+
+- | Q: Are container disks ephemeral?
+  | A: Yes, by default, all container images will be ephemeral, i.e. all changes to
+       them are volatile.
 
 
 .. _machinectl: https://www.freedesktop.org/software/systemd/man/machinectl.html
