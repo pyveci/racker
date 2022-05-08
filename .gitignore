@@ -1,6 +1,7 @@
 /.idea
 /.vagrant
 /.venv*
+/dist
 /tmp
 *.egg-info
 __pycache__

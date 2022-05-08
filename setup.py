@@ -16,8 +16,7 @@ setup(
     long_description=README,
     download_url="https://pypi.org/project/racker/",
     packages=["postroj"],
-    license="AGPL-3.0",
-    platforms="All",
+    license="AGPL-3.0, EUPL-1.2",
     keywords=[
         "systemd",
         "systemd-nspawn",

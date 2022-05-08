@@ -1,0 +1,7 @@
+include setup.cfg *.txt *.rst LICENSE
+exclude .bumpversion.cfg
+recursive-include doc *.*
+recursive-include testing *.*
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store
