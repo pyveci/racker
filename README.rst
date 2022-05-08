@@ -137,25 +137,25 @@ Basic commands::
 
     # Invoke the vanilla Docker `hello-world` image.
     # FIXME: Does not work yet.
-    # postroj run -it --rm hello-world
+    # racker run -it --rm hello-world
 
     # Acquire rootfs images.
     postroj pull debian-bullseye
     postroj pull fedora-37
 
     # Launch an interactive shell.
-    postroj run -it --rm debian-bullseye bash
-    postroj run -it --rm fedora-37 bash
+    racker run -it --rm debian-bullseye bash
+    racker run -it --rm fedora-37 bash
 
     # Launch a single command.
-    postroj run -it --rm debian-11 hostnamectl
-    postroj run -it --rm opensuse-tumbleweed hostnamectl
+    racker run -it --rm debian-11 hostnamectl
+    racker run -it --rm opensuse-tumbleweed hostnamectl
 
     # Verbose mode.
     postroj --verbose run -it --rm fedora-37 hostnamectl
 
     # Use stdin and stdout, with timing.
-    time echo "hello world" | postroj run -it --rm fedora-37 cat /dev/stdin > hello
+    time echo "hello world" | racker run -it --rm fedora-37 cat /dev/stdin > hello
     cat hello
 
 More commands::

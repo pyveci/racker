@@ -42,23 +42,23 @@ Test package on Fedora 36::
     Improve!
 
 
-***********
-postroj run
-***********
+**************
+postroj invoke
+**************
 
 Purpose: Invoke programs within a Windows/Java/OpenJDK environment.
 
 ::
 
     # Basic usage.
-    postroj run \
+    postroj invoke \
       --system=windows-1809 --cpus=8 --memory=8192M \
       --mount type=git,src=https://github.com/crate/crate,dst=C:/src \
       -- \
       cmd /C "cd src && gradlew :server:test -Dtests.crate.run-windows-incompatible=false"
 
     # Advanced usage.
-    postroj run \
+    postroj invoke \
         --environment=windows-1809 --cpus=8 --memory=8192M \
         --repository=https://github.com/crate/crate \
         --command="gradlew :server:test -Dtests.crate.run-windows-incompatible=false"

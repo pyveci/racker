@@ -1,6 +1,6 @@
-###############
-postroj backlog
-###############
+##############
+Racker backlog
+##############
 
 .. note::
 
@@ -45,9 +45,9 @@ Release 0.2.0
       From docker.io, ghcr.io, registry.access.redhat.com
 - [o] Improve error messages, see "Compatibility" section
 
-  - postroj run -it --rm debian-stretch hostnamectl
-  - postroj run -it --rm debian-stretch /bin/hostnamectl
-  - postroj run -it --rm debian-stretch /usr/bin/hostnamectl
+  - racker run -it --rm debian-stretch hostnamectl
+  - racker run -it --rm debian-stretch /bin/hostnamectl
+  - racker run -it --rm debian-stretch /usr/bin/hostnamectl
 - [o] Wait for container to properly shut down before moving on.
       Q: When running ``postroj selftest``, why is there more output from
          containers shutting down, while the program is finished already?
