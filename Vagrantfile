@@ -12,15 +12,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.insert_key = false
 
   # Mount source code directory
-  config.vm.synced_folder ".", "/usr/src/postroj"
+  config.vm.synced_folder ".", "/usr/src/racker"
 
-  config.vm.define "postroj-debian11" do |machine|
+  config.vm.define "rackerhost-debian11" do |machine|
 
     # Don't check for box updates
     machine.vm.box_check_update = false
 
     # Specify the hostname of the VM
-    machine.vm.hostname = "postroj-debian11"
+    machine.vm.hostname = "rackerhost-debian11"
 
     # Specify the Vagrant box to use
     machine.vm.box = "generic/debian11"
@@ -35,7 +35,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       #v.customize ["modifyvm", :id, "--memory", 1024]
-      v.customize ["modifyvm", :id, "--name", "postroj-debian11"]
+      v.customize ["modifyvm", :id, "--name", "rackerhost-debian11"]
     end
 
     machine.vm.provision :shell, inline: <<-SHELL
@@ -45,13 +45,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         sudo apt-get install --yes systemd-container skopeo umoci python3-pip python3-venv
     SHELL
 
-    # Setup postroj sandbox
+    # Setup Racker sandbox
     machine.vm.provision :shell, privileged: true, inline: <<-SHELL
-        SOURCE=/usr/src/postroj
-        TARGET=/opt/postroj
-        PROGRAM=/usr/local/bin/postroj
-        echo "Installing postroj package from ${SOURCE} to virtualenv at ${TARGET}"
-        echo "Installing postroj program to ${PROGRAM}"
+        SOURCE=/usr/src/racker
+        TARGET=/opt/racker
+        PROGRAM=/usr/local/bin/racker
+        echo "Installing package from ${SOURCE} to virtualenv at ${TARGET}"
+        echo "Installing program to ${PROGRAM}"
         set -x
         whoami
         python3 -m venv ${TARGET}
@@ -60,8 +60,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         set -x
         python -V
         pip install --editable=${SOURCE}[test]
-        postroj --version
-        ln -sf ${TARGET}/bin/postroj ${PROGRAM}
+        racker --version
+        ln -sf ${TARGET}/bin/racker ${PROGRAM}
     SHELL
 
   end
