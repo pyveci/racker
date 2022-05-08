@@ -47,7 +47,7 @@ setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Affero General Public License v3",
         "Development Status :: 3 - Alpha",
-        "Operating System :: Linux",
+        "Operating System :: POSIX :: Linux",
         "Natural Language :: English",
         "Intended Audience :: Customer Service",
         "Intended Audience :: Developers",
