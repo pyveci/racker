@@ -81,6 +81,7 @@ setup(
     extras_require={
         "test": [
             "pytest>=6,<8",
+            "pytest-cov>=2,<3",
         ]
     },
 )

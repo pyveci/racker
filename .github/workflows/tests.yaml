@@ -15,10 +15,12 @@ jobs:
       matrix:
         os: ['ubuntu-latest']
         python-version: ['3.9']
-
     defaults:
       run:
         shell: bash
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
 
     name: Python ${{ matrix.python-version }} on OS ${{ matrix.os }}
     steps:
@@ -46,4 +48,15 @@ jobs:
 
     - name: Run tests
       # FIXME: Can this be run without elevated privileges?
-      run: sudo $(command -v pytest)
+      run: |
+        sudo $(command -v pytest)
+        coverage xml
+
+    - name: Upload coverage results to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        env_vars: OS,PYTHON
+        name: codecov-umbrella
+        fail_ci_if_error: false
