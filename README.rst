@@ -94,7 +94,8 @@ Basic commands::
     postroj run -it --rm fedora-37 bash
 
     # Launch a single command.
-    postroj run -it --rm suse-tumbleweed hostnamectl
+    postroj run -it --rm debian-11 hostnamectl
+    postroj run -it --rm opensuse-tumbleweed hostnamectl
 
     # Verbose mode.
     postroj --verbose run -it --rm fedora-37 hostnamectl

@@ -179,7 +179,7 @@ def generate_curated_distributions() -> Generator[LinuxDistribution, None, None]
 def find_distribution(image_label: str) -> LinuxDistribution:
 
     for distribution in generate_curated_distributions():
-        if distribution.fullname == image_label:
+        if image_label == distribution.fullname or image_label == distribution.versionname:
             return distribution
 
     raise ValueError(f"Unknown image label {image_label}")

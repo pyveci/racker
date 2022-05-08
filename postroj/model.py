@@ -46,3 +46,7 @@ class LinuxDistribution:
     @property
     def fullname(self):
         return f"{self.name.value}-{self.release}"
+
+    @property
+    def versionname(self):
+        return f"{self.name.value}-{self.version}"
