@@ -8,7 +8,8 @@ postroj
 About
 *****
 
-An experimental harness tool based on `systemd-nspawn`_  containers.
+An experimental harness tool based on `systemd-nspawn`_  containers, in the
+spirit to address some details of `Docker Considered Harmful`_.
 At the same time, a tribute to the authors and contributors of GNU, Linux,
 systemd, VirtualBox, Vagrant, Docker, Python and more.
 
@@ -73,6 +74,7 @@ Install postroj::
     If you are not running Linux on your workstation, the `postroj sandbox
     installation`_ documentation outlines how to run this program within
     a virtual machine using Vagrant.
+
 
 
 *****
@@ -152,7 +154,7 @@ overhead of environment setup/teardown is insignificant.
 
     time postroj pkgprobe --image=debian-buster --check-unit=systemd-journald
 
-    real    0m0.610s
+    real    0m0.589s
     user    0m0.161s
     sys     0m0.065s
 
@@ -183,18 +185,24 @@ Questions and answers
     shell, similar to ``machinectl shell``. In general, ``systemd-run`` is preferable for
     scripting purposes.
 
-- | Q: Does the program need root privileges?
-  | A: Yes, the program must be invoked with ``root`` or corresponding ``sudo`` privileges.
+- | Q: How does it work, really?
+  | A: Roughly speaking...
 
-- | Q: Where does postroj store its data?
-  | A: The managed environment used by postroj is stored at ``/var/lib/postroj``.
-       In this manner, it completely gets out of the way of any other machine images
-       located at ``/var/lib/machines``. Thus, images created by postroj images will
-       not be listed by ``machinectl list-images``.
-  | A: The download cache is located at ``/var/cache/postroj/downloads``.
+  - `skopeo`_ and `umoci`_ are used to acquire root filesystem images from Docker image registries.
+  - `systemd-nspawn`_ is used to run commands on root filesystems for provisioning them.
+  - Containers are started with ``systemd-nspawn --boot``.
+  - `systemd-run`_ is used to interact with running containers.
+  - `machinectl`_ is used to terminate containers.
 
-- | Q: Where are the filesystem images stored?
-  | A: Activated filesystem images are located at ``/var/lib/postroj/images``.
+- | Q: How is this project related with Docker?
+  | A: The runtime is completely independent of Docker, it is solely based on
+       ``systemd-nspawn`` containers instead. However, root filesystem images can be
+       pulled from Docker image registries in the spirit of `machinectl pull-dkr`_.
+       Other than this, the ``racker`` command and library aim to be drop-in replacements
+       for their corresponding Docker counterparts.
+
+- | Q: Do I need to have Docker installed on my machine?
+  | A: No, Racker works without Docker.
 
 - | Q: How are machine names assigned?
   | A: Machine names for spawned containers are automatically assigned.
@@ -210,13 +218,33 @@ Questions and answers
   | A: Yes, by default, all container images will be ephemeral, i.e. all changes to
        them are volatile.
 
+- | Q: Where does postroj store its data?
+  | A: The managed environment used by postroj is stored at ``/var/lib/postroj``.
+       In this manner, it completely gets out of the way of any other machine images
+       located at ``/var/lib/machines``. Thus, images created by postroj images will
+       not be listed by ``machinectl list-images``.
+  | A: The download cache is located at ``/var/cache/postroj/downloads``.
+
+- | Q: Where are the filesystem images stored?
+  | A: Activated filesystem images are located at ``/var/lib/postroj/images``.
+
+- | Q: Does the program need root privileges?
+  | A: Yes, the program currently must be invoked with ``root`` or corresponding
+       ``sudo`` privileges. However, it would be sweet to enable unprivileged
+       operations soon. ``systemd-nspawn`` should be able to do it, using
+       ``--private-users`` or ``--user``?
+
 
 .. _machinectl: https://www.freedesktop.org/software/systemd/man/machinectl.html
 .. _systemd-nspawn: https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html
 .. _systemd-run: https://www.freedesktop.org/software/systemd/man/systemd-run.html
 
+.. _Docker Considered Harmful: https://catern.com/docker.html
+.. _machinectl pull-dkr: https://github.com/cicerops/postroj/blob/main/doc/machinectl-pull-dkr.rst
 .. _postroj sandbox installation: https://github.com/cicerops/postroj/blob/main/doc/sandbox.rst
+.. _skopeo: https://github.com/containers/skopeo
 .. _Running containers with systemd-nspawn: https://janma.tk/2019-10-13/systemd-nspawn/
+.. _umoci: https://github.com/opencontainers/umoci
 
 .. _Containers without a Container Manager, with systemd: https://invidious.fdn.fr/watch?v=sqhojVPr7xM
 .. _Systemd-Nspawn is Chroot on Steroids: https://invidious.fdn.fr/watch?v=s7LlUs5D9p4

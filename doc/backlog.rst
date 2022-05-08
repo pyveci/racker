@@ -19,8 +19,11 @@ Release 0.1.0
 - [x] Improve convenience of Vagrant sandbox with autosetup and sudo permissions
 - [x] Add logging.
 - [x] Implement ``postroj run``.
-- [o] Add some basic software tests.
-- [o] Format code using ``black`` and ``isort``.
+- [x] Add some basic software tests.
+- [x] Format code using ``black`` and ``isort``.
+- [x] Add more Linux distributions: Amazon Linux and Oracle Linux
+- [x] Add changelog
+- [x] Update setup.py
 - [o] Rename project and Python package to ``racker``.
 
 
@@ -28,15 +31,18 @@ Release 0.1.0
 Release 0.2.0
 *************
 
+- [o] Test case currently does not tear down container?
+- [o] Check using btrfs as container root.
 - [o] Improve software tests.
 - [o] Check if software tests can be invoked on CI/GHA.
 - [o] Continue renaming to ``racker``.
 - [o] Split functionality between ``racker`` and ``postroj``.
 
-  - ``racker {run,pull,logs}``
+  - ``racker {run,ps,pull,logs}``
   - ``postroj {list-images,pkgprobe,selftest}``
   - ``pronto opensuse/tumbleweed hostnamectl`` (``pronto.hexagon`` (hx), ``pronto.kaxon`` (kx))
-- [o] Provide more advanced and generic image (label) resolution, from docker.io, ghcr.io, etc.
+- [o] Provide more advanced and generic image (label) resolution using ``postroj pull-dkr``.
+      From docker.io, ghcr.io, registry.access.redhat.com
 - [o] Improve error messages, see "Compatibility" section
 
   - postroj run -it --rm debian-stretch hostnamectl
@@ -54,8 +60,23 @@ Release 0.2.0
   - https://forums.raspberrypi.com/viewtopic.php?t=232417&start=100
   - https://github.com/sakaki-/raspbian-nspawn-64
   - https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-generic-arm64.tar.xz
+  - ``podman run --arch arm64 'docker.io/alpine:latest' arch``
+    https://wiki.archlinux.org/title/Podman
 
-- [o] Improve README: Point out some specific features and their use cases
+- [o] Improve README:
+  - Point out some specific features and their use cases
+  - ``racker pull`` as a successor to ``machinectl pull-dkr``.
+
+- [o] When installing packages, maybe don't use the ``--pipe`` option::
+
+    Console mode 'pipe' selected, but standard input/output are connected to an interactive TTY. Most likely you want to use 'interactive' console mode for proper interactivity and shell job control. Proceeding anyway.
+
+- Use/integrate with ``mkosi``.
+
+  - https://github.com/systemd/mkosi
+  - http://0pointer.net/blog/mkosi-a-tool-for-generating-os-images.html
+  - https://lwn.net/Articles/726655/
+  - https://github.com/asiffer/netspot/search?q=mkosi
 
 
 *************
@@ -70,7 +91,9 @@ Release 0.3.0
 - [o] Generalize package installation (is_debian vs. is_redhat vs. is_suse)
 - [o] Implement ``racker compose``.
   - What about network isolation, host name assignment and resolution?
+    - https://wiki.gnome.org/LubomirRintel/NMContainers
   - What about filesystem mounting?
+    - https://fntlnz.wtf/post/systemd-nspawn/
 
 
 *************
@@ -78,8 +101,12 @@ Release 0.4.0
 *************
 
 - [o] Is it possible to run RHEL and SLES?
+
+  - registry.access.redhat.com/rhel7/rhel
+
 - [o] Improve HTTP probe request/response handling and verification.
   Q: Would it be possible to implement it completely in Python?
+  E: Grafana responds with ``302 Found``, ``Location: /login``.
 
 
 *************
@@ -99,6 +126,12 @@ Behaviour on error conditions
 
     docker run -it --rm opensuse/leap2 bash
     Unable to find image 'opensuse/leap2:latest' locally
+
+Podman
+======
+- https://wiki.archlinux.org/title/Podman
+- https://github.com/containers/podman
+- https://podman.io/
 
 References
 ==========
@@ -121,12 +154,6 @@ Ideas
 
   - https://wiki.archlinux.org/title/Systemd-firstboot
 
-- Use/integrate with ``mkosi``.
-
-  - https://github.com/systemd/mkosi
-  - http://0pointer.net/blog/mkosi-a-tool-for-generating-os-images.html
-  - https://lwn.net/Articles/726655/
-
 - Currently, ``systemd-nspawn`` needs to be invoked as user ``root``.
 
   - Investigate *systemd-nspawn unprivileged mode* if that can improve the situation.
@@ -143,7 +170,7 @@ Ideas
 
 - Use ``CacheDirectory=`` directive to cache download artefacts
 - Build ``RootImage=``-compatible images, with GPT
-- Integrate packaging code from Kotori
+- Integrate ``fpm``-based packaging code from Kotori
 - Proposal: ``postroj create image`` vs. ``postroj create package``
 - Check if "login prompt" unit can be deactivated when running with ``--boot``
 - Check ``systemd-dissect``
@@ -151,6 +178,11 @@ Ideas
 - Boot Xen guest, using Hexagon, with ``hx``.
 - Logging to journald
 - Run system provisioning with Ansible
+- How to crate and ship portable services?
+  - https://github.com/asiffer/netspot/blob/v2.1.2/.github/workflows/systemd.yaml
+  - https://github.com/asiffer/netspot/blob/v2.1.2/Makefile#L193-L203
+
+- Check Lima. -- https://github.com/lima-vm/lima
 
 
 ********
@@ -194,6 +226,24 @@ Research
 - Look into Kubernetes Image Builder
 
   - https://github.com/kubernetes-sigs/image-builder
+
+- Running systemd within a Docker Container
+
+  - https://developers.redhat.com/blog/2014/05/05/running-systemd-within-docker-container
+  - https://lwn.net/Articles/676831/
+  - https://developers.redhat.com/blog/2016/09/13/running-systemd-in-a-non-privileged-container
+  - https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container
+  - https://medium.com/swlh/docker-and-systemd-381dfd7e4628
+
+- Container wars
+
+  - https://www.ctl.io/developers/blog/post/what-is-rocket-and-how-its-different-than-docker/
+  - https://entwickler.de/docker/projekt-rkt-offiziell-eingestellt-eine-reminiszenz-an-eine-container-engine
+  - https://github.com/rkt/rkt/issues/4024
+  - https://www.ionos.de/digitalguide/server/knowhow/podman-vs-docker/
+  - https://mkdev.me/posts/dockerless-part-3-moving-development-environment-to-containers-with-podman
+  - https://github.com/kinvolk
+  - https://developers.redhat.com/blog/2018/02/22/container-terminology-practical-introduction
 
 
 ********

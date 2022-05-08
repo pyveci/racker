@@ -126,9 +126,9 @@ STDIN: Inappropriate ioctl for device
 - https://bitbucket.org/gehrmann/pyguibot/src/ea1ceed3029a3460949910e0d4b19ca9a3bf6227/pyguibot/controllers/qt_gui.py#lines-671
 
 
-*******************************
-Traceback on container teardown
-*******************************
+********************************
+Tracebacks on container teardown
+********************************
 
 ::
 
@@ -137,6 +137,31 @@ Traceback on container teardown
     All filesystems, swaps, loop devices, MD devices and DM devices detached.
     Halting system.
     Exception ignored in: <function BaseEventLoop.__del__ at 0x7f9c363268b0>
+    Traceback (most recent call last):
+      File "/usr/lib/python3.9/asyncio/base_events.py", line 683, in __del__
+        self.close()
+      File "/usr/lib/python3.9/asyncio/unix_events.py", line 58, in close
+        super().close()
+      File "/usr/lib/python3.9/asyncio/selector_events.py", line 92, in close
+        self._close_self_pipe()
+      File "/usr/lib/python3.9/asyncio/selector_events.py", line 99, in _close_self_pipe
+        self._remove_reader(self._ssock.fileno())
+      File "/usr/lib/python3.9/asyncio/selector_events.py", line 277, in _remove_reader
+        key = self._selector.get_key(fd)
+      File "/usr/lib/python3.9/selectors.py", line 191, in get_key
+        return mapping[fileobj]
+      File "/usr/lib/python3.9/selectors.py", line 72, in __getitem__
+        fd = self._selector._fileobj_lookup(fileobj)
+      File "/usr/lib/python3.9/selectors.py", line 226, in _fileobj_lookup
+        return _fileobj_to_fd(fileobj)
+      File "/usr/lib/python3.9/selectors.py", line 42, in _fileobj_to_fd
+        raise ValueError("Invalid file descriptor: {}".format(fd))
+    ValueError: Invalid file descriptor: -1
+
+
+::
+
+    Exception ignored in: <function BaseEventLoop.__del__ at 0x7f4730101160>
     Traceback (most recent call last):
       File "/usr/lib/python3.9/asyncio/base_events.py", line 683, in __del__
         self.close()
