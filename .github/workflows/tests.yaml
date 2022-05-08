@@ -45,4 +45,5 @@ jobs:
         postroj --version
 
     - name: Run tests
-      run: pytest
+      # FIXME: Can this be run without elevated privileges?
+      run: sudo $(command -v pytest)
