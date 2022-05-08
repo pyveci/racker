@@ -28,6 +28,14 @@ Racker
     :target: https://pypi.org/project/racker/
     :alt: Maturity status
 
+.. image:: https://github.com/cicerops/racker/workflows/Tests/badge.svg
+    :target: https://github.com/cicerops/racker/actions?workflow=Tests
+    :alt: Test suite status
+
+.. image:: https://codecov.io/gh/cicerops/racker/branch/main/graph/badge.svg
+    :target: https://codecov.io/gh/cicerops/racker
+    :alt: Test suite code coverage
+
 .. image:: https://img.shields.io/pypi/l/racker.svg
     :target: https://pypi.org/project/racker/
     :alt: License
