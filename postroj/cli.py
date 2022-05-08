@@ -12,7 +12,7 @@ from postroj.util import setup_logging
 
 
 @click.group()
-@click.version_option()
+@click.version_option(package_name="racker")
 @click.option("--verbose", is_flag=True, required=False)
 @click.option("--debug", is_flag=True, required=False)
 @click.pass_context
