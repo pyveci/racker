@@ -20,7 +20,7 @@ Synopsis
 ::
 
     # Basic usage.
-    postroj run --system=windows-1809 -- cmd /C echo hello
+    postroj invoke --system=windows-1809 -- cmd /C echo hello
 
 
 *****

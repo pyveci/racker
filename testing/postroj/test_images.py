@@ -31,7 +31,7 @@ def test_list_images():
         "rockylinux-8",
         "amazonlinux-2022",
         "oraclelinux-8",
-        "archlinux-20220501"
+        "archlinux-20220501",
     ]
 
     assert json.loads(result.stdout) == reference

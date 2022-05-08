@@ -39,7 +39,8 @@ setup(
         "virtualbox",
         "vagrant",
         "docker",
-        "docker-image" "skopeo",
+        "docker-image",
+        "skopeo",
         "umoci",
     ],
     classifiers=[
@@ -70,6 +71,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
+            "racker = postroj.racker.cli:cli",
             "postroj = postroj.cli:cli",
         ],
     },

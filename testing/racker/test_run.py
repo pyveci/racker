@@ -7,7 +7,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from postroj.cli import cli
+from postroj.racker.cli import cli
 
 
 def test_run_hostnamectl(capfd):
@@ -35,8 +35,8 @@ def test_run_stdin_stdout(monkeypatch, capsys):
     Proof that echoing this to stdout again works well.
     """
     program_path = Path(sys.argv[0]).parent
-    postroj = program_path / "postroj"
-    command = f"{postroj} run -it --rm debian-buster /bin/cat /dev/stdin"
+    racker = program_path / "racker"
+    command = f"{racker} run -it --rm debian-buster /bin/cat /dev/stdin"
     process = subprocess.run(shlex.split(command), input=b"foo", stdout=subprocess.PIPE, env={"TESTING": "true"})
     process.check_returncode()
     assert process.stdout == b"foo"

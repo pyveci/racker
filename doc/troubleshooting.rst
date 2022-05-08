@@ -113,7 +113,7 @@ STDIN: Inappropriate ioctl for device
 *************************************
 ::
 
-    echo "hello world" | sudo postroj run -it --rm fedora-37 cat -
+    echo "hello world" | sudo racker run -it --rm fedora-37 cat -
 
 ::
 

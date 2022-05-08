@@ -20,6 +20,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Optional, Tuple, Union
 
+import click
 import subprocess_tee
 
 logger = logging.getLogger(__name__)
@@ -404,3 +405,26 @@ def to_json(obj, pretty=True):
     if pretty:
         kwargs["indent"] = 2
     return json.dumps(obj, cls=JsonEncoderPlus, **kwargs)
+
+
+def boot(ctx: click.Context, verbose: bool, debug: bool):
+
+    # Debugging.
+    # click.echo(f"Verbose mode is {'on' if verbose else 'off'}", err=True)
+    # click.echo(f"Debug mode is {'on' if debug else 'off'}", err=True)
+
+    # Adjust log level according to subcommand.
+    # `racker run` should be more silent by default.
+    if ctx.invoked_subcommand == "run":
+        log_level = logging.WARNING
+    else:
+        log_level = logging.INFO
+
+    # Adjust log level according to `verbose` / `debug` flags.
+    if verbose:
+        log_level = logging.INFO
+    if debug:
+        log_level = logging.DEBUG
+
+    # Setup logging, according to `verbose` / `debug` flags.
+    setup_logging(level=log_level)
