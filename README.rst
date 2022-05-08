@@ -18,19 +18,24 @@ Racker
 
 .. image:: https://img.shields.io/pypi/pyversions/racker.svg
     :target: https://pypi.org/project/racker/
-
-.. image:: https://img.shields.io/pypi/status/racker.svg
-    :target: https://pypi.org/project/racker/
+    :alt: Python version
 
 .. image:: https://img.shields.io/pypi/v/racker.svg
     :target: https://pypi.org/project/racker/
+    :alt: Version
+
+.. image:: https://img.shields.io/pypi/status/racker.svg
+    :target: https://pypi.org/project/racker/
+    :alt: Maturity status
 
 .. image:: https://img.shields.io/pypi/l/racker.svg
-    :alt: License
     :target: https://pypi.org/project/racker/
+    :alt: License
 
 .. image:: https://img.shields.io/pypi/dm/racker.svg?label=PyPI%20downloads
     :target: https://pypi.org/project/racker/
+    :alt: PyPI downloads
+
 
 ----
 
