@@ -10,7 +10,7 @@ Racker
     - **Source code**: https://github.com/cicerops/racker
     - **PyPI**: https://pypi.org/project/racker/
 
-----
+|
 
 .. image:: https://img.shields.io/badge/systemd-239%20and%20newer-blue.svg
     :target: https://github.com/systemd/systemd
