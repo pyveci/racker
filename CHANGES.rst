@@ -1,6 +1,6 @@
-#################
-postroj changelog
-#################
+################
+Racker changelog
+################
 
 
 in progress
@@ -31,6 +31,7 @@ in progress
 - Add software test framework and basic tests for ``postroj run``
 - Refactor data model for curated operating systems / disk images
 - Allow ``versionname`` labels like ``debian-11`` for addressing curated filesystem images
+- Rename project to *Racker* and Python package to ``racker``
 
 
 2022-03-16 0.0.0

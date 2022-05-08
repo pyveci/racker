@@ -7,14 +7,14 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, "README.rst")).read()
 
 setup(
-    name="postroj",
+    name="racker",
     version="0.0.0",
     author="Andreas Motl",
     author_email="andreas.motl@cicerops.de",
-    url="https://github.com/cicerops/postroj",
+    url="https://github.com/cicerops/racker",
     description="An experimental harness tool based on systemd-nspawn containers",
     long_description=README,
-    download_url="https://pypi.org/project/postroj/",
+    download_url="https://pypi.org/project/racker/",
     packages=["postroj"],
     license="AGPL-3.0",
     platforms="All",

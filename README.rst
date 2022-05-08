@@ -1,6 +1,6 @@
-#######
-postroj
-#######
+######
+Racker
+######
 
 
 
@@ -13,7 +13,7 @@ spirit to address some details of `Docker Considered Harmful`_.
 At the same time, a tribute to the authors and contributors of GNU, Linux,
 systemd, VirtualBox, Vagrant, Docker, Python and more.
 
-``postroj`` is ...
+Racker is ...
 
 - A runtime harness for testing software packages and similar purposes, in
   different environments, mostly run headless and non-interactive.
@@ -39,8 +39,8 @@ See also [2], where Lennart Poettering and Kai Sievers outline their vision
 of systemd as a platform for running systems and their focus on containers.
 
 ``systemd`` already provides a stack of features in the areas of *resource
-bundling* and *sandboxing* [1]. ``postroj`` might fill some gaps on the
-*delivery* aspects.
+bundling* and *sandboxing* [1]. Racker might fill some gaps on the *delivery*
+aspects.
 
 [3] outlines how systemd-nspawn was conceived to aid in testing and debugging
 systemd and [4] is the latest overview of systemd in 2018. From a user's
@@ -63,15 +63,19 @@ Install prerequisites::
     apt-get install --yes systemd-container skopeo umoci python3-pip python3-venv
 
 
-Install postroj::
+Install Racker::
 
     python3 -m venv .venv
     source .venv/bin/activate
-    pip install git+https://github.com/cicerops/postroj --upgrade
+    pip install racker --upgrade
+
+When needing to run the latest development version, use this command instead::
+
+    pip install git+https://github.com/cicerops/racker --upgrade
 
 .. note::
 
-    If you are not running Linux on your workstation, the `postroj sandbox
+    If you are not running Linux on your workstation, the `Racker sandbox
     installation`_ documentation outlines how to run this program within
     a virtual machine using Vagrant.
 
@@ -210,19 +214,20 @@ Questions and answers
        prefixed with ``postroj-``.
        Examples: ``postroj-debian-buster``, ``postroj-centos-8``.
 
-- | Q: How large are filesystem images?
-  | A: postroj prefers to use "slim" variants of filesystem images, aiming to
-       only use artefacts with download sizes < 100 MB.
+- | Q: How large are curated filesystem images?
+  | A: The preference for curated filesystem images is to use their corresponding
+       "slim" variants where possible, aiming to only use artefacts with download
+       sizes < 100 MB.
 
 - | Q: Are container disks ephemeral?
   | A: Yes, by default, all container images will be ephemeral, i.e. all changes to
        them are volatile.
 
-- | Q: Where does postroj store its data?
-  | A: The managed environment used by postroj is stored at ``/var/lib/postroj``.
-       In this manner, it completely gets out of the way of any other machine images
-       located at ``/var/lib/machines``. Thus, images created by postroj images will
-       not be listed by ``machinectl list-images``.
+- | Q: Where does the program store its data?
+  | A: Data is stored at ``/var/lib/postroj``.
+       In this manner, it completely gets out of the way of any other images, for
+       example located at ``/var/lib/machines``. Thus, any images created or managed
+       by Racker will not be listed by ``machinectl list-images``.
   | A: The download cache is located at ``/var/cache/postroj/downloads``.
 
 - | Q: Where are the filesystem images stored?
@@ -240,8 +245,8 @@ Questions and answers
 .. _systemd-run: https://www.freedesktop.org/software/systemd/man/systemd-run.html
 
 .. _Docker Considered Harmful: https://catern.com/docker.html
-.. _machinectl pull-dkr: https://github.com/cicerops/postroj/blob/main/doc/machinectl-pull-dkr.rst
-.. _postroj sandbox installation: https://github.com/cicerops/postroj/blob/main/doc/sandbox.rst
+.. _machinectl pull-dkr: https://github.com/cicerops/racker/blob/main/doc/machinectl-pull-dkr.rst
+.. _Racker sandbox installation: https://github.com/cicerops/racker/blob/main/doc/sandbox.rst
 .. _skopeo: https://github.com/containers/skopeo
 .. _Running containers with systemd-nspawn: https://janma.tk/2019-10-13/systemd-nspawn/
 .. _umoci: https://github.com/opencontainers/umoci

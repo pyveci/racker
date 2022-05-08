@@ -24,7 +24,7 @@ Release 0.1.0
 - [x] Add more Linux distributions: Amazon Linux and Oracle Linux
 - [x] Add changelog
 - [x] Update setup.py
-- [o] Rename project and Python package to ``racker``.
+- [x] Rename project and Python package to ``racker``
 
 
 *************
