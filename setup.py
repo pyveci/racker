@@ -79,7 +79,6 @@ setup(
         "click>=7,<9",
         "furl>=2,<3",
         "subprocess-tee>=0.3,<1",
-        "strip-ansi>=0.1,<0.2",
     ],
     extras_require={
         "test": [
