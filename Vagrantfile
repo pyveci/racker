@@ -49,7 +49,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     machine.vm.provision :shell, privileged: true, inline: <<-SHELL
         SOURCE=/usr/src/racker
         TARGET=/opt/racker
-        PROGRAM=/usr/local/bin/racker
+        RACKER=/usr/local/bin/racker
+        POSTROJ=/usr/local/bin/postroj
+
         echo "Installing package from ${SOURCE} to virtualenv at ${TARGET}"
         echo "Installing program to ${PROGRAM}"
         set -x
@@ -61,7 +63,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         python -V
         pip install --editable=${SOURCE}[test]
         racker --version
-        ln -sf ${TARGET}/bin/racker ${PROGRAM}
+        ln -sf ${TARGET}/bin/racker ${RACKER}
+        ln -sf ${TARGET}/bin/postroj ${POSTROJ}
     SHELL
 
   end
