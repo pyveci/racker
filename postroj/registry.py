@@ -182,7 +182,7 @@ def find_distribution(image_label: str) -> LinuxDistribution:
         if image_label == distribution.fullname or image_label == distribution.versionname:
             return distribution
 
-    raise ValueError(f"Unknown image label {image_label}")
+    raise ValueError(f"Unknown image label: {image_label}")
 
 
 def generate_images():

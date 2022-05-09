@@ -2,6 +2,7 @@
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 import io
 import logging
+import subprocess
 import sys
 from contextlib import redirect_stderr, redirect_stdout
 
@@ -10,7 +11,7 @@ import click
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
 from postroj.registry import find_distribution
-from postroj.util import boot
+from postroj.util import boot, subprocess_get_error_message
 
 logger = logging.getLogger(__name__)
 
@@ -85,10 +86,17 @@ def racker_run(ctx, interactive: bool, tty: bool, rm: bool, image: str, command:
     logger.info(f"Invoking command '{command}' on {dist}")
 
     # Acquire rootfs filesystem image.
-    ip = ImageProvider(distribution=dist)
-    rootfs = ip.image
+    try:
+        ip = ImageProvider(distribution=dist)
+        rootfs = ip.image
+    except subprocess.CalledProcessError as ex:
+        message = subprocess_get_error_message(exception=ex)
+        logger.critical(f"Acquiring filesystem image failed. {message}")
+        # subprocess_forward_stderr_stdout(exception=ex)
+        raise SystemExit(ex.returncode)
 
     # TODO: Combine verbose + capturing by employing some Tee-like multiplexing.
+    # TODO: After killing most of the code in `util.cmd`, this might be able to go away as well?
     if debug:
         stdout = sys.stderr
         stderr = sys.stderr
@@ -98,11 +106,25 @@ def racker_run(ctx, interactive: bool, tty: bool, rm: bool, image: str, command:
 
     # Boot container and run command.
     with PostrojContainer(rootfs=rootfs) as pc:
-        with redirect_stdout(stdout):
-            with redirect_stderr(stderr):
-                pc.boot()
-                pc.wait()
-        pc.run(command, use_pty=use_pty)
+        try:
+            with redirect_stdout(stdout):
+                with redirect_stderr(stderr):
+                    pc.boot()
+                    pc.wait()
+
+        except subprocess.CalledProcessError as ex:
+
+            message = subprocess_get_error_message(exception=ex)
+            logger.critical(f"Launching container failed. {message}")
+            # subprocess_forward_stderr_stdout(exception=ex)
+            raise SystemExit(ex.returncode)
+
+        try:
+            pc.run(command, use_pty=use_pty)
+        except subprocess.CalledProcessError as ex:
+            message = subprocess_get_error_message(exception=ex)
+            logger.critical(f"Running command in container '{pc.machine}' failed. {message}")
+            raise SystemExit(ex.returncode)
 
 
 cli.add_command(cmd=racker_pull, name="pull")
