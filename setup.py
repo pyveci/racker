@@ -15,7 +15,7 @@ setup(
     description="An experimental harness tool based on systemd-nspawn containers",
     long_description=README,
     download_url="https://pypi.org/project/racker/",
-    packages=["postroj"],
+    packages=["racker", "postroj"],
     license="AGPL-3.0, EUPL-1.2",
     keywords=[
         "systemd",
@@ -71,7 +71,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "racker = postroj.racker.cli:cli",
+            "racker = racker.cli:cli",
             "postroj = postroj.cli:cli",
         ],
     },
