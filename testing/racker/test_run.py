@@ -9,7 +9,7 @@ import pytest
 from click._compat import strip_ansi
 from click.testing import CliRunner
 
-from postroj.racker.cli import cli
+from racker.cli import cli
 
 
 def test_run_image_invalid():

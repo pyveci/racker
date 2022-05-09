@@ -30,7 +30,13 @@ def cli(ctx: click.Context, verbose: bool, debug: bool):
 @click.pass_context
 def racker_pull(ctx, name: str):
     """
-    Pull rootfs images from suitable locations
+    Pull rootfs images from suitable locations.
+
+    hello-world
+    redis
+    library/redis
+    docker.io/library/redis
+    ghcr.io/jpmens/mqttwarn-full:nightly
     """
     raise NotImplementedError("Hm?")
 
