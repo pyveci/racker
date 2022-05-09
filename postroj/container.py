@@ -10,7 +10,8 @@ from typing import Optional, Tuple, Union
 import subprocess_tee
 
 from postroj.settings import appsettings
-from postroj.util import LongRunningProcess, _SysExcInfoType, ccmd, fix_tty, hcmd, mask_logging, noop, print_header
+from postroj.util import LongRunningProcess, _SysExcInfoType, ccmd, fix_tty, hcmd, mask_logging, noop, print_header, \
+    find_rootfs
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,9 @@ class PostrojContainer:
 
         print_header(f"Spawning container {self.machine} with filesystem at {self.rootfs}")
 
+        # Check if rootfs is nested.
+        rootfs_real = find_rootfs(self.rootfs)
+
         """
         if not self.is_down():
             self.destroy_after_use = False
@@ -104,7 +108,7 @@ class PostrojContainer:
                 --volatile=overlay \
                 --bind-ro=/etc/resolv.conf:/etc/resolv.conf \
                 --bind={cache_directory}:{cache_directory} \
-                --directory={self.rootfs} \
+                --directory={rootfs_real} \
                 --machine={self.machine}
         """.strip()
         logger.info(f"Launch command is: {command}")
