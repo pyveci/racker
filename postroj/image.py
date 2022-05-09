@@ -10,7 +10,7 @@ from typing import Union
 
 from postroj.model import ConfigurationOptions, LinuxDistribution, OperatingSystemFamily, OperatingSystemName
 from postroj.settings import get_appsettings
-from postroj.util import hcmd, is_dir_empty, scmd, stdout_to_stderr
+from postroj.util import hcmd, is_dir_empty, scmd, stdout_to_stderr, find_rootfs
 
 logger = logging.getLogger(__name__)
 
@@ -301,21 +301,26 @@ class ImageProvider:
         archive_directory = self.settings.archive_directory
 
         # Download and extract image.
-        archive_oci = archive_directory / f"{self.distribution.fullname}.oci"
-        archive_image = archive_directory / f"{self.distribution.fullname}.img"
+        oci_path = archive_directory / f"{self.distribution.fullname}.oci"
+        image_path = archive_directory / f"{self.distribution.fullname}.img"
 
         if self.force:
-            shutil.rmtree(archive_oci, ignore_errors=True)
-            shutil.rmtree(archive_image, ignore_errors=True)
+            shutil.rmtree(oci_path, ignore_errors=True)
+            shutil.rmtree(image_path, ignore_errors=True)
 
-        if not archive_oci.exists() or not (archive_oci / "index.json").exists():
+        # FIXME: Detect if tag is given.
+        oci_tag = "default"
+
+        distribution_image = self.distribution.image
+
+        if not oci_path.exists() or not (oci_path / "index.json").exists():
             hcmd(
-                f"skopeo copy --override-os=linux {self.distribution.image} oci:{archive_oci}:{self.distribution.fullname}"
+                f"skopeo copy --override-os=linux {distribution_image} oci:{oci_path}:{oci_tag}"
             )
-        if not archive_image.exists() or is_dir_empty(archive_image) or is_dir_empty(archive_image / "rootfs"):
-            hcmd(f"umoci unpack --rootless --image={archive_oci}:{self.distribution.fullname} {archive_image}")
+        if not image_path.exists() or is_dir_empty(image_path) or is_dir_empty(image_path / "rootfs"):
+            hcmd(f"umoci unpack --rootless --image={oci_path}:{oci_tag} {image_path}")
 
-        return archive_image / "rootfs"
+        return find_rootfs(image_path)
 
     @property
     def image(self):

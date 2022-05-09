@@ -466,3 +466,14 @@ def subprocess_forward_stderr_stdout(exception: subprocess.CalledProcessError):
     sys.stdout.flush()
 
 
+def find_rootfs(image_path: Path):
+    os_release_file = Path("./etc/os-release")
+    os_release_candidates = [
+        # Image directory contains rootfs directly.
+        image_path / os_release_file,
+        # Image directory contains "rootfs" subdirectory, having been converted with `umoci`.
+        image_path / "rootfs" / os_release_file,
+    ]
+    for candidate in os_release_candidates:
+        if candidate.exists():
+            return candidate.parent.parent
