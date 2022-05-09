@@ -85,7 +85,7 @@ class PostrojContainer:
         cache_directory.mkdir(parents=True, exist_ok=True)
         logger.info(f"Cache directory is {cache_directory}")
 
-        print_header(f"Spawning container {self.machine}")
+        print_header(f"Spawning container {self.machine} with filesystem at {self.rootfs}")
 
         """
         if not self.is_down():

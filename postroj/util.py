@@ -43,6 +43,8 @@ def cmd(command, check: bool = True, passthrough: bool = True, capture: bool = F
     Run command in a separate process.
     """
     try:
+        p = subprocess_tee.run(shlex.split(command), tee=passthrough)
+        """
         if capture:
             p = subprocess_tee.run(shlex.split(command), tee=passthrough)
         else:
@@ -65,11 +67,13 @@ def cmd(command, check: bool = True, passthrough: bool = True, capture: bool = F
                     stderr = None
 
             p = subprocess.run(shlex.split(command), stdout=stdout, stderr=stderr)
+        """
         if check:
             p.check_returncode()
         return p
     except subprocess.CalledProcessError as ex:
-        logger.exception(f"Process exited with returncode {ex.returncode}. The output was:\n{ex.output}")
+        message = subprocess_get_error_message(exception=ex)
+        logger.debug(f"Invoking command failed. {message}")
         raise
 
 
@@ -97,8 +101,9 @@ def ccmd(machine: str, command: str, use_pty: bool = False, capture: bool = Fals
     pty = ""
     if use_pty:
         pty = "--pty"
-    command = f"systemd-run --machine={machine} --wait --quiet --pipe {pty} {command}"
-    # log.debug(f"Effective command is: {command}")
+    # TODO: Maybe add `--collect`?
+    command = f"systemd-run --machine={machine} --wait --pipe --quiet {pty} {command}"
+    logger.debug(f"Effective command is: {command}")
     return cmd(command, capture=capture)
 
 
@@ -324,7 +329,7 @@ class LongRunningProcess:
 
 
 def setup_logging(level=logging.INFO):
-    log_format = "%(asctime)-15s [%(name)-18s] %(levelname)-7s: %(message)s"
+    log_format = "%(asctime)-15s [%(name)-18s] %(levelname)-8s: %(message)s"
     logging.basicConfig(format=log_format, stream=sys.stderr, level=level)
 
 
@@ -428,3 +433,36 @@ def boot(ctx: click.Context, verbose: bool, debug: bool):
 
     # Setup logging, according to `verbose` / `debug` flags.
     setup_logging(level=log_level)
+
+
+def subprocess_get_error_message(exception: subprocess.CalledProcessError, process: Optional[subprocess.Popen] = None):
+
+    # Capture stderr output into error message.
+    cmd = " ".join(exception.cmd)
+    message = f"Command '{cmd}' returned non-zero exit status {exception.returncode}."
+    reason = exception.stderr.strip()
+
+    # Assume exit status 203 from `systemd-run` means "file/command not found".
+    # TODO: Validate this assumption.
+    if not reason and exception.returncode == 203:
+        try:
+            real_command = exception.cmd[-1].split(" ")[0]
+        except IndexError:
+            real_command = "<unknown>"
+        reason = f"{real_command}: No such file or directory"
+
+    if reason:
+        message += f" Reason: {reason}"
+    return message
+
+
+def subprocess_forward_stderr_stdout(exception: subprocess.CalledProcessError):
+    # Propagate stderr.
+    sys.stderr.write(exception.stderr)
+    sys.stderr.flush()
+
+    # Propagate stdout.
+    sys.stdout.write(exception.stdout)
+    sys.stdout.flush()
+
+

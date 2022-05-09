@@ -8,6 +8,7 @@ in progress
 
 - Add software tests to CI/GHA
 - Naming things: Add ``racker`` command with ``racker {pull,run}`` subcommands
+- Improve subprocess stdout/stderr redirection and error handling
 
 
 2022-05-08 0.1.0

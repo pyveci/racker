@@ -67,7 +67,7 @@ class ImageProvider:
         elif self.distribution.name == OperatingSystemName.ARCHLINUX:
             self.setup_archlinux()
         else:
-            raise ValueError(f"Unknown operating system family: {self.distribution.family}")
+            logger.warning(f"Unknown operating system family: {self.distribution.family}")
 
     def setup_debian(self):
         """
@@ -81,7 +81,8 @@ class ImageProvider:
         # Prepare image by installing systemd and additional packages.
         scmd(
             directory=rootfs,
-            command=f"sh -c 'apt-get update; apt-get install --yes systemd {' '.join(self.ADDITIONAL_PACKAGES)}'",
+            command=f"sh -c 'export DEBIAN_FRONTEND=noninteractive; "
+                    f"apt-get update; apt-get install --yes systemd {' '.join(self.ADDITIONAL_PACKAGES)}'",
         )
 
         # Activate image.
@@ -117,7 +118,8 @@ class ImageProvider:
         # Prepare image by adding additional packages.
         scmd(
             directory=rootfs,
-            command=f"sh -c 'apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES)}'",
+            command=f"sh -c 'export DEBIAN_FRONTEND=noninteractive; "
+                    f"apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES)}'",
         )
 
         # Prepare image by deactivating services which are hogging the bootstrapping.
