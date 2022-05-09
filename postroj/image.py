@@ -43,6 +43,10 @@ class ImageProvider:
         self.settings.archive_directory.mkdir(parents=True, exist_ok=True)
         self.settings.image_directory.mkdir(parents=True, exist_ok=True)
 
+        path_prefix = self.settings.archive_directory / self.distribution.fullname
+        self.oci_path = path_prefix.with_suffix(".oci")
+        self.image_staging = path_prefix.with_suffix(".img")
+
         if self.autosetup and (not self.image.exists() or self.force):
             with stdout_to_stderr():
                 self.setup()
@@ -54,6 +58,16 @@ class ImageProvider:
         logger.info(f"Provisioning container image {self.distribution.fullname}")
         logger.info(f"Using distribution {self.distribution}")
         logger.info(f"Installing image at {self.image}")
+        try:
+            self.prepare_systemd()
+        except ValueError as ex:
+            logger.warning(ex)
+            return
+
+        self.activate_image()
+
+    def prepare_systemd(self):
+
         if self.distribution.name == OperatingSystemName.DEBIAN:
             self.setup_debian()
         elif self.distribution.name == OperatingSystemName.UBUNTU:
@@ -67,7 +81,7 @@ class ImageProvider:
         elif self.distribution.name == OperatingSystemName.ARCHLINUX:
             self.setup_archlinux()
         else:
-            logger.warning(f"Unknown operating system family: {self.distribution.family}")
+            raise ValueError(f"Unsupported operating system: {self.distribution}")
 
     def setup_debian(self):
         """
@@ -76,7 +90,8 @@ class ImageProvider:
         """
 
         # Acquire image.
-        rootfs = self.acquire_from_docker()
+        self.acquire_from_docker()
+        rootfs = find_rootfs(self.image_staging)
 
         # Prepare image by installing systemd and additional packages.
         scmd(
@@ -84,9 +99,6 @@ class ImageProvider:
             command=f"sh -c 'export DEBIAN_FRONTEND=noninteractive; "
                     f"apt-get update; apt-get install --yes systemd {' '.join(self.ADDITIONAL_PACKAGES)}'",
         )
-
-        # Activate image.
-        self.activate_image(rootfs)
 
     def setup_ubuntu(self):
         """
@@ -101,17 +113,17 @@ class ImageProvider:
         """
 
         download_directory = self.settings.download_directory
-        archive_directory = self.settings.archive_directory
 
         # Acquire image.
         image_tarball = download_directory / os.path.basename(self.distribution.image)
-        rootfs = archive_directory / self.distribution.fullname
+        rootfs = self.image_staging
 
         if self.force:
             shutil.rmtree(rootfs, ignore_errors=True)
 
         hcmd(f"wget --continue --no-clobber --directory-prefix={download_directory} {self.distribution.image}")
         if not rootfs.exists() or is_dir_empty(rootfs):
+            logger.info(f"Extracting rootfs from {image_tarball} to {rootfs}")
             rootfs.mkdir(parents=True, exist_ok=True)
             hcmd(f"tar --directory={rootfs} -xf {image_tarball}")
 
@@ -130,22 +142,17 @@ class ImageProvider:
         # sometimes container does not signal readiness then.
         # scmd(directory=rootfs, command="systemctl mask snapd snapd.socket")
 
-        # Activate image.
-        self.activate_image(rootfs)
-
     def setup_redhat(self):
         """
         It works the same for all Red Hat based systems like Fedora, CentOS, Rocky Linux and Oracle Linux.
         """
 
         # Acquire image.
-        rootfs = self.acquire_from_docker()
+        self.acquire_from_docker()
+        rootfs = find_rootfs(self.image_staging)
 
         # Prepare image by installing systemd and additional packages.
         scmd(directory=rootfs, command=f"dnf install -y systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
-
-        # Activate image.
-        self.activate_image(rootfs)
 
     def setup_suse(self):
         """
@@ -153,14 +160,12 @@ class ImageProvider:
         """
 
         # Acquire image.
-        rootfs = self.acquire_from_docker()
+        self.acquire_from_docker()
+        rootfs = find_rootfs(self.image_staging)
 
         # Prepare image by installing systemd and additional packages.
         # TODO: Install additional packages only for `postroj pkgprobe`, only `systemd` is mandatory.
         scmd(directory=rootfs, command=f"zypper install -y systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
-
-        # Activate image.
-        self.activate_image(rootfs)
 
     def setup_centos(self):
         """
@@ -168,7 +173,8 @@ class ImageProvider:
         """
 
         # Acquire image.
-        rootfs = self.acquire_from_docker()
+        self.acquire_from_docker()
+        rootfs = find_rootfs(self.image_staging)
 
         # Fix CentOS 7 by upgrading systemd.
         self.upgrade_systemd(rootfs)
@@ -185,22 +191,17 @@ class ImageProvider:
         # Prepare image by adding additional packages.
         scmd(directory=rootfs, command=f"yum install -y {' '.join(self.ADDITIONAL_PACKAGES)}")
 
-        # Activate image.
-        self.activate_image(rootfs)
-
     def setup_archlinux(self):
         """
         Arch Linux images are acquired from Docker Hub.
         """
 
         # Acquire image.
-        rootfs = self.acquire_from_docker()
+        self.acquire_from_docker()
+        rootfs = find_rootfs(self.image_staging)
 
         # Prepare image by installing systemd and additional packages.
         scmd(directory=rootfs, command=f"pacman -Syu --noconfirm systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
-
-        # Activate image.
-        self.activate_image(rootfs)
 
     @staticmethod
     def upgrade_systemd(rootfs):
@@ -298,42 +299,40 @@ class ImageProvider:
         - https://github.com/opencontainers/runtime-spec/blob/main/bundle.md
         """
 
-        archive_directory = self.settings.archive_directory
-
-        # Download and extract image.
-        oci_path = archive_directory / f"{self.distribution.fullname}.oci"
-        image_path = archive_directory / f"{self.distribution.fullname}.img"
-
+        # When forces are applied, start from scratch by removing
+        # all established download artefacts.
         if self.force:
-            shutil.rmtree(oci_path, ignore_errors=True)
-            shutil.rmtree(image_path, ignore_errors=True)
+            shutil.rmtree(self.oci_path, ignore_errors=True)
+            shutil.rmtree(self.image_staging, ignore_errors=True)
 
         # FIXME: Detect if tag is given.
         oci_tag = "default"
 
+        # Adjust source image URI.
         distribution_image = self.distribution.image
+        if not distribution_image.startswith("docker://"):
+            distribution_image = "docker://" + distribution_image
 
-        if not oci_path.exists() or not (oci_path / "index.json").exists():
+        # Download and extract image.
+        if not self.oci_path.exists() or not (self.oci_path / "index.json").exists():
             hcmd(
-                f"skopeo copy --override-os=linux {distribution_image} oci:{oci_path}:{oci_tag}"
+                f"skopeo copy --override-os=linux {distribution_image} oci:{self.oci_path}:{oci_tag}"
             )
-        if not image_path.exists() or is_dir_empty(image_path) or is_dir_empty(image_path / "rootfs"):
-            hcmd(f"umoci unpack --rootless --image={oci_path}:{oci_tag} {image_path}")
-
-        return find_rootfs(image_path)
+        if not self.image_staging.exists() or is_dir_empty(self.image_staging) or is_dir_empty(self.image_staging / "rootfs"):
+            hcmd(f"umoci unpack --rootless --image={self.oci_path}:{oci_tag} {self.image_staging}")
 
     @property
     def image(self):
         return self.settings.image_directory / self.distribution.fullname
 
-    def activate_image(self, rootfs: Union[Path, str]):
+    def activate_image(self):
         """
         Activate a filesystem image to make it available for invoking it.
         """
-        if not is_dir_empty(rootfs):
+        if not is_dir_empty(self.image_staging):
             target_path = self.image
             target_path.unlink(missing_ok=True)
-            target_path.symlink_to(rootfs, target_is_directory=True)
+            target_path.symlink_to(self.image_staging, target_is_directory=True)
             return target_path
         else:
-            raise ValueError(f"Unable to activate image at {rootfs}")
+            raise ValueError(f"Unable to activate image at {self.image_staging}")
