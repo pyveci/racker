@@ -132,6 +132,7 @@ class PostrojContainer:
         """
         print_header("Host information")
         self.run("/usr/bin/hostnamectl")
+        self.run("/bin/cat /etc/os-release")
 
     def run(self, command, use_pty: bool = False, capture: bool = False):
         """

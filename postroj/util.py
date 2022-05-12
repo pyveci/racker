@@ -73,7 +73,7 @@ def cmd(command, check: bool = True, passthrough: bool = True, capture: bool = F
             p.check_returncode()
         return p
     except subprocess.CalledProcessError as ex:
-        message = subprocess_get_error_message(exception=ex)
+        message = subprocess_get_error_message(exception=ex, process=p)
         logger.debug(f"Invoking command failed. {message}")
         raise
 
@@ -86,12 +86,16 @@ def hcmd(command, check: bool = True, passthrough: bool = True, capture: bool = 
     return cmd(command, check=check, passthrough=passthrough, capture=capture)
 
 
-def scmd(directory: Union[Path, str], command: str):
+def scmd(directory: Union[Path, str], command: str, passthrough: bool = True, capture: bool = False):
     """
     Run command within root filesystem.
     """
     logger.info(f"Running command within rootfs at {directory}: {command}")
-    return cmd(f"systemd-nspawn --directory={directory} --bind-ro=/etc/resolv.conf:/etc/resolv.conf --pipe {command}")
+    return cmd(
+        f"systemd-nspawn --directory={directory} --bind-ro=/etc/resolv.conf:/etc/resolv.conf --pipe {command}",
+        passthrough=passthrough,
+        capture=capture,
+    )
 
 
 def ccmd(machine: str, command: str, use_pty: bool = False, capture: bool = False):
@@ -444,7 +448,15 @@ def subprocess_get_error_message(exception: subprocess.CalledProcessError, proce
     # Capture stderr output into error message.
     cmd = " ".join(exception.cmd)
     message = f"Command '{cmd}' returned non-zero exit status {exception.returncode}."
-    reason = exception.stderr.strip()
+
+    reason = None
+    if exception.stderr:
+        reason = exception.stderr.strip()
+
+    if exception.stdout:
+        stdout_prefix = exception.stdout[:200]
+        if not reason and "execv" in stdout_prefix and "failed" in stdout_prefix:
+            reason = exception.stdout.strip()
 
     # Assume exit status 203 from `systemd-run` means "file/command not found".
     # TODO: Validate this assumption.
