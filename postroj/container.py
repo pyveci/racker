@@ -10,8 +10,17 @@ from typing import Optional, Tuple, Union
 import subprocess_tee
 
 from postroj.settings import appsettings
-from postroj.util import LongRunningProcess, _SysExcInfoType, ccmd, fix_tty, hcmd, mask_logging, noop, print_header, \
-    find_rootfs
+from postroj.util import (
+    LongRunningProcess,
+    _SysExcInfoType,
+    ccmd,
+    find_rootfs,
+    fix_tty,
+    hcmd,
+    mask_logging,
+    noop,
+    print_header,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -78,11 +87,11 @@ class PostrojContainer:
         to ensure reproducible actions.
         """
 
-        cache_directory = appsettings.cache_directory
-
         if not self.rootfs.exists():
-            raise Exception(f"Image at {self.rootfs} not found")
+            raise Exception(f"Image not found: {self.rootfs}")
 
+        # Prepare and announce cache directory.
+        cache_directory = appsettings.cache_directory
         cache_directory.mkdir(parents=True, exist_ok=True)
         logger.info(f"Cache directory is {cache_directory}")
 

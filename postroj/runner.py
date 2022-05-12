@@ -5,8 +5,8 @@ import sys
 
 import click
 
-from racker.cli import racker_run
 from postroj.winrunner import WinRunner
+from racker.cli import racker_run
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ from abc import abstractmethod
 from furl import furl
 
 from postroj.container import PostrojContainer
-from postroj.util import print_header, wait_for_port
+from postroj.util import find_rootfs, print_header, wait_for_port
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 class ProbeBase:
     def __init__(self, container: PostrojContainer):
         self.container = container
+        self.container.rootfs = find_rootfs(self.container.rootfs)
 
     @abstractmethod
     def invoke(self):
