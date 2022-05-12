@@ -21,6 +21,7 @@ from types import TracebackType
 from typing import Optional, Tuple, Union
 
 import click
+import furl
 import subprocess_tee
 
 logger = logging.getLogger(__name__)
@@ -387,11 +388,12 @@ def mask_logging(highest_level=logging.CRITICAL):
 
 class JsonEncoderPlus(json.JSONEncoder):
     """
-    JSON encoder with support for serializing Enums and Data Classes.
+    JSON encoder with support for serializing Enums, Data Classes, and `furl` instances.
 
     - https://docs.python.org/3/library/json.html#json.JSONEncoder
     - https://docs.python.org/3/library/enum.html
     - https://docs.python.org/3/library/dataclasses.html
+    - https://github.com/gruns/furl
     """
 
     def default(self, obj):
@@ -399,6 +401,8 @@ class JsonEncoderPlus(json.JSONEncoder):
             return obj.value
         elif dataclasses.is_dataclass(obj):
             return dataclasses.asdict(obj)
+        elif isinstance(obj, furl.furl):
+            return obj.asdict()
         return json.JSONEncoder.default(self, obj)
 
 
@@ -467,6 +471,14 @@ def subprocess_forward_stderr_stdout(exception: subprocess.CalledProcessError):
 
 
 def find_rootfs(image_path: Path):
+    """
+    Check for existence of `/etc/os-release` file in OS root directory.
+    When `systemd-nspawn` would encounter an OS root directory without an
+    `/etc/os-release` file, it would croak like::
+
+        Directory /path/to/rootfs doesn't look like an OS root directory (os-release file is missing). Refusing.
+    """
+
     os_release_file = Path("./etc/os-release")
     os_release_candidates = [
         # Image directory contains rootfs directly.
@@ -477,3 +489,6 @@ def find_rootfs(image_path: Path):
     for candidate in os_release_candidates:
         if candidate.exists():
             return candidate.parent.parent
+
+    # TODO: Introduce appropriate exception classes.
+    raise ValueError(f"OS root directory {image_path} lacks an operating system (os-release file is missing).")

@@ -21,6 +21,7 @@ class OperatingSystemFamily(Enum):
     DEBIAN = "debian"
     REDHAT = "redhat"
     SUSE = "suse"
+    ARCHLINUX = "archlinux"
 
 
 class OperatingSystemName(Enum):
