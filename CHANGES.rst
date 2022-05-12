@@ -11,6 +11,7 @@ in progress
 - Improve subprocess stdout/stderr redirection and error handling
 - Activate full ``umoci``-unpacked images
 - Add test case for ``postroj pkgprobe``
+- Improve image subsystem to acquire arbitrary Docker filesystem images
 
 
 2022-05-08 0.1.0

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import dataclasses
 from enum import Enum
-from typing import Generator, List
+from typing import Dict, Generator, List
 
 from postroj.model import LinuxDistribution, OperatingSystemFamily, OperatingSystemName
 
@@ -168,6 +169,53 @@ CURATED_OPERATING_SYSTEMS: List[Enum] = [
     # others
     CuratedOperatingSystem.ARCHLINUX_20220501,
 ]
+
+
+@dataclasses.dataclass
+class OperatingSystemType:
+    family: OperatingSystemFamily
+    name: OperatingSystemName
+
+
+# Map of `NAME=` items in `/etc/os-release` file to qualified operating systems types.
+OS_RELEASE_NAME_MAP: Dict[str, OperatingSystemType] = {
+    "Debian GNU/Linux": OperatingSystemType(
+        family=OperatingSystemFamily.DEBIAN,
+        name=OperatingSystemName.DEBIAN,
+    ),
+    "Ubuntu": OperatingSystemType(
+        family=OperatingSystemFamily.DEBIAN,
+        name=OperatingSystemName.UBUNTU,
+    ),
+    "Fedora Linux": OperatingSystemType(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.FEDORA,
+    ),
+    "CentOS Linux": OperatingSystemType(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.CENTOS,
+    ),
+    "Rocky Linux": OperatingSystemType(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.ROCKYLINUX,
+    ),
+    "Amazon Linux": OperatingSystemType(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.AMAZONLINUX,
+    ),
+    "openSUSE Leap": OperatingSystemType(
+        family=OperatingSystemFamily.SUSE,
+        name=OperatingSystemName.OPENSUSE,
+    ),
+    "openSUSE Tumbleweed": OperatingSystemType(
+        family=OperatingSystemFamily.SUSE,
+        name=OperatingSystemName.OPENSUSE,
+    ),
+    "Arch Linux": OperatingSystemType(
+        family=OperatingSystemFamily.ARCHLINUX,
+        name=OperatingSystemName.ARCHLINUX,
+    ),
+}
 
 
 def generate_curated_distributions() -> Generator[LinuxDistribution, None, None]:
