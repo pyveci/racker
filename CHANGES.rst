@@ -10,6 +10,7 @@ in progress
 - Naming things: Add ``racker`` command with ``racker {pull,run}`` subcommands
 - Improve subprocess stdout/stderr redirection and error handling
 - Activate full ``umoci``-unpacked images
+- Add test case for ``postroj pkgprobe``
 
 
 2022-05-08 0.1.0
