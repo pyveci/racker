@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import io
 import logging
 import os
+from contextlib import redirect_stdout
+from functools import partial
 from typing import List
 
 import click
@@ -11,6 +14,7 @@ from postroj.image import ImageProvider
 from postroj.probe import ProbeBase
 from postroj.registry import find_distribution
 from postroj.settings import get_appsettings
+from postroj.util import noop
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +41,17 @@ def main(ctx, image: str, package: str, check_unit: List[str], check_network: Li
     ip = ImageProvider(distribution=dist)
     rootfs = ip.image
 
+    # Adjust verbosity.
+    silent_boot = True
+    ctx = noop
+    if silent_boot:
+        ctx = partial(redirect_stdout, io.StringIO())
+
     # Boot container and run probe commands.
     with PostrojContainer(rootfs=rootfs) as pc:
-        pc.boot()
-        pc.wait()
+        with ctx():
+            pc.boot()
+            pc.wait()
         pc.info()
 
         probe = PackageProbe(container=pc)
