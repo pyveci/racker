@@ -93,7 +93,7 @@ introductory walkthrough can be found at [5].
 The most important bits being covered by the systemd software family already,
 Racker tries to fill some gaps on the *delivery* aspects.
 
-
+|
 | [1] `Containers without a Container Manager, with systemd`_ (2018)
 | [2] `Lennart Poettering und Kay Sievers über Systemd`_ (2014)
 | [3] `Systemd-Nspawn is Chroot on Steroids`_ (2013)
@@ -133,35 +133,42 @@ When needing to run the latest development version, use this command instead::
 Usage
 *****
 
-Basic commands::
+Racker commands::
 
     # Invoke the vanilla Docker `hello-world` image.
     # FIXME: Does not work yet.
     # racker run -it --rm hello-world
 
     # Acquire rootfs images.
-    postroj pull debian-bullseye
-    postroj pull fedora-37
+    racker pull debian:bullseye-slim
+    racker pull fedora:37
 
     # Launch an interactive shell.
-    racker run -it --rm debian-bullseye bash
-    racker run -it --rm fedora-37 bash
+    racker run -it --rm debian:bullseye-slim bash
+    racker run -it --rm fedora:37 bash
 
     # Launch a single command.
-    racker run -it --rm debian-11 hostnamectl
-    racker run -it --rm opensuse-tumbleweed hostnamectl
+    racker run -it --rm debian:11-slim hostnamectl
+    racker run -it --rm opensuse/tumbleweed hostnamectl
+    racker run -it --rm ubuntu:jammy /bin/cat /etc/os-release
+    racker run -it --rm registry.suse.com/bci/bci-base /bin/cat /etc/os-release
+    racker run -it --rm docker://ghcr.io/jpmens/mqttwarn-standard /usr/bin/hostnamectl
 
     # Verbose mode.
-    postroj --verbose run -it --rm fedora-37 hostnamectl
+    racker --verbose run -it --rm fedora:37 hostnamectl
 
     # Use stdin and stdout, with timing.
-    time echo "hello world" | racker run -it --rm fedora-37 cat /dev/stdin > hello
+    time echo "hello world" | racker run -it --rm fedora:37 cat /dev/stdin > hello
     cat hello
 
-More commands::
+Postroj commands::
 
     # List available images.
     postroj list-images
+
+    # Acquire images for curated operating systems.
+    postroj pull debian-bullseye
+    postroj pull fedora-37
 
     # Acquire rootfs images for all available distributions.
     postroj pull --all
@@ -179,7 +186,13 @@ Package testing::
     postroj pkgprobe --image=fedora-37 --check-unit=systemd-journald
     postroj pkgprobe --image=archlinux-20220501 --check-unit=systemd-journald
 
-    # Run two probes that need installing a 3rd party package beforehand.
+    # Run probes that need to install a 3rd party package beforehand.
+
+    postroj pkgprobe \
+        --image=debian-stretch \
+        --package=http://ftp.debian.org/debian/pool/main/w/webfs/webfs_1.21+ds1-12_amd64.deb \
+        --check-unit=webfs \
+        --check-network=http://localhost:8000
 
     postroj pkgprobe \
         --image=debian-bullseye \
@@ -250,8 +263,8 @@ Questions and answers
   | A: The runtime is completely independent of Docker, it is solely based on
        ``systemd-nspawn`` containers instead. However, root filesystem images can be
        pulled from Docker image registries in the spirit of `machinectl pull-dkr`_.
-       Other than this, the ``racker`` command and library aim to be drop-in replacements
-       for their corresponding Docker counterparts.
+       Other than this, the ``racker`` command aims to be a drop-in replacement for
+       its corresponding ``docker`` counterpart.
 
 - | Q: Do I need to have Docker installed on my machine?
   | A: No, Racker works without Docker.
@@ -286,6 +299,17 @@ Questions and answers
 - | Q: Are container disks ephemeral?
   | A: Yes, by default, all container images will be ephemeral, i.e. all changes to
        them are volatile.
+
+
+***************
+Troubleshooting
+***************
+
+*It's always the cable. ;]*
+
+1. If you see that your container might not have network access, make sure to
+   provide a valid DNS configuration in your host's ``/etc/resolv.conf``.
+   When in doubt, please add ``nameserver 9.9.9.9`` as the first entry.
 
 
 .. _machinectl: https://www.freedesktop.org/software/systemd/man/machinectl.html

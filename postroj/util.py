@@ -39,12 +39,15 @@ def is_dir_empty(path):
         return next(scan, None) is None
 
 
-def cmd(command, check: bool = True, passthrough: bool = True, capture: bool = False):
+def cmd(command, check: bool = True, passthrough: bool = True, capture: bool = False, use_pty: bool = False):
     """
     Run command in a separate process.
     """
     try:
-        p = subprocess_tee.run(shlex.split(command), tee=passthrough)
+        if use_pty:
+            p = subprocess.run(shlex.split(command))
+        else:
+            p = subprocess_tee.run(shlex.split(command), tee=passthrough)
         """
         if capture:
             p = subprocess_tee.run(shlex.split(command), tee=passthrough)
@@ -109,7 +112,7 @@ def ccmd(machine: str, command: str, use_pty: bool = False, capture: bool = Fals
     # TODO: Maybe add `--collect`?
     command = f"systemd-run --machine={machine} --wait --pipe --quiet {pty} {command}"
     logger.debug(f"Effective command is: {command}")
-    return cmd(command, capture=capture)
+    return cmd(command, capture=capture, use_pty=use_pty)
 
 
 def fix_tty():

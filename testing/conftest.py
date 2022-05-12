@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import time
 from pathlib import Path
 from typing import Generator
 
@@ -31,3 +32,16 @@ def adjust_storage_paths(monkeypatch_session):
         cache_directory=Path("/var/cache/testdrive/postroj"),
     )
     monkeypatch_session.setattr(postroj.settings, "appsettings", appsettings)
+
+
+@pytest.fixture
+def delay():
+    """
+    Needed to give the container some time to settle after use. Otherwise, the test suite is
+    timing-sensitive re.::
+
+        Directory tree /var/lib/testdrive/postroj/archive/debian-stretch-slim.img/rootfs is currently busy.
+
+    FIXME: Can be removed after proper "wait-for-teardown" has been implemented.
+    """
+    time.sleep(0.25)

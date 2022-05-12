@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import enum
 import logging
 import os.path
 import shutil
+import subprocess
 from enum import Enum
 from pathlib import Path
 from textwrap import dedent, indent
-from typing import Union
+
+from furl import furl
 
 from postroj.model import ConfigurationOptions, LinuxDistribution, OperatingSystemFamily, OperatingSystemName
+from postroj.registry import OS_RELEASE_NAME_MAP
 from postroj.settings import get_appsettings
-from postroj.util import hcmd, is_dir_empty, scmd, stdout_to_stderr, find_rootfs
+from postroj.util import find_rootfs, hcmd, is_dir_empty, scmd, stdout_to_stderr
 
 logger = logging.getLogger(__name__)
 
@@ -27,29 +31,45 @@ class ImageProvider:
     ``/var/lib/postroj/images``.
     """
 
-    ADDITIONAL_PACKAGES = ["curl", "wget"]
+    ADDITIONAL_PACKAGES = [
+        # Needed for `pkgprobe`.
+        "curl",
+        "wget",
+        # Put into `analytics` section.
+        # "procps",
+        # "lsof",
+        # "nano",
+    ]
 
     def __init__(self, distribution: LinuxDistribution, autosetup: bool = True, force: bool = False):
 
         if isinstance(distribution, Enum):
             distribution = distribution.value
+
         self.distribution = distribution
         self.autosetup = autosetup
+
+        self.has_systemd = None
+        self.is_docker = None
+
         # TODO: Discriminate `force` vs. `update`.
         self.force = force
 
         self.settings: ConfigurationOptions = get_appsettings()
-
-        self.settings.archive_directory.mkdir(parents=True, exist_ok=True)
-        self.settings.image_directory.mkdir(parents=True, exist_ok=True)
-
         path_prefix = self.settings.archive_directory / self.distribution.fullname
         self.oci_path = path_prefix.with_suffix(".oci")
         self.image_staging = path_prefix.with_suffix(".img")
 
-        if self.autosetup and (not self.image.exists() or self.force):
-            with stdout_to_stderr():
-                self.setup()
+        if self.autosetup or self.force:
+
+            self.settings.archive_directory.mkdir(parents=True, exist_ok=True)
+            self.settings.image_directory.mkdir(parents=True, exist_ok=True)
+
+            if self.image.exists():
+                self.discover()
+            else:
+                with stdout_to_stderr():
+                    self.setup()
 
     def setup(self):
         """
@@ -58,15 +78,95 @@ class ImageProvider:
         logger.info(f"Provisioning container image {self.distribution.fullname}")
         logger.info(f"Using distribution {self.distribution}")
         logger.info(f"Installing image at {self.image}")
-        try:
-            self.prepare_systemd()
-        except ValueError as ex:
-            logger.warning(ex)
-            return
-
+        self.acquire()
         self.activate_image()
 
-    def prepare_systemd(self):
+    def acquire(self):
+        """
+        Acquire an operating system image from the network.
+        """
+
+        image_uri = furl(self.distribution.image)
+        if image_uri.scheme in ["http", "https"]:
+            outcome = None
+        elif image_uri.scheme == "docker":
+            outcome = self.acquire_from_docker()
+        else:
+            # TODO: Introduce appropriate exception classes.
+            raise KeyError(f"Unsupported scheme for image {self.distribution.image}")
+
+        self.discover()
+
+        if outcome == ImageAcquisitionOutcome.DOWLOADED_NEWER:
+            logger.info(f"Status: Downloaded newer image for {self.distribution.fullname}")
+        elif outcome == ImageAcquisitionOutcome.UP_TO_DATE:
+            logger.info(f"Status: Image is up to date for {self.distribution.fullname}")
+
+        self.provision_systemd()
+
+    def discover(self):
+
+        # Skip discovery if already qualified.
+        if self.distribution.family and self.distribution.name:
+            return
+
+        rootfs = find_rootfs(self.image_staging)
+
+        logger.info(f"Discovering operating system from {rootfs}")
+
+        # Read `/etc/os-release` file from OS root directory in order to determine operating system.
+        try:
+            process = scmd(directory=rootfs, command="/bin/cat /etc/os-release", passthrough=False, capture=True)
+            os_release = process.stdout
+        except subprocess.CalledProcessError:
+            raise
+        except Exception:
+            logger.exception(f"Reading /etc/os-release failed")
+            # TODO: Introduce appropriate exception classes.
+            raise ValueError(
+                f"Container {self.distribution.fullname} at directory {rootfs} "
+                f"lacks an operating system (os-release file is missing)."
+            )
+
+        # Check if systemd is present in the OS root directory.
+        self.check_systemd()
+
+        # Determine operating system by reading `/etc/os-release` file.
+        for os_name, os_type in OS_RELEASE_NAME_MAP.items():
+            if os_name in os_release:
+                self.distribution.family = os_type.family
+                self.distribution.name = os_type.name
+
+        logger.info(f"Discovered operating system family={self.distribution.family}, name={self.distribution.name}")
+
+    def check_systemd(self) -> bool:
+        """
+        Check whether `systemd` or another `init` program is present in the OS root directory.
+
+        When `systemd-nspawn` would encounter an OS root directory without an appropriate program, it would croak like:
+        execv(/usr/lib/systemd/systemd, /lib/systemd/systemd, /sbin/init) failed: No such file or directory
+        """
+
+        self.has_systemd = False
+
+        rootfs = find_rootfs(self.image_staging)
+        init_candidates = ["usr/lib/systemd/systemd", "lib/systemd/systemd", "sbin/init"]
+        for candidate in init_candidates:
+            if (rootfs / candidate).exists():
+                self.has_systemd = True
+                logger.info(f"Init program {rootfs / candidate} found")
+                break
+
+        return self.has_systemd
+
+    def provision_systemd(self):
+        """
+        Install systemd within the OS root directory in order to make the machine bootable.
+        """
+
+        if self.has_systemd:
+            logger.info("Skipping systemd installation")
+            return
 
         if self.distribution.name == OperatingSystemName.DEBIAN:
             self.setup_debian()
@@ -78,10 +178,13 @@ class ImageProvider:
             self.setup_redhat()
         elif self.distribution.family == OperatingSystemFamily.SUSE:
             self.setup_suse()
-        elif self.distribution.name == OperatingSystemName.ARCHLINUX:
+        elif self.distribution.family == OperatingSystemFamily.ARCHLINUX:
             self.setup_archlinux()
         else:
-            raise ValueError(f"Unsupported operating system: {self.distribution}")
+            # TODO: Introduce appropriate exception classes.
+            raise KeyError(f"Unsupported operating system: {self.distribution}")
+
+        self.check_systemd()
 
     def setup_debian(self):
         """
@@ -89,15 +192,13 @@ class ImageProvider:
         by installing systemd.
         """
 
-        # Acquire image.
-        self.acquire_from_docker()
         rootfs = find_rootfs(self.image_staging)
 
         # Prepare image by installing systemd and additional packages.
         scmd(
             directory=rootfs,
             command=f"sh -c 'export DEBIAN_FRONTEND=noninteractive; "
-                    f"apt-get update; apt-get install --yes systemd {' '.join(self.ADDITIONAL_PACKAGES)}'",
+            f"apt-get update; apt-get install --yes systemd {' '.join(self.ADDITIONAL_PACKAGES)}'",
         )
 
     def setup_ubuntu(self):
@@ -111,6 +212,9 @@ class ImageProvider:
         - https://askubuntu.com/questions/1090631/start-job-is-running-for-wait-for-network-to-be-configured-ubuntu-server-18-04
         - https://github.com/systemd/systemd/issues/12313
         """
+
+        if self.is_docker:
+            return self.setup_debian()
 
         download_directory = self.settings.download_directory
 
@@ -131,7 +235,7 @@ class ImageProvider:
         scmd(
             directory=rootfs,
             command=f"sh -c 'export DEBIAN_FRONTEND=noninteractive; "
-                    f"apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES)}'",
+            f"apt-get update; apt-get install --yes {' '.join(self.ADDITIONAL_PACKAGES)}'",
         )
 
         # Prepare image by deactivating services which are hogging the bootstrapping.
@@ -147,8 +251,6 @@ class ImageProvider:
         It works the same for all Red Hat based systems like Fedora, CentOS, Rocky Linux and Oracle Linux.
         """
 
-        # Acquire image.
-        self.acquire_from_docker()
         rootfs = find_rootfs(self.image_staging)
 
         # Prepare image by installing systemd and additional packages.
@@ -159,8 +261,6 @@ class ImageProvider:
         openSUSE images are acquired from Docker Hub.
         """
 
-        # Acquire image.
-        self.acquire_from_docker()
         rootfs = find_rootfs(self.image_staging)
 
         # Prepare image by installing systemd and additional packages.
@@ -172,8 +272,6 @@ class ImageProvider:
         CentOS images are acquired from Docker Hub.
         """
 
-        # Acquire image.
-        self.acquire_from_docker()
         rootfs = find_rootfs(self.image_staging)
 
         # Fix CentOS 7 by upgrading systemd.
@@ -196,8 +294,6 @@ class ImageProvider:
         Arch Linux images are acquired from Docker Hub.
         """
 
-        # Acquire image.
-        self.acquire_from_docker()
         rootfs = find_rootfs(self.image_staging)
 
         # Prepare image by installing systemd and additional packages.
@@ -227,6 +323,7 @@ class ImageProvider:
         try:
             systemd_version_installed = int(response.splitlines()[0].split(" ", maxsplit=2)[1].split("-")[0])
         except:
+            # TODO: Introduce appropriate exception classes.
             raise ValueError(f"Unable to decode systemd version from:\n{response}")
         if systemd_version_installed >= systemd_version_minimal:
             logger.info(
@@ -292,12 +389,14 @@ class ImageProvider:
         started by systemd-nspawn, we use `skopeo` and `umoci`. As an
         intermediary step, an OCI Filesystem Bundle is created.
 
-        TODO: Patches for improvement are very welcome.
+        TODO: Patches for improvements are very welcome.
 
         - https://github.com/containers/skopeo
         - https://github.com/opencontainers/umoci
         - https://github.com/opencontainers/runtime-spec/blob/main/bundle.md
         """
+
+        self.is_docker = True
 
         # When forces are applied, start from scratch by removing
         # all established download artefacts.
@@ -308,21 +407,26 @@ class ImageProvider:
         # FIXME: Detect if tag is given.
         oci_tag = "default"
 
-        # Adjust source image URI.
-        distribution_image = self.distribution.image
-        if not distribution_image.startswith("docker://"):
-            distribution_image = "docker://" + distribution_image
-
         # Download and extract image.
+        outcome = ImageAcquisitionOutcome.UP_TO_DATE
         if not self.oci_path.exists() or not (self.oci_path / "index.json").exists():
-            hcmd(
-                f"skopeo copy --override-os=linux {distribution_image} oci:{self.oci_path}:{oci_tag}"
-            )
-        if not self.image_staging.exists() or is_dir_empty(self.image_staging) or is_dir_empty(self.image_staging / "rootfs"):
+            hcmd(f"skopeo copy --override-os=linux {self.distribution.image} oci:{self.oci_path}:{oci_tag}")
+            outcome = ImageAcquisitionOutcome.DOWLOADED_NEWER
+        if (
+            not self.image_staging.exists()
+            or is_dir_empty(self.image_staging)
+            or is_dir_empty(self.image_staging / "rootfs")
+        ):
             hcmd(f"umoci unpack --rootless --image={self.oci_path}:{oci_tag} {self.image_staging}")
+            outcome = ImageAcquisitionOutcome.DOWLOADED_NEWER
+
+        return outcome
 
     @property
-    def image(self):
+    def image(self) -> Path:
+        """
+        Return path to image directory.
+        """
         return self.settings.image_directory / self.distribution.fullname
 
     def activate_image(self):
@@ -335,4 +439,14 @@ class ImageProvider:
             target_path.symlink_to(self.image_staging, target_is_directory=True)
             return target_path
         else:
+            # TODO: Introduce appropriate exception classes.
             raise ValueError(f"Unable to activate image at {self.image_staging}")
+
+
+class ImageAcquisitionOutcome(enum.Enum):
+    """
+    Bundle the outcome from an image acquisition operation.
+    """
+
+    DOWLOADED_NEWER = enum.auto()
+    UP_TO_DATE = enum.auto()

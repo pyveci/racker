@@ -79,6 +79,8 @@ setup(
         "click>=7,<9",
         "furl>=2,<3",
         "subprocess-tee>=0.3,<1",
+        "python-slugify>=6,<7",
+        "tld>=0.10,<1",
     ],
     extras_require={
         "test": [

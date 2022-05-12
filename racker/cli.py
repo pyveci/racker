@@ -8,10 +8,12 @@ from contextlib import redirect_stderr, redirect_stdout
 
 import click
 
+from postroj.api import pull_curated_image
 from postroj.container import PostrojContainer
 from postroj.image import ImageProvider
 from postroj.registry import find_distribution
 from postroj.util import boot, subprocess_get_error_message
+from racker.image import ImageLibrary
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +40,8 @@ def racker_pull(ctx, name: str):
     docker.io/library/redis
     ghcr.io/jpmens/mqttwarn-full:nightly
     """
-    raise NotImplementedError("Hm?")
+    library = ImageLibrary()
+    library.acquire(name)
 
 
 @click.command()
@@ -82,24 +85,34 @@ def racker_run(ctx, interactive: bool, tty: bool, rm: bool, image: str, command:
     if interactive or tty:
         use_pty = True
 
-    # Figure out the image from the list of available ones.
     # TODO: Add more advanced image registry, maybe using `docker-py`,
     #       resolving image names from postroj-internal images, Docker Hub,
     #       GHCR, etc.
-    dist = find_distribution(image)
-
-    # Status reporting.
-    logger.info(f"Invoking command '{command}' on {dist}")
-
-    # Acquire rootfs filesystem image.
     try:
-        ip = ImageProvider(distribution=dist)
-        rootfs = ip.image
+        rootfs = None
+        try:
+            rootfs = pull_curated_image(image)
+        except ValueError as ex:
+            if "Unknown image label" not in str(ex):
+                raise
+
+        if rootfs is None:
+            library = ImageLibrary()
+            rootfs = library.acquire(image)
+
     except subprocess.CalledProcessError as ex:
         message = subprocess_get_error_message(exception=ex)
         logger.critical(f"Acquiring filesystem image failed. {message}")
         # subprocess_forward_stderr_stdout(exception=ex)
         raise SystemExit(ex.returncode)
+
+    except KeyError as ex:
+        message = str(ex.args[0])
+        logger.critical(f"Acquiring filesystem image failed. {message}")
+        raise SystemExit(1)
+
+    # Status reporting.
+    logger.info(f"Invoking command '{command}' on {rootfs}")
 
     # TODO: Combine verbose + capturing by employing some Tee-like multiplexing.
     # TODO: After killing most of the code in `util.cmd`, this might be able to go away as well?
