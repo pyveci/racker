@@ -64,15 +64,16 @@ Purpose: Invoke programs within a Windows/Java/OpenJDK environment.
         --command="gradlew :server:test -Dtests.crate.run-windows-incompatible=false"
 
 
-***************
-Troubleshooting
-***************
+********
+Failures
+********
 
-CrateDB on openSUSE fails
-=========================
 
-A: Workaround applied by running ``rpm --install --nodeps``.
-TODO: Maybe adjust the RPM dependencies?
+Using the CrateDB RPM package on openSUSE
+=========================================
+
+| A: Workaround applied by running ``rpm --install --nodeps``.
+| TODO: Maybe adjust the RPM dependencies?
 
 ::
 
@@ -94,3 +95,17 @@ TODO: Maybe adjust the RPM dependencies?
     error: Failed dependencies:
         shadow-utils is needed by crate-4.7.2-1.x86_64
         systemd-units is needed by crate-4.7.2-1.x86_64
+
+
+Spawning a container from the CrateDB Docker image
+==================================================
+
+::
+
+    racker run -it --rm crate/crate:nightly bash
+
+::
+
+    Failed to start transient service unit: Cannot set property AddRef, or unknown property.
+
+=> systemd too old.
