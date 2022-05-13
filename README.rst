@@ -52,28 +52,68 @@ Racker
 About
 *****
 
-An experimental harness tool based on `systemd-nspawn`_  containers, in the
-spirit to address some details of `Docker Considered Harmful`_.
-At the same time, a tribute to the authors and contributors of GNU, Linux,
-systemd, VirtualBox, Vagrant, Docker, Python and more.
+An experimental harness tool based on `systemd`_ and `systemd-nspawn`_, to run
+OS containers, in the spirit of addressing some details of `Docker Considered
+Harmful`_.
+
+At the same time, it is a tribute to the authors and contributors of GNU, Linux,
+systemd, Python, VirtualBox, Vagrant, Docker, and more.
+
+Most people running Linux probably want to use `Podman`_ these days. For more
+background, enjoy reading `Container wars`_ and `Container Tools Guide`_.
 
 Racker is ...
 
 - A runtime harness for testing software packages and similar purposes, in
-  different environments, mostly run headless and non-interactive.
+  different environments, mostly run headless and non-interactively.
 
-- A lightweight wrapper around ``systemd-nspawn`` to provide container
-  environments with ``systemd``.
+- A lightweight wrapper around ``systemd-nspawn`` to provide and launch
+  container environments for/with ``systemd``.
 
 - A lightweight wrapper around ``vagrant`` to provide convenient access to all
   things needing a full VM, like running Windows on Linux or macOS.
 
 
-**********
-Background
-**********
 
-Lennart Poettering identifies three pillars of containers [1]:
+************
+Introduction
+************
+
+As a general introduction, we recommend to read an introductory article on LWN
+as well as two installments of the `systemd for administrators`_ blog series:
+
+- `Creating containers with systemd-nspawn`_
+
+    - Lennart Poettering spoke about a mostly unknown utility that ships with it:
+      systemd-nspawn. The tool started as a debugging aid for systemd development,
+      but has many more uses than just that, he said. [...]
+    - The idea was to write a tool that does much of what LXC and libvirt LXC do,
+      but is easier to use. It is targeted at "building, testing, debugging, and
+      profiling", not at deployment. systemd-nspawn uses the same kernel APIs that
+      the other two tools use, but is not a competitor to them because it is not
+      targeted at running in a production environment. [...]
+
+- `Changing Roots`_
+
+    - As administrator or developer sooner or later you'll encounter
+      ``chroot()`` environments. [...]
+    - File system namespaces are in fact a better replacement for ``chroot()``
+      in many many ways. [...]
+    - More importantly however systemd comes out-of-the-box with the
+      ``systemd-nspawn`` tool which acts as ``chroot`` on steroids: it makes
+      use of file system and PID namespaces to boot a simple lightweight
+      container on a file system tree. [...]
+
+- `OS containers`_
+
+    - We'll focus on OS containers here, i.e. the case where an init system
+      runs inside the container, and the container hence in most ways appears
+      like an independent system of its own. [...]
+    - We use systemd-nspawn extensively when developing systemd. [...]
+
+
+Lennart Poettering, the author of `systemd`_, identifies three main pillars of
+containers [1]:
 
 - Resource bundling
 - Sandboxing
@@ -117,7 +157,7 @@ Install Racker::
     source .venv/bin/activate
     pip install racker --upgrade
 
-When needing to run the latest development version, use this command instead::
+To install the latest development version, use this command instead::
 
     pip install git+https://github.com/cicerops/racker --upgrade
 
@@ -133,11 +173,19 @@ When needing to run the latest development version, use this command instead::
 Usage
 *****
 
-Racker commands::
+
+Racker
+======
+
+The ``racker`` program aims to resemble the semantics of Docker by providing a
+command line interface compatible with the ``docker`` command.
+
+::
 
     # Invoke the vanilla Docker `hello-world` image.
     # FIXME: Does not work yet.
     # racker run -it --rm hello-world
+    # racker run -it --rm quay.io/podman/hello
 
     # Acquire rootfs images.
     racker pull debian:bullseye-slim
@@ -161,7 +209,22 @@ Racker commands::
     time echo "hello world" | racker run -it --rm fedora:37 cat /dev/stdin > hello
     cat hello
 
-Postroj commands::
+
+Postroj
+=======
+
+The idea behind ``postroj`` is to provide an entrypoint to a command line
+interface implementing actions that don't fit into ``racker``, mostly having a
+more high-level character.
+
+Currently, ``postroj pkgprobe`` implements a flavor of *full system
+integration/acceptance testing* in order to test the soundness of actual
+installed binary distribution packages, in the spirit of `autopkgtest`_.
+
+To do so, it implements the concept of *curated* operating system images,
+whose labels have a different layout than labels of Docker filesystem images.
+
+Getting started::
 
     # List available images.
     postroj list-images
@@ -312,18 +375,27 @@ Troubleshooting
    When in doubt, please add ``nameserver 9.9.9.9`` as the first entry.
 
 
-.. _machinectl: https://www.freedesktop.org/software/systemd/man/machinectl.html
-.. _systemd-nspawn: https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html
-.. _systemd-run: https://www.freedesktop.org/software/systemd/man/systemd-run.html
-
+.. _autopkgtest: https://www.freedesktop.org/wiki/Software/systemd/autopkgtest/
+.. _Changing Roots: http://0pointer.de/blog/projects/changing-roots.html
+.. _Container Tools Guide: https://github.com/containers/buildah/tree/main/docs/containertools
+.. _Container wars: https://github.com/cicerops/racker/blob/main/doc/research/container-wars.rst
+.. _Creating containers with systemd-nspawn: https://lwn.net/Articles/572957/
 .. _Docker Considered Harmful: https://catern.com/docker.html
-.. _machinectl pull-dkr: https://github.com/cicerops/racker/blob/main/doc/machinectl-pull-dkr.rst
+.. _machinectl pull-dkr: https://github.com/cicerops/racker/blob/main/doc/research/machinectl-pull-dkr.rst
+.. _OS containers: http://0pointer.net/blog/systemd-for-administrators-part-xxi.html
+.. _Podman: https://podman.io/
 .. _Racker sandbox installation: https://github.com/cicerops/racker/blob/main/doc/sandbox.rst
-.. _skopeo: https://github.com/containers/skopeo
 .. _Running containers with systemd-nspawn: https://janma.tk/2019-10-13/systemd-nspawn/
+.. _skopeo: https://github.com/containers/skopeo
+.. _systemd: https://www.freedesktop.org/wiki/Software/systemd/
+.. _systemd for administrators: https://www.freedesktop.org/wiki/Software/systemd/#thesystemdforadministratorsblogseries
 .. _umoci: https://github.com/opencontainers/umoci
 
 .. _Containers without a Container Manager, with systemd: https://invidious.fdn.fr/watch?v=sqhojVPr7xM
-.. _Systemd-Nspawn is Chroot on Steroids: https://invidious.fdn.fr/watch?v=s7LlUs5D9p4
 .. _Lennart Poettering und Kay Sievers über Systemd: https://invidious.fdn.fr/watch?v=6Q_iTG6_EF4
 .. _NYLUG Presents - Lennart Poettering on Systemd in 2018: https://invidious.fdn.fr/watch?v=_obJr3a_2G8
+.. _Systemd-Nspawn is Chroot on Steroids: https://invidious.fdn.fr/watch?v=s7LlUs5D9p4
+
+.. _machinectl: https://www.freedesktop.org/software/systemd/man/machinectl.html
+.. _systemd-nspawn: https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html
+.. _systemd-run: https://www.freedesktop.org/software/systemd/man/systemd-run.html

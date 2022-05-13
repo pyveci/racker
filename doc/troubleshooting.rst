@@ -182,3 +182,41 @@ Tracebacks on container teardown
       File "/usr/lib/python3.9/selectors.py", line 42, in _fileobj_to_fd
         raise ValueError("Invalid file descriptor: {}".format(fd))
     ValueError: Invalid file descriptor: -1
+
+
+***********************************
+SYSTEMD_COLORS environment variable
+***********************************
+
+Turning that off does not seem to work with `systemd-run` and::
+
+    Failed to start transient service unit: Path foo is not absolute.
+
+
+*******************
+systemd exit status
+*******************
+
+Assume exit status 203 from `systemd-run` means "file/command not found". True?
+
+
+*****************************
+No way to disable /etc/issue?
+*****************************
+
+It looks like the subsystem responsible for reading ``/etc/issue`` and displaying
+its content at the beginning of an interactive login session, will add a newline
+character even if the file is empty. It also looks like there is no obvious way
+to turn off this feature completely.
+
+- https://www.linuxquestions.org/questions/linux-newbie-8/disable-etc-issue-net-775967/
+- https://bugzilla.redhat.com/show_bug.cgi?id=1663812
+- https://unix.stackexchange.com/questions/107138/i-want-to-print-a-line-when-a-user-login
+- https://unix.stackexchange.com/questions/84280/is-etc-issue-common-for-all-linux-distributions
+- Use ``agetty``'s ``--noissue`` option?
+
+  - https://sleeplessbeastie.eu/2019/09/18/how-to-modify-system-identification-message/
+  - /usr/lib/systemd/system/console-getty.service
+  - /usr/lib/systemd/system/container-getty@.service
+  - /usr/lib/systemd/system/getty@.service
+  - /usr/lib/systemd/system/serial-getty@.service
