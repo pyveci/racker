@@ -119,6 +119,13 @@ class CuratedOperatingSystem(Enum):
         version="latest",
         image="docker://docker.io/opensuse/tumbleweed:latest",
     )
+    SLES_15 = LinuxDistribution(
+        family=OperatingSystemFamily.SUSE,
+        name=OperatingSystemName.SLES,
+        release="15",
+        version="15",
+        image="docker://registry.suse.com/suse/sle15",
+    )
     AMAZONLINUX_2022 = LinuxDistribution(
         family=OperatingSystemFamily.REDHAT,
         name=OperatingSystemName.AMAZONLINUX,
@@ -160,6 +167,7 @@ CURATED_OPERATING_SYSTEMS: List[Enum] = [
     CuratedOperatingSystem.FEDORA_37,
     CuratedOperatingSystem.OPENSUSE_LEAP,
     CuratedOperatingSystem.OPENSUSE_TUMBLEWEED,
+    CuratedOperatingSystem.SLES_15,
     # .rpm-based II
     CuratedOperatingSystem.CENTOS_7,
     CuratedOperatingSystem.CENTOS_8,
@@ -210,6 +218,10 @@ OS_RELEASE_NAME_MAP: Dict[str, OperatingSystemType] = {
     "openSUSE Tumbleweed": OperatingSystemType(
         family=OperatingSystemFamily.SUSE,
         name=OperatingSystemName.OPENSUSE,
+    ),
+    "SLES": OperatingSystemType(
+        family=OperatingSystemFamily.SUSE,
+        name=OperatingSystemName.SLES,
     ),
     "Arch Linux": OperatingSystemType(
         family=OperatingSystemFamily.ARCHLINUX,

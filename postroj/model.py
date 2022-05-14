@@ -32,6 +32,7 @@ class OperatingSystemName(Enum):
     ROCKYLINUX = "rockylinux"
     ARCHLINUX = "archlinux"
     OPENSUSE = "opensuse"
+    SLES = "sles"
     AMAZONLINUX = "amazonlinux"
     ORACLELINUX = "oraclelinux"
 

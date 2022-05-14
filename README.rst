@@ -199,7 +199,7 @@ command line interface compatible with the ``docker`` command.
     racker run -it --rm debian:11-slim hostnamectl
     racker run -it --rm opensuse/tumbleweed hostnamectl
     racker run -it --rm ubuntu:jammy /bin/cat /etc/os-release
-    racker run -it --rm registry.suse.com/bci/bci-base /bin/cat /etc/os-release
+    racker run -it --rm registry.suse.com/suse/sle15 /bin/cat /etc/os-release
     racker run -it --rm docker://ghcr.io/jpmens/mqttwarn-standard /usr/bin/hostnamectl
 
     # Verbose mode.
