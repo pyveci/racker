@@ -251,6 +251,11 @@ class ImageProvider:
         It works the same for all Red Hat based systems like Fedora, CentOS, Rocky Linux and Oracle Linux.
         """
 
+        # Unable to install packages on RHEL9/UBI9-beta.
+        # This system is not registered with an entitlement server.
+        if self.distribution.name == OperatingSystemName.RHEL and self.distribution.release == "9":
+            return
+
         rootfs = find_rootfs(self.image_staging)
 
         # Prepare image by installing systemd and additional packages.

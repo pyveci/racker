@@ -98,6 +98,20 @@ class CuratedOperatingSystem(Enum):
         version="8",
         image="docker://docker.io/centos:8",
     )
+    RHEL_8 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.RHEL,
+        release="8",
+        version="8",
+        image="docker://registry.access.redhat.com/ubi8/ubi",
+    )
+    RHEL_9 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.RHEL,
+        release="9",
+        version="9",
+        image="docker://registry.access.redhat.com/ubi9-beta/ubi",
+    )
     ROCKYLINUX_8 = LinuxDistribution(
         family=OperatingSystemFamily.REDHAT,
         name=OperatingSystemName.ROCKYLINUX,
@@ -165,6 +179,8 @@ CURATED_OPERATING_SYSTEMS: List[Enum] = [
     CuratedOperatingSystem.FEDORA_35,
     CuratedOperatingSystem.FEDORA_36,
     CuratedOperatingSystem.FEDORA_37,
+    CuratedOperatingSystem.RHEL_8,
+    CuratedOperatingSystem.RHEL_9,
     CuratedOperatingSystem.OPENSUSE_LEAP,
     CuratedOperatingSystem.OPENSUSE_TUMBLEWEED,
     CuratedOperatingSystem.SLES_15,
@@ -202,6 +218,10 @@ OS_RELEASE_NAME_MAP: Dict[str, OperatingSystemType] = {
     "CentOS Linux": OperatingSystemType(
         family=OperatingSystemFamily.REDHAT,
         name=OperatingSystemName.CENTOS,
+    ),
+    "Red Hat Enterprise Linux": OperatingSystemType(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.RHEL,
     ),
     "Rocky Linux": OperatingSystemType(
         family=OperatingSystemFamily.REDHAT,

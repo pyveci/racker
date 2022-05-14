@@ -29,6 +29,7 @@ class OperatingSystemName(Enum):
     UBUNTU = "ubuntu"
     FEDORA = "fedora"
     CENTOS = "centos"
+    RHEL = "rhel"
     ROCKYLINUX = "rockylinux"
     ARCHLINUX = "archlinux"
     OPENSUSE = "opensuse"
