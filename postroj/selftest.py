@@ -187,9 +187,13 @@ def get_selftest_distributions():
     selected_systems.remove(CuratedOperatingSystem.FEDORA_35)
     selected_systems.remove(CuratedOperatingSystem.CENTOS_7)
 
+    # Mask RHEL9/UBI9 because it can not install packages.
+    selected_systems.remove(CuratedOperatingSystem.RHEL_9)
+
     # On demand, select only specific items.
     # selected_systems = [CuratedOperatingSystem.ARCHLINUX_20220501]
     # selected_systems = [CuratedOperatingSystem.OPENSUSE_TUMBLEWEED]
+    # selected_systems = [CuratedOperatingSystem.RHEL_9]
 
     selected_distributions = [system.value for system in selected_systems]
 
