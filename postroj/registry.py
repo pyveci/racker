@@ -98,6 +98,13 @@ class CuratedOperatingSystem(Enum):
         version="8",
         image="docker://docker.io/centos:8",
     )
+    CENTOS_9 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.CENTOS,
+        release="9",
+        version="9",
+        image="docker://quay.io/centos/centos:stream9",
+    )
     RHEL_8 = LinuxDistribution(
         family=OperatingSystemFamily.REDHAT,
         name=OperatingSystemName.RHEL,
@@ -187,6 +194,7 @@ CURATED_OPERATING_SYSTEMS: List[Enum] = [
     # .rpm-based II
     CuratedOperatingSystem.CENTOS_7,
     CuratedOperatingSystem.CENTOS_8,
+    CuratedOperatingSystem.CENTOS_9,
     CuratedOperatingSystem.ROCKYLINUX_8,
     CuratedOperatingSystem.AMAZONLINUX_2022,
     CuratedOperatingSystem.ORACLELINUX_8,
@@ -216,6 +224,10 @@ OS_RELEASE_NAME_MAP: Dict[str, OperatingSystemType] = {
         name=OperatingSystemName.FEDORA,
     ),
     "CentOS Linux": OperatingSystemType(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.CENTOS,
+    ),
+    "CentOS Stream": OperatingSystemType(
         family=OperatingSystemFamily.REDHAT,
         name=OperatingSystemName.CENTOS,
     ),
