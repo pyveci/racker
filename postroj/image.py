@@ -259,7 +259,7 @@ class ImageProvider:
         rootfs = find_rootfs(self.image_staging)
 
         # Prepare image by installing systemd and additional packages.
-        scmd(directory=rootfs, command=f"dnf install -y systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
+        scmd(directory=rootfs, command=f"dnf install -y --skip-broken systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
 
     def setup_suse(self):
         """
@@ -278,6 +278,9 @@ class ImageProvider:
         """
 
         rootfs = find_rootfs(self.image_staging)
+
+        if self.distribution.name == OperatingSystemName.CENTOS and self.distribution.release == "9":
+            return self.setup_redhat()
 
         # Fix CentOS 7 by upgrading systemd.
         self.upgrade_systemd(rootfs)
