@@ -258,8 +258,25 @@ class ImageProvider:
 
         rootfs = find_rootfs(self.image_staging)
 
+        has_dnf = False
+        has_microdnf = False
+        try:
+            scmd(directory=rootfs, command=f"command -v dnf")
+            has_dnf = True
+        except:
+            try:
+                scmd(directory=rootfs, command=f"command -v microdnf")
+                has_microdnf = True
+            except:
+                raise
+
         # Prepare image by installing systemd and additional packages.
-        scmd(directory=rootfs, command=f"dnf install -y --skip-broken systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
+        if has_dnf:
+            scmd(directory=rootfs, command=f"dnf install -y --skip-broken systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
+        elif has_microdnf:
+            scmd(directory=rootfs, command=f"microdnf install -y systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
+        else:
+            raise ValueError(f"Unable to install packages")
 
     def setup_suse(self):
         """

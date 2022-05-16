@@ -194,6 +194,8 @@ command line interface compatible with the ``docker`` command.
     # Launch an interactive shell.
     racker run -it --rm debian:bullseye-slim bash
     racker run -it --rm fedora:37 bash
+    racker run -it --rm docker://registry.access.redhat.com/ubi8/ubi-minimal /bin/bash
+    racker run -it --rm docker://quay.io/centos/centos:stream9 bash
 
     # Launch a single command.
     racker run -it --rm debian:11-slim hostnamectl

@@ -13,6 +13,7 @@ in progress
 - Add test case for ``postroj pkgprobe``
 - Improve image subsystem to acquire arbitrary Docker filesystem images
 - Add operating system support for SLES, RHEL, CentOS 9
+- Add operating system support for RHEL UBI's "minimal" flavors
 
 
 2022-05-08 0.1.0
