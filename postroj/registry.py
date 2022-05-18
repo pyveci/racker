@@ -147,6 +147,13 @@ class CuratedOperatingSystem(Enum):
         version="15",
         image="docker://registry.suse.com/suse/sle15",
     )
+    SLES_BCI = LinuxDistribution(
+        family=OperatingSystemFamily.SUSE,
+        name=OperatingSystemName.SLES,
+        release="bci",
+        version="latest",
+        image="docker://registry.suse.com/bci/bci-base:latest",
+    )
     AMAZONLINUX_2022 = LinuxDistribution(
         family=OperatingSystemFamily.REDHAT,
         name=OperatingSystemName.AMAZONLINUX,
@@ -191,6 +198,7 @@ CURATED_OPERATING_SYSTEMS: List[Enum] = [
     CuratedOperatingSystem.OPENSUSE_LEAP,
     CuratedOperatingSystem.OPENSUSE_TUMBLEWEED,
     CuratedOperatingSystem.SLES_15,
+    CuratedOperatingSystem.SLES_BCI,
     # .rpm-based II
     CuratedOperatingSystem.CENTOS_7,
     CuratedOperatingSystem.CENTOS_8,
