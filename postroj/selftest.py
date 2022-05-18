@@ -195,6 +195,7 @@ def get_selftest_distributions():
     # selected_systems = [CuratedOperatingSystem.OPENSUSE_TUMBLEWEED]
     # selected_systems = [CuratedOperatingSystem.RHEL_9]
     # selected_systems = [CuratedOperatingSystem.CENTOS_9]
+    # selected_systems = [CuratedOperatingSystem.SLES_BCI]
 
     selected_distributions = [system.value for system in selected_systems]
 
