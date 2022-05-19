@@ -17,6 +17,12 @@ xfail_strict = true
 markers = [
 ]
 
+[tool.coverage.run]
+omit = [
+    "testing/*",
+    "postroj/winrunner.py",
+]
+
 [tool.coverage.report]
 fail_under = 0
 show_missing = true

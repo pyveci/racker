@@ -49,6 +49,13 @@ class DynamicDistribution(LinuxDistribution):
         return self.fullname
 
     @classmethod
+    def empty(cls):
+        """
+        Factory method to create an empty instance.
+        """
+        return cls(family=None, name="None", release="None", version=None, image=None)
+
+    @classmethod
     def from_image(cls, image: str):
         """
         Factory method to create a shim instance, only carrying the Docker image name forward.
