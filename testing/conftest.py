@@ -3,12 +3,15 @@
 import time
 from pathlib import Path
 from typing import Generator
+from unittest.mock import patch
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
 import postroj.model
 import postroj.settings
+from postroj.image import ImageProvider
+from racker.babelfish import DynamicDistribution
 
 
 @pytest.fixture(scope="session")
@@ -45,3 +48,42 @@ def delay():
     FIXME: Can be removed after proper "wait-for-teardown" has been implemented.
     """
     time.sleep(0.25)
+
+
+@pytest.fixture
+def fakeroot(tmpdir):
+    path = Path(tmpdir)
+    (path / "etc").mkdir()
+    (path / "etc" / "os-release").touch()
+    return path
+
+
+@pytest.fixture
+def fakeimage(fakeroot):
+    distribution = DynamicDistribution.from_image("foo")
+    ip = ImageProvider(distribution=distribution, autosetup=False)
+    ip.image_staging = fakeroot
+    return ip
+
+
+@pytest.fixture
+def scmd_mock():
+    with patch("postroj.image.scmd") as scmd:
+        yield scmd
+
+
+@pytest.fixture
+def scmd_first_command(scmd_mock):
+    def invoke():
+        scmd_mock.assert_called_once()
+        kwargs = scmd_mock.call_args[1]
+        command = kwargs["command"]
+        return command
+
+    return invoke
+
+
+@pytest.fixture
+def hcmd_mock():
+    with patch("postroj.image.hcmd") as hcmd:
+        yield hcmd
