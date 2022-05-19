@@ -30,7 +30,7 @@ Iteration 2
 - [x] Provide more advanced and generic image (label) resolution.
   From docker.io, ghcr.io, registry.access.redhat.com, etc.
 - [x] Improve documentation
-- [o] Is it possible to run RHEL and SLES?
+- [x] Is it possible to run RHEL and SLES?
 
   - registry.access.redhat.com/rhel7/rhel
   - registry.suse.com/bci/bci-base
@@ -50,10 +50,10 @@ Iteration 3
 
 - [o] Address issues in ``bugs.rst``
 
-- [o] Invoke arbitrary Docker containers, even when they don't contain an OS tree.
+- [o] Invoke arbitrary Docker containers, even when they don't contain an OS root directory.
 
   - Directory ``/var/lib/postroj/archive/hello-world.img/rootfs`` doesn't look like an OS root directory (os-release file is missing). Refusing.
-  - Directory ``/var/lib/postroj/archive/hello-world.img/rootfs`` doesn't look like it has an OS tree. Refusing.
+  - Directory ``/var/lib/postroj/archive/hello-world.img/rootfs`` doesn't look like it has an OS root directory. Refusing.
   - ``unshare --fork --pid --mount-proc --root=/var/lib/postroj/images/hello-world ./hello``
 
 - [o] Use/integrate with ``mkosi``.
@@ -68,7 +68,9 @@ Iteration 3
 - [o] Tests: ``racker pull foo``. Also remove ``/var/lib/postroj/archive/foo`` again.
 - [o] No ``--boot`` / No ``umoci``?
 - [o] Introduce ``postroj pull-dkr``
-
+- [o] ``racker --verbose run -it --rm https://cloud-images.ubuntu.com/minimal/daily/focal/current/focal-minimal-cloudimg-amd64-root.tar.xz /bin/bash``
+- [o] TODO: Introduce appropriate exception classes.
+- [o] Maybe use ``ubi8/ubi-init`` instead of ``ubi8/ubi``?
 
 
 ***********
@@ -114,12 +116,7 @@ Iteration 4
     - https://fntlnz.wtf/post/systemd-nspawn/
   - Test on common Docker Compose configurations
     - https://github.com/bcremer/docker-telegraf-influx-grafana-stack
-- [o] Q: Can Alpine Linux be used?
-  A: Not out of the box, because Alpine Linux uses the OpenRC init system. Maybe ``alpine-systemd`` helps?
-  - https://www.cyberciti.biz/faq/how-to-enable-and-start-services-on-alpine-linux/
-  - https://news.ycombinator.com/item?id=19375234
-  - https://github.com/bryanlatten/alpine-systemd
-  - https://www.client9.com/article/docker-and-alpine-linux-and-systemd/
+
 - [o] Improve HTTP probe request/response handling and verification.
   Q: Would it be possible to implement it completely in Python?
   E: Grafana responds with ``302 Found``, ``Location: /login``.
@@ -239,6 +236,6 @@ Ideas
 - Provide web-based log tail like GHA and others, or even full access to the system.
   - wtee -- https://github.com/gvalkov/wtee
   - frontail -- https://github.com/mthenw/frontail
-  - GoTTY -- https://github.com/yudai/gotty
+  - GoTTY -- https://github.com/yudai/gotty; https://jpmens.net/2022/05/03/one-gotty-per-user/
 - Rebundle multiple microservice containers into groups, which are hosted on
   single OS containers.

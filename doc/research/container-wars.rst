@@ -142,6 +142,29 @@ systemd mode
 Podman containers as systemd services
 =====================================
 - https://www.redhat.com/sysadmin/podman-shareable-systemd-services
+- https://mohitgoyal.co/2021/06/01/running-containers-as-systemd-services-with-podman/
+
+
+Podman and Compose
+==================
+- https://compose-spec.io/
+- https://github.com/compose-spec/compose-spec/blob/master/spec.md
+- https://github.com/containers/podman-compose
+- https://www.redhat.com/sysadmin/podman-docker-compose
+- https://www.redhat.com/sysadmin/compose-podman-pods
+- https://fedoramagazine.org/manage-containers-with-podman-compose/
+- https://fedoramagazine.org/use-docker-compose-with-podman-to-orchestrate-containers-on-fedora/
+- https://balagetech.com/convert-docker-compose-services-to-pods/
+- https://github.com/containers/podman/issues/9169
+
+
+Rootless
+========
+- https://www.redhat.com/sysadmin/rootless-podman-makes-sense
+- https://www.redhat.com/sysadmin/rootless-podman
+- https://www.redhat.com/sysadmin/behind-scenes-podman
+- https://www.redhat.com/sysadmin/user-flag-rootless-containers
+- https://www.redhat.com/sysadmin/user-namespaces-selinux-rootless-containers
 
 
 References
@@ -155,6 +178,13 @@ References
 - https://wiki.debian.org/Podman
 - https://github.com/containers/podman/issues/8452
 - https://documentation.suse.com/sle-micro/5.1/html/SLE-Micro-all/article-podman.html
+- https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/building_running_and_managing_containers/index
+- https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9-beta/html-single/building_running_and_managing_containers/index
+- https://www.redhat.com/sysadmin/improved-systemd-podman
+- https://docs.podman.io/en/latest/markdown/podman-auto-update.1.html
+- https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/building_running_and_managing_containers/assembly_porting-containers-to-systemd-using-podman_building-running-and-managing-containers
+- https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods
+- https://developers.redhat.com/blog/2019/02/21/podman-and-buildah-for-docker-users
 
 
 *******
@@ -185,6 +215,34 @@ systemd-nspawn
 
 - https://unix.stackexchange.com/questions/180161/why-is-systemd-nspawn-not-appropriate-for-production-deployments
 
+
+********************************
+OCI-compatible container engines
+********************************
+
+
+runc
+====
+- https://github.com/opencontainers/runc
+
+
+crun
+====
+- https://github.com/containers/crun
+- https://www.redhat.com/sysadmin/introduction-crun
+
+
+RHEL
+====
+
+    The default container runtime in RHEL 8 is runc. The default container runtime in RHEL 9 is crun.
+
+    -- https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9-beta/html/considerations_in_adopting_rhel_9/assembly_containers_considerations-in-adopting-rhel-9
+
+Misc
+====
+
+- https://github.com/eth-cscs/sarus
 
 
 
