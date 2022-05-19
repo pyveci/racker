@@ -17,6 +17,7 @@ in progress
 - Add custom exception objects
 - Add more test cases to raise code coverage to >75%
 - Refactoring: Bundle ``systemd-nspawn``/``machinectl`` to ``postroj.backend.nspawn``
+- Refactoring: Move code from ``setup_ubuntu`` to generic ``acquire_from_http``
 
 
 2022-05-08 0.1.0

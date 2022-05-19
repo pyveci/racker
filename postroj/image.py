@@ -96,7 +96,7 @@ class ImageProvider:
         logger.info(f"Acquiring container image from {self.distribution.image}")
         image_uri = furl(self.distribution.image)
         if image_uri.scheme in ["http", "https"]:
-            outcome = None
+            outcome = self.acquire_from_http()
         elif image_uri.scheme == "docker":
             outcome = self.acquire_from_docker()
         else:
@@ -242,20 +242,7 @@ class ImageProvider:
         if self.is_docker:
             return self.setup_debian()
 
-        download_directory = self.settings.download_directory
-
-        # Acquire image.
-        image_tarball = download_directory / os.path.basename(self.distribution.image)
         rootfs = self.image_staging
-
-        if self.force:
-            shutil.rmtree(rootfs, ignore_errors=True)
-
-        hcmd(f"wget --continue --no-clobber --directory-prefix={download_directory} {self.distribution.image}")
-        if not rootfs.exists() or is_dir_empty(rootfs):
-            logger.info(f"Extracting rootfs from {image_tarball} to {rootfs}")
-            rootfs.mkdir(parents=True, exist_ok=True)
-            hcmd(f"tar --directory={rootfs} -xf {image_tarball}")
 
         # Prepare image by adding additional packages.
         scmd(
@@ -433,6 +420,31 @@ class ImageProvider:
 
         logger.info(f"Installing systemd version {systemd_version_minimal}")
         os.system(upgrade_systemd_command)
+
+    def acquire_from_http(self):
+        download_directory = self.settings.download_directory
+
+        # Acquire image.
+        image_tarball = download_directory / os.path.basename(self.distribution.image)
+        rootfs = self.image_staging
+
+        if self.force:
+            shutil.rmtree(rootfs, ignore_errors=True)
+
+        try:
+            hcmd(f"wget --continue --no-clobber --directory-prefix={download_directory} {self.distribution.image}")
+        except subprocess.CalledProcessError as ex:
+            raise InvalidImageReference(f"Unable to download image: {self.distribution.image}")
+
+        if not rootfs.exists() or is_dir_empty(rootfs):
+            logger.info(f"Extracting rootfs from {image_tarball} to {rootfs}")
+            rootfs.mkdir(parents=True, exist_ok=True)
+            hcmd(f"tar --directory={rootfs} -xf {image_tarball}")
+            outcome = ImageAcquisitionOutcome.DOWLOADED_NEWER
+        else:
+            outcome = ImageAcquisitionOutcome.UP_TO_DATE
+
+        return outcome
 
     def acquire_from_docker(self):
         """
