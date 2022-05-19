@@ -12,11 +12,12 @@ from typing import Union
 
 from furl import furl
 
+from postroj.backend.nspawn import scmd
 from postroj.exceptions import InvalidImageReference, InvalidPhysicalImage, OsReleaseFileMissing, ProvisioningError
 from postroj.model import ConfigurationOptions, LinuxDistribution, OperatingSystemFamily, OperatingSystemName
 from postroj.registry import OS_RELEASE_NAME_MAP
 from postroj.settings import get_appsettings
-from postroj.util import find_rootfs, hcmd, is_dir_empty, scmd, stdout_to_stderr, subprocess_get_error_message
+from postroj.util import find_rootfs, hcmd, is_dir_empty, stdout_to_stderr, subprocess_get_error_message
 
 logger = logging.getLogger(__name__)
 

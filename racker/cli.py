@@ -123,7 +123,7 @@ def racker_run(ctx, interactive: bool, tty: bool, rm: bool, image: str, command:
         stderr = io.StringIO()
 
     # Boot container and run command.
-    with PostrojContainer(rootfs=rootfs) as pc:
+    with PostrojContainer(image_path=rootfs) as pc:
         try:
             with redirect_stdout(stdout):
                 with redirect_stderr(stderr):

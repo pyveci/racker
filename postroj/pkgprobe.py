@@ -48,7 +48,7 @@ def main(ctx, image: str, package: str, check_unit: List[str], check_network: Li
         ctx = partial(redirect_stdout, io.StringIO())
 
     # Boot container and run probe commands.
-    with PostrojContainer(rootfs=rootfs) as pc:
+    with PostrojContainer(image_path=rootfs) as pc:
         with ctx():
             pc.boot()
             pc.wait()

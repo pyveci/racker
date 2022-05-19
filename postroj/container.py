@@ -7,50 +7,10 @@ import time
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
-import subprocess_tee
-
-from postroj.settings import appsettings
-from postroj.util import (
-    LongRunningProcess,
-    _SysExcInfoType,
-    ccmd,
-    find_rootfs,
-    fix_tty,
-    hcmd,
-    mask_logging,
-    noop,
-    print_header,
-)
+from postroj.settings import get_appsettings
+from postroj.util import find_rootfs, fix_tty, hcmd, mask_logging, noop, print_header
 
 logger = logging.getLogger(__name__)
-
-
-class NspawnLauncher(LongRunningProcess):
-    def __init__(self, container):
-        super(NspawnLauncher, self).__init__()
-        self.container: PostrojContainer = container
-
-    def abort_handler(self):
-        """
-        Propagate signal when machinery croaked while invoking the
-        `systemd-nspawn` process.
-
-        In this case, the teardown procedure will be skipped.
-        """
-        self.container.destroy_after_use = False
-
-    def error_handler(self, exc_info: _SysExcInfoType):
-        """
-        When machine already exists, modify exception from `CalledProcessError` to `RuntimeError`.
-        """
-        exc: subprocess_tee.CompletedProcess = exc_info[1]
-        stderr = exc.stderr.strip()
-        if "already exists" in stderr:
-            machine = self.container.machine
-            hint = f"Please run `machinectl terminate {machine}` and try again."
-            surrogate_exception = RuntimeError(f"Unable to spawn container {machine}. Reason: {stderr}. {hint}")
-            exc_info = (exc_info[0], surrogate_exception, exc_info[2])
-        return exc_info
 
 
 class PostrojContainer:
@@ -60,17 +20,20 @@ class PostrojContainer:
 
     WAIT_TIMEOUT_SECONDS = 15.0
 
-    def __init__(self, rootfs: Union[Path, str], machine: str = None):
+    def __init__(self, image_path: Union[Path, str], machine: str = None):
         """
         Initialize container wrapper infrastructure and machine name.
         """
 
         # The path to the rootfs filesystem image.
-        self.rootfs: Path = Path(rootfs)
+        self.image_path: Path = Path(image_path)
+        self.rootfs: Optional[Path] = None
+
+        self.settings = get_appsettings()
 
         # Augment the machine name.
         if machine is None:
-            machine = f"postroj-{os.path.basename(self.rootfs)}"
+            machine = f"postroj-{os.path.basename(self.image_path)}"
         self.machine: str = machine
 
         # Flag to suppress destroying the container on teardown.
@@ -78,7 +41,9 @@ class PostrojContainer:
         self.destroy_after_use: bool = True
 
         # Process wrapper for invoking `systemd-nspawn --boot`.
-        self.launcher: Optional[NspawnLauncher] = None
+        from postroj.backend.nspawn import NspawnBackend
+
+        self.backend: Optional[NspawnBackend] = None
 
     def boot(self):
         """
@@ -87,18 +52,18 @@ class PostrojContainer:
         to ensure reproducible actions.
         """
 
-        if not self.rootfs.exists():
-            raise Exception(f"Image not found: {self.rootfs}")
+        if not self.image_path.exists():
+            raise Exception(f"Image not found: {self.image_path}")
 
         # Prepare and announce cache directory.
-        cache_directory = appsettings.cache_directory
+        cache_directory = self.settings.cache_directory
         cache_directory.mkdir(parents=True, exist_ok=True)
         logger.info(f"Cache directory is {cache_directory}")
 
-        print_header(f"Spawning container {self.machine} with filesystem at {self.rootfs}")
+        print_header(f"Spawning container {self.machine} with filesystem at {self.image_path}")
 
         # Check if rootfs is nested.
-        rootfs_real = find_rootfs(self.rootfs)
+        self.rootfs = find_rootfs(self.image_path)
 
         """
         if not self.is_down():
@@ -107,24 +72,10 @@ class PostrojContainer:
             raise RuntimeError(f"Container {self.machine} already running. {hint}")
         """
 
-        # Define the command to spawn the container.
-        # TODO: Why does `--ephemeral` not work?
-        # TODO: Maybe use `--register=false`?
-        # TODO: What about `--notify-ready=true`?
-        command = f"""
-            /usr/bin/systemd-nspawn \
-                --quiet --boot --link-journal=try-guest \
-                --volatile=overlay \
-                --bind-ro=/etc/resolv.conf:/etc/resolv.conf \
-                --bind={cache_directory}:{cache_directory} \
-                --directory={rootfs_real} \
-                --machine={self.machine}
-        """.strip()
-        logger.info(f"Launch command is: {command}")
+        from postroj.backend.nspawn import NspawnBackend
 
-        self.launcher = NspawnLauncher(container=self)
-        self.launcher.start(command=command)
-        self.launcher.check()
+        self.backend = NspawnBackend(container=self)
+        self.backend.launch()
 
     def info(self):
         """
@@ -138,7 +89,7 @@ class PostrojContainer:
         """
         Run command on spawned container.
         """
-        return ccmd(self.machine, command, use_pty=use_pty, capture=capture)
+        return self.backend.run(self.machine, command, use_pty=use_pty, capture=capture)
 
     def terminate(self):
         """
@@ -157,7 +108,7 @@ class PostrojContainer:
             logger.info(f"Container {self.machine} not running, skipping termination")
             return
 
-        hcmd(f"/bin/machinectl terminate {self.machine}")
+        return self.backend.terminate()
 
     def is_down(self) -> bool:
         """
@@ -292,5 +243,5 @@ class PostrojContainer:
         else:
             logger.info("Skipping container destruction")
 
-        if self.launcher:
-            self.launcher.stop()
+        if self.backend:
+            self.backend.shutdown()

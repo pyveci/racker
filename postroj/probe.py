@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class ProbeBase:
     def __init__(self, container: PostrojContainer):
         self.container = container
-        self.container.rootfs = find_rootfs(self.container.rootfs)
+        self.container.rootfs = find_rootfs(self.container.image_path)
 
     @abstractmethod
     def invoke(self):
