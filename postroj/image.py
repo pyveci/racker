@@ -67,10 +67,10 @@ class ImageProvider:
         self.oci_path = path_prefix.with_suffix(".oci")
         self.image_staging = path_prefix.with_suffix(".img")
 
-        if self.autosetup or self.force:
+        self.settings.archive_directory.mkdir(parents=True, exist_ok=True)
+        self.settings.image_directory.mkdir(parents=True, exist_ok=True)
 
-            self.settings.archive_directory.mkdir(parents=True, exist_ok=True)
-            self.settings.image_directory.mkdir(parents=True, exist_ok=True)
+        if self.autosetup or self.force:
 
             if self.image.exists():
                 self.discover()
@@ -124,6 +124,7 @@ class ImageProvider:
 
         # Skip discovery if already qualified.
         if self.distribution.family and self.distribution.name:
+            self.has_operating_system = True
             logger.info(
                 f"Skipping operating system discovery, using distribution "
                 f"family={self.distribution.family}, name={self.distribution.name}"
