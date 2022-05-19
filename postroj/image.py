@@ -8,13 +8,15 @@ import subprocess
 from enum import Enum
 from pathlib import Path
 from textwrap import dedent, indent
+from typing import Union
 
 from furl import furl
 
+from postroj.exceptions import InvalidImageReference, InvalidPhysicalImage, OsReleaseFileMissing, ProvisioningError
 from postroj.model import ConfigurationOptions, LinuxDistribution, OperatingSystemFamily, OperatingSystemName
 from postroj.registry import OS_RELEASE_NAME_MAP
 from postroj.settings import get_appsettings
-from postroj.util import find_rootfs, hcmd, is_dir_empty, scmd, stdout_to_stderr
+from postroj.util import find_rootfs, hcmd, is_dir_empty, scmd, stdout_to_stderr, subprocess_get_error_message
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,9 @@ class ImageProvider:
     ``/var/lib/postroj/images``.
     """
 
+    CAT_COMMAND = "/bin/cat"
+    OS_RELEASE_FILE = "/etc/os-release"
+
     ADDITIONAL_PACKAGES = [
         # Needed for `pkgprobe`.
         "curl",
@@ -41,7 +46,7 @@ class ImageProvider:
         # "nano",
     ]
 
-    def __init__(self, distribution: LinuxDistribution, autosetup: bool = True, force: bool = False):
+    def __init__(self, distribution: Union[LinuxDistribution, Enum], autosetup: bool = True, force: bool = False):
 
         if isinstance(distribution, Enum):
             distribution = distribution.value
@@ -49,6 +54,7 @@ class ImageProvider:
         self.distribution = distribution
         self.autosetup = autosetup
 
+        self.has_operating_system = None
         self.has_systemd = None
         self.is_docker = None
 
@@ -86,14 +92,14 @@ class ImageProvider:
         Acquire an operating system image from the network.
         """
 
+        logger.info(f"Acquiring container image from {self.distribution.image}")
         image_uri = furl(self.distribution.image)
         if image_uri.scheme in ["http", "https"]:
             outcome = None
         elif image_uri.scheme == "docker":
             outcome = self.acquire_from_docker()
         else:
-            # TODO: Introduce appropriate exception classes.
-            raise KeyError(f"Unsupported scheme for image {self.distribution.image}")
+            raise InvalidImageReference(f"Unsupported scheme for image: {self.distribution.image}")
 
         self.discover()
 
@@ -102,31 +108,51 @@ class ImageProvider:
         elif outcome == ImageAcquisitionOutcome.UP_TO_DATE:
             logger.info(f"Status: Image is up to date for {self.distribution.fullname}")
 
-        self.provision_systemd()
+        if self.has_operating_system:
+            try:
+                self.provision_systemd()
+            except ProvisioningError as ex:
+                details = str(ex.args[0])
+                message = f"Provisioning filesystem image failed: {details}"
+                logger.warning(message)
+                raise ProvisioningError(message)
+        else:
+            logger.info(f"Skipping provisioning of systemd")
 
     def discover(self):
 
         # Skip discovery if already qualified.
         if self.distribution.family and self.distribution.name:
+            logger.info(
+                f"Skipping operating system discovery, using distribution "
+                f"family={self.distribution.family}, name={self.distribution.name}"
+            )
             return
 
+        logger.info(f"Inspecting container image at {self.image_staging}")
         rootfs = find_rootfs(self.image_staging)
 
-        logger.info(f"Discovering operating system from {rootfs}")
-
         # Read `/etc/os-release` file from OS root directory in order to determine operating system.
+        logger.info(f"Discovering operating system from OS root directory at {rootfs}")
+        error_message = (
+            f"Container {self.distribution.fullname} at directory {rootfs} "
+            f"lacks an operating system (os-release file is missing or inaccessible)."
+        )
         try:
-            process = scmd(directory=rootfs, command="/bin/cat /etc/os-release", passthrough=False, capture=True)
-            os_release = process.stdout
-        except subprocess.CalledProcessError:
-            raise
-        except Exception:
-            logger.exception(f"Reading /etc/os-release failed")
-            # TODO: Introduce appropriate exception classes.
-            raise ValueError(
-                f"Container {self.distribution.fullname} at directory {rootfs} "
-                f"lacks an operating system (os-release file is missing)."
+            process = scmd(
+                directory=rootfs, command=f"{self.CAT_COMMAND} {self.OS_RELEASE_FILE}", passthrough=False, capture=True
             )
+            os_release = process.stdout
+            self.has_operating_system = True
+        except subprocess.CalledProcessError as ex:
+            self.has_operating_system = False
+            message = subprocess_get_error_message(exception=ex)
+            logger.exception(f"Reading {self.OS_RELEASE_FILE} failed")
+            raise OsReleaseFileMissing(f"{error_message} Error: {ex.__class__.__name__}. Reason: {message}")
+        except Exception as ex:
+            self.has_operating_system = False
+            logger.exception(f"Reading {self.OS_RELEASE_FILE} failed")
+            raise OsReleaseFileMissing(f"{error_message} Error: {ex.__class__.__name__}. Reason: {ex}")
 
         # Check if systemd is present in the OS root directory.
         self.check_systemd()
@@ -181,8 +207,7 @@ class ImageProvider:
         elif self.distribution.family == OperatingSystemFamily.ARCHLINUX:
             self.setup_archlinux()
         else:
-            # TODO: Introduce appropriate exception classes.
-            raise KeyError(f"Unsupported operating system: {self.distribution}")
+            raise ProvisioningError(f"Unsupported operating system: {self.distribution}")
 
         self.check_systemd()
 
@@ -254,6 +279,9 @@ class ImageProvider:
         # Unable to install packages on RHEL9/UBI9-beta.
         # This system is not registered with an entitlement server.
         if self.distribution.name == OperatingSystemName.RHEL and self.distribution.release == "9":
+            logger.warning(
+                "Unable to provision UBI9 image, as it would need " "to be registered with an entitlement server"
+            )
             return
 
         rootfs = find_rootfs(self.image_staging)
@@ -276,7 +304,10 @@ class ImageProvider:
         elif has_microdnf:
             scmd(directory=rootfs, command=f"microdnf install -y systemd {' '.join(self.ADDITIONAL_PACKAGES)}")
         else:
-            raise ValueError(f"Unable to install packages")
+            raise ProvisioningError(
+                f"Installing packages on Red Hat Linux or derivate failed. "
+                f"Unable to find appropriate package manager, tried `dnf` and `microdnf`."
+            )
 
     def setup_suse(self):
         """
@@ -348,8 +379,7 @@ class ImageProvider:
         try:
             systemd_version_installed = int(response.splitlines()[0].split(" ", maxsplit=2)[1].split("-")[0])
         except:
-            # TODO: Introduce appropriate exception classes.
-            raise ValueError(f"Unable to decode systemd version from:\n{response}")
+            raise ProvisioningError(f"Unable to decode systemd version from:\n{response}")
         if systemd_version_installed >= systemd_version_minimal:
             logger.info(
                 f"Found systemd version {systemd_version_installed}, "
@@ -440,7 +470,7 @@ class ImageProvider:
         if (
             not self.image_staging.exists()
             or is_dir_empty(self.image_staging)
-            or is_dir_empty(self.image_staging / "rootfs")
+            or is_dir_empty(self.image_staging / "rootfs", missing_ok=True)
         ):
             hcmd(f"umoci unpack --rootless --image={self.oci_path}:{oci_tag} {self.image_staging}")
             outcome = ImageAcquisitionOutcome.DOWLOADED_NEWER
@@ -464,8 +494,7 @@ class ImageProvider:
             target_path.symlink_to(self.image_staging, target_is_directory=True)
             return target_path
         else:
-            # TODO: Introduce appropriate exception classes.
-            raise ValueError(f"Unable to activate image at {self.image_staging}")
+            raise InvalidPhysicalImage(f"Unable to activate image at {self.image_staging}")
 
 
 class ImageAcquisitionOutcome(enum.Enum):

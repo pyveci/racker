@@ -14,6 +14,7 @@ in progress
 - Improve image subsystem to acquire arbitrary Docker filesystem images
 - Add operating system support for SLES 15, SLES BCI, RHEL, CentOS 9
 - Add operating system support for RHEL UBI's "minimal" flavors
+- Add custom exception objects
 
 
 2022-05-08 0.1.0

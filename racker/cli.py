@@ -10,6 +10,7 @@ import click
 
 from postroj.api import pull_curated_image
 from postroj.container import PostrojContainer
+from postroj.exceptions import ProvisioningError
 from postroj.image import ImageProvider
 from postroj.registry import find_distribution
 from postroj.util import boot, subprocess_get_error_message
@@ -106,9 +107,7 @@ def racker_run(ctx, interactive: bool, tty: bool, rm: bool, image: str, command:
         # subprocess_forward_stderr_stdout(exception=ex)
         raise SystemExit(ex.returncode)
 
-    except KeyError as ex:
-        message = str(ex.args[0])
-        logger.critical(f"Acquiring filesystem image failed. {message}")
+    except ProvisioningError as ex:
         raise SystemExit(1)
 
     # Status reporting.
