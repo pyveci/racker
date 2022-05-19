@@ -61,10 +61,6 @@ General
   - https://www.heise.de/newsticker/meldung/Systemd-Lennart-Poettering-moechte-das-Home-Verzeichnis-modernisieren-4536581.html
   - https://www.heise.de/newsticker/meldung/FOSDEM-Systemd-und-die-Neuerfindung-der-Home-Verzeichnisse-4651663.html
 
-- Look at the LXC container driver
-
-  - https://libvirt.org/drvlxc.html
-
 - Windows
 
   - https://github.com/containers/podman/issues/8136
@@ -78,52 +74,49 @@ General
   - https://github.com/apache/buildstream/
   - https://docs.buildstream.build/
 
+- Pacstall and Axel
 
-What about other Linux distributions?
-=====================================
+  - https://github.com/pacstall/pacstall
+  - https://github.com/axel-download-accelerator/axel
 
-- https://distrowatch.com/
-- Slackware
-- Gentoo
-- Alpine: n/a
-- NixOS
-- Fedora CoreOS, SilverBlue, IoT, Liri, Kinoite
+- https://snapcraft.io/install/starship/fedora
 
-  - https://getfedora.org/coreos/
-  - https://silverblue.fedoraproject.org/
-  - https://docs.fedoraproject.org/en-US/fedora-silverblue/
-  - https://kinoite.fedoraproject.org/
-  - https://getfedora.org/iot/
-  - https://liri.io/download/silverblue/
-  - quay.io/fedora/coreos:stable
-  - quay.io/fedora/silverblue:36
-  - quay.io/coreos-assembler/fcos:stable
+- PID 1
 
-- Fedora Cloud
-
-  - https://alt.fedoraproject.org/cloud/
-
-- openSUSE Kubic
-
-  - https://kubic.opensuse.org/
-
-- RHEL UBI minimal/micro, using ``microdnf``
-- CentOS 9 Stream
+  - https://about.gitlab.com/blog/2022/05/17/how-we-removed-all-502-errors-by-caring-about-pid-1-in-kubernetes/
 
 
-KISS Linux
-----------
+Misc links
+==========
+- Virtualization made Easy: https://linuxgazette.net/144/howell.html
+- Virtualizing without Virtualizing: https://linuxgazette.net/150/kapil.html
+- Schroot
 
-- https://web.archive.org/web/20200528200318/https://k1ss.org/
-- https://kisslinux.org/
-- https://github.com/kiss-community
-- https://kisscommunity.org/
-- https://news.ycombinator.com/item?id=31307846
-- https://jedahan.com/kiss-find/
+  - https://wiki.debian.org/Schroot
+  - https://web.archive.org/web/20200927080600/https://debian-administration.org/article/566/schroot_-_chroot_for_any_users
+- User-mode Linux: http://user-mode-linux.sourceforge.net/
 
-The distribution explicitly excludes logind, udev, dbus, systemd, polkit,
-pulseaudio, electron and all desktop environments. This software is either
-with lock-in, too complex or otherwise out of scope.
+
+
+The LXC container driver
+========================
+
+    The libvirt LXC driver has no dependency on the LXC userspace tools hosted on
+    sourceforge.net. It directly utilizes the relevant kernel features to build the
+    container environment. This allows for sharing of many libvirt technologies
+    across both the QEMU/KVM and LXC drivers. In particular sVirt for mandatory
+    access control, auditing of operations, integration with control groups and
+    many other features.
+
+    -- https://libvirt.org/drvlxc.html
+
+    Containers on Linux usually means either using LXC or libvirt LXC, he said.
+    Those two are, he stressed, totally separate projects despite the name
+    similarity. Both are quite different from the well-known (and understood)
+    chroot command (and underlying system call).
+
+    -- https://lwn.net/Articles/572957/
+
 
 
 What about other computing architectures?
