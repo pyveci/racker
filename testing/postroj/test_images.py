@@ -75,6 +75,9 @@ def test_acquire_invalid_image():
 
 
 def test_acquire_provisioning_error():
+    """
+    Simulate a provisioning error.
+    """
     distribution = DynamicDistribution.empty()
     distribution.image = "docker://docker.io/debian:stretch-slim"
     ip = ImageProvider(distribution=distribution, autosetup=False)
@@ -96,13 +99,13 @@ def test_acquire_no_operating_system():
     ip.acquire()
 
 
-def test_acquire_http_missing():
+def test_acquire_http_not_found():
     distribution = DynamicDistribution.empty()
     distribution.image = "https://cloud-images.example.org/foobar-minimal-cloudimg-amd64-root.tar.xz"
     ip = ImageProvider(distribution=distribution, autosetup=False)
-    with pytest.raises(OsReleaseFileMissing) as ex:
+    with pytest.raises(InvalidImageReference) as ex:
         ip.acquire()
-    assert ex.match(r"OS root directory .* lacks an operating system \(os-release file is missing\).")
+    assert ex.match(f"Unable to download image: {re.escape(distribution.image)}")
 
 
 def test_discover_not_needed(caplog):
