@@ -24,17 +24,21 @@ import click
 import furl
 import subprocess_tee
 
+from postroj.exceptions import OsReleaseFileMissing
+
 logger = logging.getLogger(__name__)
 
 USE_LOGGING = True
 
 
-def is_dir_empty(path):
+def is_dir_empty(path: Path, missing_ok=False):
     """
     Efficiently check whether a directory is empty.
 
     https://stackoverflow.com/a/65117802
     """
+    if missing_ok and not path.exists():
+        return True
     with os.scandir(path) as scan:
         return next(scan, None) is None
 
@@ -485,7 +489,7 @@ def subprocess_forward_stderr_stdout(exception: subprocess.CalledProcessError):
     sys.stdout.flush()
 
 
-def find_rootfs(image_path: Path):
+def find_rootfs(image_path: Union[Path, str]) -> Path:
     """
     Check for existence of `/etc/os-release` file in OS root directory.
     When `systemd-nspawn` would encounter an OS root directory without an
@@ -493,7 +497,7 @@ def find_rootfs(image_path: Path):
 
         Directory /path/to/rootfs doesn't look like an OS root directory (os-release file is missing). Refusing.
     """
-
+    image_path = Path(image_path)
     os_release_file = Path("./etc/os-release")
     os_release_candidates = [
         # Image directory contains rootfs directly.
@@ -505,5 +509,6 @@ def find_rootfs(image_path: Path):
         if candidate.exists():
             return candidate.parent.parent
 
-    # TODO: Introduce appropriate exception classes.
-    raise ValueError(f"OS root directory {image_path} lacks an operating system (os-release file is missing).")
+    raise OsReleaseFileMissing(
+        f"OS root directory {image_path} lacks an operating system (os-release file is missing)."
+    )
