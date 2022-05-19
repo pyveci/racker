@@ -93,32 +93,6 @@ def hcmd(command, check: bool = True, passthrough: bool = True, capture: bool = 
     return cmd(command, check=check, passthrough=passthrough, capture=capture)
 
 
-def scmd(directory: Union[Path, str], command: str, passthrough: bool = True, capture: bool = False):
-    """
-    Run command within root filesystem.
-    """
-    logger.info(f"Running command within rootfs at {directory}: {command}")
-    return cmd(
-        f"systemd-nspawn --directory={directory} --bind-ro=/etc/resolv.conf:/etc/resolv.conf --pipe {command}",
-        passthrough=passthrough,
-        capture=capture,
-    )
-
-
-def ccmd(machine: str, command: str, use_pty: bool = False, capture: bool = False):
-    """
-    Run command on spawned container.
-    """
-    logger.info(f"Running command on container machine {machine}: {command}")
-    pty = ""
-    if use_pty:
-        pty = "--pty"
-    # TODO: Maybe add `--collect`?
-    command = f"systemd-run --machine={machine} --wait --pipe --quiet {pty} {command}"
-    logger.debug(f"Effective command is: {command}")
-    return cmd(command, capture=capture, use_pty=use_pty)
-
-
 def fix_tty():
     """
     The login prompt messes up the terminal, let's make things sane again.
@@ -261,7 +235,7 @@ class LongRunningProcess:
         """
         Launch command within dedicated thread.
         """
-        self.thread = StoppableThread(target=self.launch, args=(command,))
+        self.thread = StoppableThread(target=self._start, args=(command,))
         self.thread.start()
 
     def stop(self):
@@ -280,7 +254,7 @@ class LongRunningProcess:
             del self.thread
             self.thread = None
 
-    def launch(self, command: str):
+    def _start(self, command: str):
         """
         Thread which is invoking the command in a subprocess.
         It will block until the command has terminated.

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
 from postroj.registry import CuratedOperatingSystem
-from postroj.selftest import get_selftest_distributions, selftest_multiple, HostinfoProbe
+from postroj.selftest import HostinfoProbe, get_selftest_distributions, selftest_multiple
 
 
 def test_get_selftest_distributions(delay):

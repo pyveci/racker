@@ -6,7 +6,7 @@ import sys
 import time
 from contextlib import redirect_stdout
 from copy import copy
-from typing import Dict, List, Type
+from typing import Dict, List, Type, Union
 
 import click
 
@@ -134,14 +134,14 @@ class SelftestResult:
     probes: Dict[str, bool] = dataclasses.field(default_factory=dict)
 
 
-def selftest_multiple(distributions: List[LinuxDistribution], probes: List[Type] = None):
+def selftest_multiple(distributions: List[Union[LinuxDistribution, CuratedOperatingSystem]], probes: List[Type] = None):
     """
     Run a list of probes on a list of selected operating systems.
     """
 
     probes = probes or []
     results = []
-    success = True
+    success = None
 
     # Iterate all suitable operating systems.
     for distribution in distributions:
@@ -153,7 +153,7 @@ def selftest_multiple(distributions: List[LinuxDistribution], probes: List[Type]
         rootfs_path = ip.image
 
         # Invoke `hostnamectl` on each container.
-        with PostrojContainer(rootfs=rootfs_path) as pc:
+        with PostrojContainer(image_path=rootfs_path) as pc:
             with redirect_stdout(sys.stderr):
                 pc.boot()
                 pc.wait()
@@ -164,6 +164,7 @@ def selftest_multiple(distributions: List[LinuxDistribution], probes: List[Type]
                 try:
                     probe = probe_class(container=pc)
                     probe.invoke()
+                    success = True
                     result.probes[probe_name] = True
                 except:
                     success = False
