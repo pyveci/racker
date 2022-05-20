@@ -6,6 +6,10 @@ Racker changelog
 in progress
 ===========
 
+
+2022-05-20 0.2.0
+================
+
 - Add software tests to CI/GHA
 - Naming things: Add ``racker`` command with ``racker {pull,run}`` subcommands
 - Improve subprocess stdout/stderr redirection and error handling
