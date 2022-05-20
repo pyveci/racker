@@ -63,9 +63,10 @@ invoking `systemd-nspawn`_ without using the ``--boot`` option.
 Notes
 *****
 
-There is also `CoreOS toolbox`_, `microos-toolbox`_ and `tlbx`_.
+There is also `Boombox`_, `CoreOS toolbox`_, `microos-toolbox`_ and `tlbx`_.
 
 
+.. _Boombox: https://github.com/anthr76/boombox
 .. _CoreOS toolbox: https://github.com/coreos/toolbox
 .. _Comparison with similar tools: https://github.com/cicerops/racker#comparison-with-similar-tools
 .. _Distrobox: https://github.com/89luca89/distrobox

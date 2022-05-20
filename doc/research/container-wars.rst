@@ -235,7 +235,8 @@ crun
 RHEL
 ====
 
-    The default container runtime in RHEL 8 is runc. The default container runtime in RHEL 9 is crun.
+    The default container runtime in RHEL 8 is ``runc``.
+    The default container runtime in RHEL 9 is ``crun``.
 
     -- https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9-beta/html/considerations_in_adopting_rhel_9/assembly_containers_considerations-in-adopting-rhel-9
 
