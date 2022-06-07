@@ -10,6 +10,7 @@ in progress
   Now, it gets 4 VCPUs and 4096 MB RAM.
 - Improve platform guards and naming things
 - Improve central command invocation function
+- Improve documentation
 
 
 2022-05-20 0.2.0
