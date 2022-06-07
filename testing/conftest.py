@@ -74,13 +74,13 @@ def scmd_mock():
 
 @pytest.fixture
 def scmd_first_command(scmd_mock):
-    def invoke():
+    def invoker():
         scmd_mock.assert_called_once()
         kwargs = scmd_mock.call_args[1]
         command = kwargs["command"]
         return command
 
-    return invoke
+    return invoker
 
 
 @pytest.fixture

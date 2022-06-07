@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 # (c) 2022 Andreas Motl <andreas.motl@cicerops.de>
+import sys
+
+import pytest
 from click.testing import CliRunner
 
 from postroj.cli import cli
+
+
+if sys.platform != "linux":
+    pytest.skip("Skipping Linux-only tests", allow_module_level=True)
 
 
 def test_pkgprobe_webfs(delay):

@@ -3,6 +3,7 @@
 import io
 import logging
 import os
+import sys
 from contextlib import redirect_stdout
 from functools import partial
 from typing import List
@@ -31,6 +32,10 @@ def main(ctx, image: str, package: str, check_unit: List[str], check_network: Li
     Verify a distribution package
     """
 
+    if sys.platform != "linux":
+        raise NotImplementedError(f"Unable to launch Linux systems on non-Linux machines yet, "
+                                  f"please use the Vagrant setup")
+
     # Figure out the image from the list of available ones.
     dist = find_distribution(image)
 
@@ -41,7 +46,7 @@ def main(ctx, image: str, package: str, check_unit: List[str], check_network: Li
     ip = ImageProvider(distribution=dist)
     rootfs = ip.image
 
-    # Adjust verbosity.
+    # TODO: Adjust verbosity.
     silent_boot = True
     ctx = noop
     if silent_boot:
@@ -94,7 +99,7 @@ class PackageProbe(ProbeBase):
         # Install package.
         logger.info(f"Installing package {package}")
         if self.is_debian:
-            self.run(f"/usr/bin/apt install --yes {package}")
+            self.run(f"/usr/bin/apt-get install --yes {package}")
         elif self.is_redhat:
             self.run(f"/usr/bin/yum install -y {package}")
         elif self.is_suse:

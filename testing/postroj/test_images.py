@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+import sys
 from pathlib import Path, PosixPath
 from unittest import mock
 from unittest.mock import patch
@@ -17,6 +18,10 @@ from postroj.image import ImageProvider
 from postroj.registry import CuratedOperatingSystem
 from racker.babelfish import DynamicDistribution
 from testing.util import AnyStringWith
+
+
+if sys.platform != "linux":
+    pytest.skip("Skipping Linux-only tests", allow_module_level=True)
 
 
 def test_list_images():
