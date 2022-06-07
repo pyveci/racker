@@ -63,7 +63,8 @@ invoking `systemd-nspawn`_ without using the ``--boot`` option.
 Notes
 *****
 
-There is also `Boombox`_, `CoreOS toolbox`_, `microos-toolbox`_ and `tlbx`_.
+There is also `Boombox`_, `CoreOS toolbox`_, `docker-coreos-toolbox-ubuntu`_,
+`microos-toolbox`_ and `tlbx`_.
 
 
 .. _Boombox: https://github.com/anthr76/boombox
@@ -72,6 +73,7 @@ There is also `Boombox`_, `CoreOS toolbox`_, `microos-toolbox`_ and `tlbx`_.
 .. _Distrobox: https://github.com/89luca89/distrobox
 .. _Distrobox - Containers distribution support: https://distrobox.privatedns.org/compatibility.html#containers-distros
 .. _distrobox-init: https://distrobox.privatedns.org/usage/distrobox-init.html
+.. _docker-coreos-toolbox-ubuntu: https://github.com/wallneradam/docker-coreos-toolbox-ubuntu
 .. _microos-toolbox: https://github.com/openSUSE/microos-toolbox
 .. _systemd-nspawn: https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html
 .. _tlbx: https://gitlab.com/uppercat/tlbx

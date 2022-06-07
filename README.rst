@@ -40,9 +40,9 @@ Racker
     :target: https://pypi.org/project/racker/
     :alt: License
 
-.. image:: https://img.shields.io/pypi/dm/racker.svg?label=PyPI%20downloads
+.. image:: https://pepy.tech/badge/racker/month
     :target: https://pypi.org/project/racker/
-    :alt: PyPI downloads
+    :alt: PyPI downloads / month
 
 
 ----
@@ -52,21 +52,31 @@ Racker
 About
 *****
 
-An experimental harness tool based on `systemd`_ and `systemd-nspawn`_, to run
-`operating system containers <OS containers_>`_, in the spirit of addressing some details of
-`Docker Considered Harmful`_ and `Systemd vs. Docker`_.
 
-At the same time, it is a tribute to the authors and contributors of GNU, Linux,
-systemd, Python, VirtualBox, Vagrant, Docker, and more.
+At a glance
+===========
 
-Most people running Linux probably want to use `Podman`_ these days. For more
-background, enjoy reading `Container wars`_ and `Container Tools Guide`_.
+Racker is an experimental harness tool for provisioning and running operating
+system containers.
+
+For launching Linux operating systems, it is based on `systemd`_ and
+`systemd-nspawn`_, to run `operating system containers <OS containers_>`_,
+in the spirit of addressing some details of `Docker Considered Harmful`_ and
+`Systemd vs. Docker`_.
+
+
+Details
+=======
+
+With Racker, you can ...
+
+- Launch an interactive command prompt within a Linux environment or invoke
+  programs non-interactively.
+
+- Use the runtime harness for testing software packages and similar purposes, in
+  different environments, mostly run headless and non-interactively.
 
 Racker is ...
-=============
-
-- A runtime harness for testing software packages and similar purposes, in
-  different environments, mostly run headless and non-interactively.
 
 - A lightweight wrapper around ``systemd-nspawn`` to provide and launch
   container environments for/with ``systemd``.
@@ -74,22 +84,29 @@ Racker is ...
 - A lightweight wrapper around ``vagrant`` to provide convenient access to all
   things needing a full VM, like running Windows on Linux or macOS.
 
+- A tribute to the authors and contributors of GNU, Linux, systemd, Python,
+  VirtualBox, Vagrant, Docker, Windows, Windows Docker Machine and countless
+  others.
+
 
 Comparison with similar tools
 =============================
 
-The aims of Racker are very similar to `Distrobox`_ and `Toolbox`_. However,
-there are also some differences.
+The aims of Racker are very similar to `Docker`_, `Podman`_, `Distrobox`_ and
+`Toolbox`_. However, there are also some differences.
 
-- Racker is currently based on `systemd-nspawn`_ instead of `Docker`_ or
-  `Podman`_.
-- Racker can invoke any kind of container payload, but strongly focuses on
-  running `OS containers`_ aka. `OS-level virtualization`_, using `systemd`_
-  as init process.
-- Racker aims to provide concise usability by folding its usage into a single
-  command.
+Most people running Linux probably want to use `Podman`_ these days. For more
+background, enjoy reading `Container wars`_ and `Container Tools Guide`_.
+
+- Racker is currently based on `systemd-nspawn`_ and `Vagrant`_ instead of
+  `Docker`_ or `Podman`_.
+- Racker's focus is to provide easy provisioning and launching `OS containers`_
+  aka. `OS-level virtualization`_, using `systemd`_ as init process.
 - The acquisition and provisioning of operating system images does not need any
   special preparation steps, those are handled by Racker on the fly.
+- Racker aims to provide concise usability by folding its usage into a single
+  command.
+- Racker is written in Python instead of Golang or Bash.
 
 See also `Comparison with similar tools - more details`_.
 
@@ -398,6 +415,7 @@ Troubleshooting
 
 .. _autopkgtest: https://www.freedesktop.org/wiki/Software/systemd/autopkgtest/
 .. _Changing Roots: http://0pointer.de/blog/projects/changing-roots.html
+.. _Chocolatey: https://chocolatey.org/
 .. _Comparison with similar tools - more details: https://github.com/cicerops/racker/blob/main/doc/comparison.rst
 .. _Container Tools Guide: https://github.com/containers/buildah/tree/main/docs/containertools
 .. _Container wars: https://github.com/cicerops/racker/blob/main/doc/research/container-wars.rst
@@ -421,6 +439,8 @@ Troubleshooting
 .. _Systemd vs. Docker: https://lwn.net/Articles/676831/
 .. _Toolbox: https://containertoolbx.org/
 .. _umoci: https://github.com/opencontainers/umoci
+.. _Vagrant: https://www.vagrantup.com/
+.. _Windows Docker Machine: https://github.com/StefanScherer/windows-docker-machine
 
 .. _Containers without a Container Manager, with systemd: https://invidious.fdn.fr/watch?v=sqhojVPr7xM
 .. _Lennart Poettering und Kay Sievers über Systemd: https://invidious.fdn.fr/watch?v=6Q_iTG6_EF4

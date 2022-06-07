@@ -165,3 +165,11 @@ Unikernels
 
 - https://www.inovex.de/de/blog/containers-docker-containerd-nabla-kata-firecracker/
 - https://mirage.io/docs/hello-world
+
+
+Kubernetes
+==========
+
+- https://blog.tilt.dev/2021/03/18/kubernetes-is-so-simple.html
+- https://github.com/kubernetes-sigs/kind
+- https://www.docker.com/blog/welcome-tilt-fixing-the-pains-of-microservice-development-for-kubernetes/

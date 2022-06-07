@@ -12,7 +12,7 @@ setup(
     author="Andreas Motl",
     author_email="andreas.motl@cicerops.de",
     url="https://github.com/cicerops/racker",
-    description="An experimental harness tool based on systemd-nspawn containers",
+    description="Racker is an experimental harness tool for provisioning and running operating system containers",
     long_description=README,
     download_url="https://pypi.org/project/racker/",
     packages=["racker", "postroj"],

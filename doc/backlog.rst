@@ -8,60 +8,52 @@ Racker backlog
 
 
 ***********
-Iteration 2
-***********
-
-- [x] Check if software tests can be invoked on CI/GHA.
-- [x] Improve software tests.
-- [x] Split functionality between ``racker`` and ``postroj``.
-
-  - ``racker {run,ps,pull,logs}``
-  - ``postroj {list-images,pkgprobe,selftest}``
-  - ``pronto opensuse/tumbleweed hostnamectl`` (``pronto.hexagon`` (hx), ``pronto.kaxon`` (kx))
-
-- [x] Continue renaming to ``racker``.
-- [x] Improve error messages, see "Compatibility" section
-  Compare with ``docker run --rm -it debian:bullseye-slim foo``.
-
-  - ``racker run -it --rm debian-stretch hostnamectl``
-  - ``racker run -it --rm debian-stretch /bin/hostnamectl``
-  - ``racker run -it --rm debian-stretch /usr/bin/hostnamectl``
-
-- [x] Provide more advanced and generic image (label) resolution.
-  From docker.io, ghcr.io, registry.access.redhat.com, etc.
-- [x] Improve documentation
-- [x] Is it possible to run RHEL and SLES?
-
-  - registry.access.redhat.com/rhel7/rhel
-  - registry.suse.com/bci/bci-base
-  - https://registry.suse.com/
-
-
-***********
 Iteration 3
 ***********
 
+- [o] Support for Windows. ``windows/nanoserver:1809`` and ``windows/servercore:ltsc2019``.
+- [o] Support for Windows 11 and Windows Server 2022
+
+  - https://github.com/StefanScherer/packer-windows
+  - https://app.vagrantup.com/StefanScherer/boxes/windows_2022
+  - ``mcr.microsoft.com/windows/servercore:ltsc2022-amd64``
+- [o] Provide curated image types per ``os://`` or ``vagrant://``.
 - [o] Tests: Wait for container to properly shut down before moving on.
 
   - Q: When running ``postroj selftest``, why is there more output from
     containers shutting down, while the program is finished already?
   - Q: Why are the tests failing when trying to subsequently spin up / tear down
     the same container?
-
-- [o] Address issues in ``bugs.rst``
-
-- [o] Invoke arbitrary Docker containers, even when they don't contain an OS root directory.
-
-  - Directory ``/var/lib/postroj/archive/hello-world.img/rootfs`` doesn't look like an OS root directory (os-release file is missing). Refusing.
-  - Directory ``/var/lib/postroj/archive/hello-world.img/rootfs`` doesn't look like it has an OS root directory. Refusing.
-  - ``unshare --fork --pid --mount-proc --root=/var/lib/postroj/images/hello-world ./hello``
-
 - [o] Use/integrate with ``mkosi``.
 
   - https://github.com/systemd/mkosi
   - http://0pointer.net/blog/mkosi-a-tool-for-generating-os-images.html
   - https://lwn.net/Articles/726655/
   - https://github.com/asiffer/netspot/search?q=mkosi
+
+
+*************
+Iteration 3.5
+*************
+
+- [o] Windows support leftovers
+
+  - --cpus=8 --memory=8192M
+  - https://github.com/docker/machine/issues/531#issuecomment-73938730
+  - --mount type=git,src=https://github.com/crate/crate,dst=C:/src
+  - --repository=https://github.com/crate/crate
+  - https://github.com/StefanScherer/packer-windows
+  - Make piping from STDIN possible
+  - Display machine resources (VCPUs, memory) before starting the command/job.
+
+- [o] Address issues in ``bugs.rst``
+- [o] When using ``apt-get``, use ``DEBIAN_FRONTEND=noninteractive``
+
+- [o] Invoke arbitrary Docker containers, even when they don't contain an OS root directory.
+
+  - Directory ``/var/lib/postroj/archive/hello-world.img/rootfs`` doesn't look like an OS root directory (os-release file is missing). Refusing.
+  - Directory ``/var/lib/postroj/archive/hello-world.img/rootfs`` doesn't look like it has an OS root directory. Refusing.
+  - ``unshare --fork --pid --mount-proc --root=/var/lib/postroj/images/hello-world ./hello``
 
 - [o] Improve timeout behaviors across the board,
   using ``with stopit.ThreadingTimeout(timeout) as to_ctx_mgr``.
@@ -71,6 +63,9 @@ Iteration 3
 - [o] ``racker --verbose run -it --rm https://cloud-images.ubuntu.com/minimal/daily/focal/current/focal-minimal-cloudimg-amd64-root.tar.xz /bin/bash``
 - [o] TODO: Introduce appropriate exception classes.
 - [o] Maybe use ``ubi8/ubi-init`` instead of ``ubi8/ubi``?
+- [o] How to integrate with other tools from https://github.com/topics/systemd-nspawn
+- [o] https://github.com/NixOS/nixops
+
 
 
 ***********
