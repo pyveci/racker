@@ -30,12 +30,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Configure host specifications
     machine.vm.provider :virtualbox do |v|
 
-      v.memory = 2048
-      v.cpus = 2
+      v.memory = 4096
+      v.cpus = 4
 
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      #v.customize ["modifyvm", :id, "--memory", 1024]
       v.customize ["modifyvm", :id, "--name", "rackerhost-debian11"]
+      #v.customize ["modifyvm", :id, "--memory", 4096]
+
+      # Turn on nested virtualization.
+      v.customize ["modifyvm", :id, "--nested-hw-virt", "on"]
+
+      # https://forums.virtualbox.org/viewtopic.php?f=1&t=59379
+      v.customize ["modifyvm", :id, "--vtxux", "on"]
     end
 
     machine.vm.provision :shell, inline: <<-SHELL
