@@ -11,8 +11,6 @@ import click
 from postroj.api import pull_curated_image
 from postroj.container import PostrojContainer
 from postroj.exceptions import ProvisioningError
-from postroj.image import ImageProvider
-from postroj.registry import find_distribution
 from postroj.util import boot, subprocess_get_error_message
 from racker.image import ImageLibrary
 
@@ -131,7 +129,6 @@ def racker_run(ctx, interactive: bool, tty: bool, rm: bool, image: str, command:
                     pc.wait()
 
         except subprocess.CalledProcessError as ex:
-
             message = subprocess_get_error_message(exception=ex)
             logger.critical(f"Launching container failed. {message}")
             # subprocess_forward_stderr_stdout(exception=ex)

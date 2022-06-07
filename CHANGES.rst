@@ -8,6 +8,7 @@ in progress
 
 - Increase resources assigned to Vagrant environment.
   Now, it gets 4 VCPUs and 4096 MB RAM.
+- Improve platform guards and naming things
 
 
 2022-05-20 0.2.0

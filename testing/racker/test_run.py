@@ -5,10 +5,15 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
 from click._compat import strip_ansi
 from click.testing import CliRunner
 
 from racker.cli import cli
+
+
+if sys.platform != "linux":
+    pytest.skip("Skipping Linux-only tests", allow_module_level=True)
 
 
 def test_run_image_invalid(caplog):
