@@ -81,6 +81,7 @@ setup(
         ],
     },
     install_requires=[
+        "appdirs>=1,<2",
         "click>=7,<9",
         "furl>=2,<3",
         "subprocess-tee>=0.3,<1",
