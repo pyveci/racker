@@ -43,15 +43,31 @@ def is_dir_empty(path: Path, missing_ok=False):
         return next(scan, None) is None
 
 
-def cmd(command, check: bool = True, passthrough: bool = True, capture: bool = False, use_pty: bool = False):
+def cmd(command, check: bool = True, passthrough: bool = None, capture: bool = False, use_stderr: bool = False, use_pty: bool = False, cwd: Union[Path, str] = None, **kwargs):
     """
     Run command in a separate process.
     """
     try:
-        if use_pty:
-            p = subprocess.run(shlex.split(command))
+        command_encoded = shlex.split(command)
+        kwargs.update({
+            "cwd": cwd,
+        })
+        if use_stderr:
+            kwargs["stdout"] = sys.stderr
+            kwargs["stderr"] = sys.stderr
+
+        if passthrough in [True, False] or capture and not use_pty:
+            logger.debug(f"Running with subprocess_tee: {command}")
+            p = subprocess_tee.run(command_encoded, tee=passthrough, **kwargs)
         else:
-            p = subprocess_tee.run(shlex.split(command), tee=passthrough)
+            logger.debug(f"Running with subprocess:     {command} {kwargs}")
+            p = subprocess.run(command_encoded, **kwargs)
+        """
+        if (not passthrough and not capture) or use_pty:
+            p = subprocess.run(command, **kwargs)
+        else:
+            p = subprocess_tee.run(command, tee=passthrough, **kwargs)
+        """
         """
         if capture:
             p = subprocess_tee.run(shlex.split(command), tee=passthrough)
@@ -107,7 +123,9 @@ def fix_tty():
     if not sys.stdin.isatty():
         return
 
-    os.system("stty sane")
+    if sys.stdout.isatty():
+        os.system("stty sane")
+        os.system("tput cnorm")
 
     # Clears the whole screen.
     # os.system("tput reset")
@@ -158,6 +176,8 @@ def port_is_up(host: str, port: int):
     https://github.com/lovelysystems/lovely.testlayers/blob/0.7.0/src/lovely/testlayers/util.py#L6-L13
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # TODO: Make connect timeout configurable.
+    s.settimeout(5)
     ex = s.connect_ex((host, port))
     if ex == 0:
         s.close()
