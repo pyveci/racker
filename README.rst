@@ -109,6 +109,13 @@ another one for Windows.
   `systemd-nspawn`_. Provisioning of additional software is performed using the
   native package manager of the corresponding Linux distribution.
 
+- For running Windows operating systems containers, Racker uses `Vagrant`_,
+  `Docker`_, and `Windows Docker Machine`_. The virtual machine base image is
+  acquired from `Vagrant Cloud`_, container images are acquired from the
+  `Microsoft Container Registry`_. For provisioning additional software, the
+  `Chocolatey`_ package manager is used. All of cmd, PowerShell and Bash are
+  pre-installed on the container images.
+
 
 Operating system coverage
 -------------------------
@@ -131,6 +138,11 @@ Linux
 - Rocky Linux 8
 - SUSE SLES 15 and BCI:latest
 - Ubuntu LTS 20 and 22 (focal, jammy)
+
+Windows
+.......
+- Windows Server Core LTSC 2016, 2019, and 2022
+- Windows Nano Server 1809 and LTSC 2022
 
 
 Prior art
@@ -212,7 +224,7 @@ Racker
 The ``racker`` program aims to resemble the semantics of Docker by providing a
 command line interface compatible with the ``docker`` command.
 
-::
+Linux examples::
 
     # Invoke the vanilla Docker `hello-world` image.
     # FIXME: Does not work yet.
@@ -243,6 +255,42 @@ command line interface compatible with the ``docker`` command.
     # Use stdin and stdout, with timing.
     time echo "hello world" | racker run -it --rm fedora:37 cat /dev/stdin > hello
     cat hello
+
+Windows examples::
+
+    # Windows OS images, mostly LTSC (Long-Term Servicing Channel).
+    # Please note the download sizes.
+    # Nanoserver: 250 MB, Servercore: 6 GB, Servercore with Java: 7 GB, Windows: 15 GB
+
+    # Launch an interactive command prompt (cmd, PowerShell or Bash).
+    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 powershell
+
+    # Launch a single command.
+    racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 -- 'powershell -Command {echo "Hello, world."}'
+    racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 'sh -c "echo Hello, world."'
+
+    # Inquire system information.
+    racker run --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 wmic os get caption
+    racker run --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 'powershell -Command Get-ComputerInfo'
+
+    # Use stdin and stdout, with time keeping.
+    time racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:1809-amd64 cmd /C echo "Hello, world." > hello
+    cat hello
+
+    # Invoke a Java command prompt (JShell) with different Java versions.
+    racker run -it --rm --platform=windows/amd64 openjdk:18-windowsservercore-1809 jshell
+    racker run -it --rm --platform=windows/amd64 eclipse-temurin:18-jdk jshell
+    System.out.println("OS: " + System.getProperty("os.name") + ", version " + System.getProperty("os.version"))
+    System.out.println("Java: " + System.getProperty("java.vendor") + ", version " + System.getProperty("java.version"))
+    /exit
+
+    # Windows Nano Server.
+    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:1809-amd64 cmd
+    racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:1809-amd64 cmd /C echo Hello, world.
+
+    # Full Windows.
+    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows:1809-amd64 cmd
+
 
 
 Postroj

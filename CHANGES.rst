@@ -11,6 +11,10 @@ in progress
 - Improve platform guards and naming things
 - Improve central command invocation function
 - Improve documentation
+- Make Windows runner subsystem production ready.
+- Add support for Windows Server Core 2019 and friends, like
+  ``windows/servercore:ltsc2019``, ``windows/nanoserver:1809``, or
+  ``eclipse-temurin:17-jdk``.
 
 
 2022-05-20 0.2.0
