@@ -14,6 +14,10 @@ import pytest
 if "rackerhost-debian11" in socket.gethostname():
     pytest.skip("Nested virtualization with VT-x fails on developer's macOS workstation", allow_module_level=True)
 
+if "GITHUB_ACTIONS" in os.environ:
+    pytest.skip("Installing the Vagrant filesystem image for Windows "
+                "takes too much disk space on GitHub Actions", allow_module_level=True)
+
 
 def run_racker(command: str) -> subprocess.CompletedProcess:
     program_path = Path(sys.argv[0]).parent
