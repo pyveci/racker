@@ -89,21 +89,3 @@ systemd environments.
     Failed to start transient service unit: Cannot set property AddRef, or unknown property.
 
 => systemd too old.
-
-
-Docker context on Windows VM not reachable
-==========================================
-
-https://github.com/docker/machine/issues/531
-
-::
-
-    $ docker --context=2019-box ps
-    error during connect: Get "https://192.168.59.90:2376/v1.24/containers/json": x509: certificate is valid for 169.254.232.221, 172.30.112.1, 10.0.2.15, 127.0.0.1, not 192.168.59.90
-
-    $ docker --context=2019-box ps
-    error during connect: Get "https://192.168.59.90:2376/v1.24/containers/json": x509: certificate signed by unknown authority (possibly because of "crypto/rsa: verification error" while trying to verify candidate authority certificate "Docker TLS Root")
-
-Solution::
-
-    docker context rm 2019-box

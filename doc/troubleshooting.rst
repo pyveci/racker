@@ -220,3 +220,45 @@ to turn off this feature completely.
   - /usr/lib/systemd/system/container-getty@.service
   - /usr/lib/systemd/system/getty@.service
   - /usr/lib/systemd/system/serial-getty@.service
+
+
+******************************************
+Docker context on Windows VM not reachable
+******************************************
+
+- Symptom: Process croaks or stalls while trying to connect to the Docker context on the Windows VM.
+- Reference: https://github.com/docker/machine/issues/531
+
+Problems::
+
+    $ docker --context=2019-box ps
+    error during connect: Get "https://192.168.59.90:2376/v1.24/containers/json": x509: certificate is valid for 169.254.232.221, 172.30.112.1, 10.0.2.15, 127.0.0.1, not 192.168.59.90
+
+    $ docker --context=2019-box ps
+    error during connect: Get "https://192.168.59.90:2376/v1.24/containers/json": x509: certificate signed by unknown authority (possibly because of "crypto/rsa: verification error" while trying to verify candidate authority certificate "Docker TLS Root")
+
+Solution::
+
+    docker context rm 2019-box
+
+
+***********************************
+Problem running Windows Server 2022
+***********************************
+
+Problem when running 1709 and 1809 container images on a 2016 host::
+
+    docker: a Windows version 10.0.16299-based image is incompatible with a 10.0.14393 host.
+    docker: a Windows version 10.0.17763-based image is incompatible with a 10.0.14393 host.
+
+Problem when running a 2022 container image on a 2019 host::
+
+    docker: a Windows version 10.0.20348-based image is incompatible with a 10.0.17763 host.
+
+Problem when running a 2019 container image on a 2022 host::
+
+    docker: Error response from daemon: hcsshim::CreateComputeSystem bd3b2a3b001dbe632c11170e1cfdf2fd0ec0c26e27739a61961d50f3d01a4548:
+    The container operating system does not match the host operating system.
+
+
+Solution: Use a more recent version of Windows within the Windows Docker Machine VM.

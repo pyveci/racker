@@ -11,6 +11,7 @@ Racker backlog
 Iteration 3
 ***********
 
+- [o] Docs: Harness tool == Image bakery + Payload launcher
 - [o] Support for Windows. ``windows/nanoserver:1809`` and ``windows/servercore:ltsc2019``.
 - [o] Support for Windows 11 and Windows Server 2022
 
@@ -45,6 +46,9 @@ Iteration 3.5
   - https://github.com/StefanScherer/packer-windows
   - Make piping from STDIN possible
   - Display machine resources (VCPUs, memory) before starting the command/job.
+  - Sometimes, the Windows container keeps running after CTRL+C.
+    Workaround: ``docker --context=2022-box ps``, ``docker --context=2022-box kill 3fa89dc6d748``.
+  - Run CI jobs natively on GHA, because it doesn't work with nested virtualization.
 
 - [o] Address issues in ``bugs.rst``
 - [o] When using ``apt-get``, use ``DEBIAN_FRONTEND=noninteractive``
@@ -234,3 +238,16 @@ Ideas
   - GoTTY -- https://github.com/yudai/gotty; https://jpmens.net/2022/05/03/one-gotty-per-user/
 - Rebundle multiple microservice containers into groups, which are hosted on
   single OS containers.
+- Install Vagrant with VirtualBox on Debian::
+
+    sudo apt-get update
+    sudo apt-get install --yes fasttrack-archive-keyring
+    cat << EOF > /etc/apt/sources.list.d/debian-fasttrack.list
+    deb https://fasttrack.debian.net/debian-fasttrack/ bullseye-fasttrack main contrib
+    deb https://fasttrack.debian.net/debian-fasttrack/ bullseye-backports-staging main contrib
+    EOF
+    sudo apt-get update
+    sudo apt-get install vagrant virtualbox
+    sudo gem install -r winrm winrm-elevated
+
+- Look at https://boxstarter.org/
