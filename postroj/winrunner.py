@@ -16,20 +16,24 @@ from urllib.parse import urlparse
 import appdirs
 import pkg_resources
 
-from postroj.util import port_is_up, cmd, fix_tty
+from postroj.exceptions import InvalidImageReference
+from postroj.util import port_is_up, cmd, fix_tty, subprocess_get_error_message
 
 logger = logging.getLogger(__name__)
 
 
 class WinRunner:
 
-    BOX = "2019-box"
     VCPUS = os.environ.get("RACKER_VM_VCPUS", 6)
     MEMORY = os.environ.get("RACKER_VM_MEMORY", 6144)
 
     def __init__(self, image: str):
         self.image_base = image
         self.image_real = "racker-runtime/" + self.image_base.replace("/", "-")
+
+        self.BOX = None
+        self.choose_box()
+        logger.info(f"Using host machine box image {self.BOX} for launching container image {self.image_base}")
 
         self.workdir = Path(appdirs.user_state_dir(appname="racker"))
         self.workdir.mkdir(exist_ok=True, parents=True)
@@ -44,9 +48,8 @@ class WinRunner:
             logger.info(f"Installing Windows Docker Machine into {self.wdmdir}")
             command = f"""
                 cd '{self.workdir}'
-                git clone https://github.com/StefanScherer/windows-docker-machine
+                git clone https://github.com/cicerops/windows-docker-machine --branch racker
                 cd windows-docker-machine
-                #ls -alF
                 sed -i 's/v.cpus = [0-9]\+/v.cpus = {self.VCPUS}/' Vagrantfile
                 sed -i 's/v.memory = [0-9]\+/v.memory = {self.MEMORY}/' Vagrantfile
                 sed -i 's/v.maxmemory = [0-9]\+/v.maxmemory = {self.MEMORY}/' Vagrantfile
@@ -55,7 +58,60 @@ class WinRunner:
         else:
             logger.info(f"Windows Docker Machine already installed into {self.wdmdir}")
 
-    def start(self):
+    def choose_box(self):
+        """
+        Choose the right box based on the container image to launch.
+        """
+
+        image = self.image_base
+        if not image.startswith("docker://"):
+            image = f"docker://{image}"
+
+        logger.info(f"Inquiring information about OCI image '{image}'")
+
+        if "RACKER_VM_BOX" in os.environ:
+            self.BOX = os.environ["RACKER_VM_BOX"]
+            return
+
+        # TODO: Cache the response from `skopeo inspect` to avoid the 3-second speed bump.
+        #       https://github.com/cicerops/racker/issues/6
+        command = f"skopeo --override-os=windows inspect --config --raw {image}"
+        try:
+            process = cmd(command, capture=True)
+        except subprocess.CalledProcessError as ex:
+            message = subprocess_get_error_message(exception=ex)
+            message = f"Inquiring information about OCI image '{image}' failed. {message}"
+            logger.error(message)
+            exception = InvalidImageReference(message)
+            exception.returncode = ex.returncode
+            raise exception
+
+        image_info = json.loads(process.stdout)
+        image_os_name = image_info["os"]
+        image_os_version = image_info["os.version"]
+        logger.info(f"Image inquiry said os={image_os_name}, version={image_os_version}")
+
+        if image_os_name != "windows":
+            raise ValueError(f"Container image {image} is not Windows, but {image_os_name} instead")
+
+        # https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility
+        os_version_box_map = {
+            "10.0.14393": "2016-box",
+            "10.0.16299": "2019-box",   # openjdk:8-windowsservercore-1709
+            "10.0.17763": "2019-box",
+            "10.0.19042": "2022-box",
+            "10.0.20348": "2022-box",
+        }
+
+        for os_version, box in os_version_box_map.items():
+            if image_os_version.startswith(os_version):
+                self.BOX = box
+
+        if self.BOX is None:
+            raise ValueError(f"Unable to choose host machine box image for container image {image}, matching OS version {image_os_version}. "
+                             f"Please report this error to https://github.com/cicerops/racker/issues/new.")
+
+    def start(self, provision=False):
         """
         Start the "Windows Docker Machine" virtual machine.
 
@@ -81,7 +137,11 @@ class WinRunner:
         # https://github.com/moby/moby/blob/0e04b514fb/integration-cli/docker_cli_run_test.go
         cmd(f"docker --context={self.BOX} ps", capture=True)
 
-        if "nanoserver" in self.image_base:
+        # Skip installing software using Chocolatey for specific Windows OS versions.
+        # - Windows Nanoserver does not have PowerShell.
+        # - Windows 2016 croaks like:
+        #   `The command 'cmd /S /C choco install --yes ...' returned a non-zero code: 3221225785`
+        if "nanoserver" in self.image_base or self.BOX == "2016-box":
             self.image_real = self.image_base
         else:
             self.provision_image()

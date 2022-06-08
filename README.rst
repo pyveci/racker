@@ -263,7 +263,9 @@ Windows examples::
     # Nanoserver: 250 MB, Servercore: 6 GB, Servercore with Java: 7 GB, Windows: 15 GB
 
     # Launch an interactive command prompt (cmd, PowerShell or Bash).
+    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2016-amd64 cmd
     racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 powershell
+    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2022-amd64 bash
 
     # Launch a single command.
     racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 -- 'powershell -Command {echo "Hello, world."}'
@@ -279,6 +281,7 @@ Windows examples::
 
     # Invoke a Java command prompt (JShell) with different Java versions.
     racker run -it --rm --platform=windows/amd64 openjdk:18-windowsservercore-1809 jshell
+    racker run -it --rm --platform=windows/amd64 openjdk:19-windowsservercore-ltsc2022 jshell
     racker run -it --rm --platform=windows/amd64 eclipse-temurin:18-jdk jshell
     System.out.println("OS: " + System.getProperty("os.name") + ", version " + System.getProperty("os.version"))
     System.out.println("Java: " + System.getProperty("java.vendor") + ", version " + System.getProperty("java.version"))
@@ -287,9 +290,12 @@ Windows examples::
     # Windows Nano Server.
     racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:1809-amd64 cmd
     racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:1809-amd64 cmd /C echo Hello, world.
+    racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:ltsc2022-amd64 cmd /C echo Hello, world.
+    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/powershell:nanoserver-ltsc2022 pwsh
 
     # Full Windows.
     racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows:1809-amd64 cmd
+    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows:ltsc2022-amd64 cmd
 
 
 

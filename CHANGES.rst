@@ -15,7 +15,9 @@ in progress
 - Add support for Windows Server Core 2019 and friends, like
   ``windows/servercore:ltsc2019``, ``windows/nanoserver:1809``, or
   ``eclipse-temurin:17-jdk``.
-
+- Add support for Windows Server Core 2016, 2022 and friends, like
+  ``windows/servercore:ltsc2016``, ``windows/servercore:ltsc2022``, or
+  ``windows/nanoserver:ltsc2022``.
 
 2022-05-20 0.2.0
 ================
