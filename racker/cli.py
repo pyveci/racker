@@ -10,7 +10,7 @@ import click
 
 from postroj.api import pull_curated_image
 from postroj.container import PostrojContainer
-from postroj.exceptions import ProvisioningError
+from postroj.exceptions import ProvisioningError, InvalidImageReference
 from postroj.util import boot, subprocess_get_error_message
 from postroj.winrunner import WinRunner
 from racker.image import ImageLibrary
@@ -93,7 +93,10 @@ def racker_run(ctx, interactive: bool, tty: bool, rm: bool, platform: str, image
 
     elif platform == "windows/amd64":
         logger.info(f"Preparing runtime environment for platform {platform} and image {image}")
-        runner = WinRunner(image=image)
+        try:
+            runner = WinRunner(image=image)
+        except InvalidImageReference as ex:
+            raise SystemExit(ex.returncode)
         try:
             with redirect_stdout(sys.stderr):
                 with redirect_stderr(sys.stderr):
