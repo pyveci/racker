@@ -152,7 +152,8 @@ class WinRunner:
 
         - Provision a Windows operating system image with additional software.
         - Automatically installs the open source version of the Chocolatey package manager.
-        - By default, it installs `git`, `curl`, and `wget`.
+        - By default, it automatically installs some programs like `busybox`, `curl`, `git`,
+          `nano`, and `wget`.
         """
 
         logger.info(f"Provisioning Docker image for Windows environment based on {self.image_base}")
