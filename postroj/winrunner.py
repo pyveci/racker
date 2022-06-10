@@ -124,8 +124,12 @@ class WinRunner:
             logger.info("Docker context is online")
         else:
             logger.info("Docker context is offline, starting VirtualBox VM with Vagrant")
-            cmd(f"vagrant provision {self.BOX}", cwd=self.wdmdir, use_stderr=True)
-            cmd(f"vagrant up --provider=virtualbox {self.BOX}", cwd=self.wdmdir, use_stderr=True)
+            # TODO: The `provision` option flag is not wired in any way yet.
+            #       https://github.com/cicerops/racker/issues/7
+            provision_option = ""
+            if provision:
+                provision_option = "--provision"
+            cmd(f"vagrant up --provider=virtualbox {provision_option} {self.BOX}", cwd=self.wdmdir, use_stderr=True)
 
         logger.info("Pinging Docker context")
         if not self.docker_context_online():
