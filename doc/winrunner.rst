@@ -65,13 +65,13 @@ Resources
 =========
 
 When creating the `Windows Docker Machine`_ virtual machine, the program will
-configure it to use 6 VCPUs and 6144 MB system memory by default.
+configure it to use 4 VCPUs and 4 GB system memory by default.
 
 In order to adjust those values, use these environment variables before
 invoking the later commands::
 
-    export RACKER_VM_VCPUS=12
-    export RACKER_VM_MEMORY=8192
+    export RACKER_WDM_VCPUS=8
+    export RACKER_WDM_MEMORY=8192
 
 If you want to adjust the values after the initial deployment, you will have to
 reset the `Windows Docker Machine`_ installation directory. For example, it is:
