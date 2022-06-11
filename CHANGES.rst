@@ -20,6 +20,9 @@ in progress
   ``windows/servercore:ltsc2016``, ``windows/servercore:ltsc2022``, or
   ``windows/nanoserver:ltsc2022``.
 - Improve documentation about the Windows backend
+- Rename environment variables used to control the Windows Docker Machine
+  subsystem. The new names are ``RACKER_WDM_VCPUS``, ``RACKER_WDM_MEMORY``,
+  and ``RACKER_WDM_MACHINE``.
 
 2023-02-14 0.3.0
 ================
