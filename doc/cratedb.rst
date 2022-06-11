@@ -17,7 +17,7 @@ Run the CrateDB test suite on OpenJDK 18 (Eclipse Temurin)::
 
 Use the same image, but select a specific operating system version::
 
-    export RACKER_VM_BOX=2019-box
+    export RACKER_WDM_MACHINE=2019-box
     racker --verbose run --rm --platform=windows/amd64 eclipse-temurin:18-jdk -- wmic os get caption
 
 Invoke a Java command prompt (JShell) with OpenJDK 18::

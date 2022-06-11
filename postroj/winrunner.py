@@ -24,16 +24,16 @@ logger = logging.getLogger(__name__)
 
 class WinRunner:
 
-    VCPUS = os.environ.get("RACKER_VM_VCPUS", 6)
-    MEMORY = os.environ.get("RACKER_VM_MEMORY", 6144)
+    VCPUS = os.environ.get("RACKER_WDM_VCPUS", 6)
+    MEMORY = os.environ.get("RACKER_WDM_MEMORY", 6144)
 
     def __init__(self, image: str):
         self.image_base = image
         self.image_real = "racker-runtime/" + self.image_base.replace("/", "-")
 
-        self.BOX = None
-        self.choose_box()
-        logger.info(f"Using host machine box image {self.BOX} for launching container image {self.image_base}")
+        self.wdm_machine = None
+        self.choose_wdm_machine()
+        logger.info(f"Using WDM host machine {self.wdm_machine} for launching container image {self.image_base}")
 
         self.workdir = Path(appdirs.user_state_dir(appname="racker"))
         self.workdir.mkdir(exist_ok=True, parents=True)
@@ -58,9 +58,9 @@ class WinRunner:
         else:
             logger.info(f"Windows Docker Machine already installed into {self.wdmdir}")
 
-    def choose_box(self):
+    def choose_wdm_machine(self):
         """
-        Choose the right box based on the container image to launch.
+        Choose the right virtual machine based on the container image to launch.
         """
 
         image = self.image_base
@@ -69,8 +69,8 @@ class WinRunner:
 
         logger.info(f"Inquiring information about OCI image '{image}'")
 
-        if "RACKER_VM_BOX" in os.environ:
-            self.BOX = os.environ["RACKER_VM_BOX"]
+        if "RACKER_WDM_MACHINE" in os.environ:
+            self.wdm_machine = os.environ["RACKER_WDM_MACHINE"]
             return
 
         # TODO: Cache the response from `skopeo inspect` to avoid the 3-second speed bump.
@@ -103,12 +103,12 @@ class WinRunner:
             "10.0.20348": "2022-box",
         }
 
-        for os_version, box in os_version_box_map.items():
+        for os_version, machine in os_version_box_map.items():
             if image_os_version.startswith(os_version):
-                self.BOX = box
+                self.wdm_machine = machine
 
-        if self.BOX is None:
-            raise ValueError(f"Unable to choose host machine box image for container image {image}, matching OS version {image_os_version}. "
+        if self.wdm_machine is None:
+            raise ValueError(f"Unable to choose WDM host machine for container image {image}, matching OS version {image_os_version}. "
                              f"Please report this error to https://github.com/cicerops/racker/issues/new.")
 
     def start(self, provision=False):
@@ -129,23 +129,23 @@ class WinRunner:
             provision_option = ""
             if provision:
                 provision_option = "--provision"
-            cmd(f"vagrant up --provider=virtualbox {provision_option} {self.BOX}", cwd=self.wdmdir, use_stderr=True)
+            cmd(f"vagrant up --provider=virtualbox {provision_option} {self.wdm_machine}", cwd=self.wdmdir, use_stderr=True)
 
         logger.info("Pinging Docker context")
         if not self.docker_context_online():
-            raise IOError(f"Unable to bring up Docker context {self.BOX}")
+            raise IOError(f"Unable to bring up Docker context {self.wdm_machine}")
 
         # Attention: This can run into 60 second timeouts.
         # TODO: Use ``with stopit.ThreadingTimeout(timeout) as to_ctx_mgr``.
         # TODO: Make timeout values configurable.
         # https://github.com/moby/moby/blob/0e04b514fb/integration-cli/docker_cli_run_test.go
-        cmd(f"docker --context={self.BOX} ps", capture=True)
+        cmd(f"docker --context={self.wdm_machine} ps", capture=True)
 
         # Skip installing software using Chocolatey for specific Windows OS versions.
         # - Windows Nanoserver does not have PowerShell.
         # - Windows 2016 croaks like:
         #   `The command 'cmd /S /C choco install --yes ...' returned a non-zero code: 3221225785`
-        if "nanoserver" in self.image_base or self.BOX == "2016-box":
+        if "nanoserver" in self.image_base or self.wdm_machine == "2016-box":
             self.image_real = self.image_base
         else:
             self.provision_image()
@@ -163,7 +163,7 @@ class WinRunner:
         logger.info(f"Provisioning Docker image for Windows environment based on {self.image_base}")
         dockerfile = pkg_resources.resource_filename("postroj", "winrunner.Dockerfile")
         tmpdir = tempfile.mkdtemp()
-        command = f"docker --context={self.BOX} build --platform=windows/amd64 " \
+        command = f"docker --context={self.wdm_machine} build --platform=windows/amd64 " \
                   f"--file={dockerfile} --build-arg=BASE_IMAGE={self.image_base} --tag={self.image_real} {tmpdir}"
         logger.debug(f"Running command: {command}")
         try:
@@ -188,7 +188,8 @@ class WinRunner:
         if interactive or tty:
             option_interactive = "-it"
 
-        command = f"docker --context={self.BOX} run {option_interactive} --rm {self.image_real} {command}"
+        # TODO: Propagate ``--rm`` appropriately.
+        command = f"docker --context={self.wdm_machine} run {option_interactive} --rm {self.image_real} {command}"
 
         # When an interactive prompt is requested, spawn a shell without further ado.
         if interactive or tty:
@@ -203,11 +204,11 @@ class WinRunner:
         """
         Test if the Docker context is online.
         """
-        logger.info(f"Checking connectivity to Docker daemon in Windows context '{self.BOX}'")
+        logger.info(f"Checking connectivity to Docker daemon in Windows context '{self.wdm_machine}'")
         try:
-            response = cmd(f"docker context inspect {self.BOX}", capture=True)
+            response = cmd(f"docker context inspect {self.wdm_machine}", capture=True)
         except:
-            logger.warning(f"Docker context {self.BOX} not online or not created yet")
+            logger.warning(f"Docker context {self.wdm_machine} not online or not created yet")
             return False
 
         data = json.loads(response.stdout)

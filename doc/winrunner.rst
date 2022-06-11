@@ -98,13 +98,13 @@ when possible, the image will be launched on a Windows 2022 machine. If you
 want to explicitly control on which runner host the container will be launched,
 use another environment variable::
 
-    export RACKER_VM_BOX=2019-box
+    export RACKER_WDM_MACHINE=2019-box
 
 If you receive error messages like ``docker: no matching manifest for
 windows/amd64 10.0.17763 in the manifest list entries.``, reset this setting
 by typing::
 
-    unset RACKER_VM_BOX
+    unset RACKER_WDM_MACHINE
 
 Vagrant stores the boxes in this directory:
 
@@ -296,7 +296,7 @@ Display Python version, launched within containers in different environments::
 
     # Explicitly select `2019-box` as different host OS.
     # The default would be to automatically select `2022-box`.
-    RACKER_VM_BOX=2019-box racker --verbose run --rm --platform=windows/amd64 winamd64/python:3.11-rc -- python -V
+    RACKER_WDM_MACHINE=2019-box racker --verbose run --rm --platform=windows/amd64 winamd64/python:3.11-rc -- python -V
 
     # Nano Server
     racker --verbose run --rm --platform=windows/amd64 stefanscherer/python-windows:nano -- python -V
@@ -327,7 +327,7 @@ Display Java version, launched within containers in different environments::
 
     # Explicitly select `2019-box` as different host OS.
     # The default would be to automatically select `2022-box`.
-    RACKER_VM_BOX=2019-box racker --verbose run --rm --platform=windows/amd64 openjdk:19 -- java --version
+    RACKER_WDM_MACHINE=2019-box racker --verbose run --rm --platform=windows/amd64 openjdk:19 -- java --version
 
     # Nano Server
     racker --verbose run --rm --platform=windows/amd64 openjdk:19-nanoserver -- java --version
