@@ -12,9 +12,14 @@ in progress
 - Updated OS registry with Fedora 44 and 45, CentOS 10, RHEL 10, RockyLinux 9,
   OpenSUSE Leap 16, AmazonLinux 2023, Oracle Linux 9 and 10
 - Make Windows runner subsystem production ready.
+- Make Windows runner subsystem production ready.
+- Add support for Windows Server Core 2019 and friends, like
+  ``windows/servercore:ltsc2019``, ``windows/nanoserver:1809``, or
+  ``eclipse-temurin:17-jdk``.
 - Add support for Windows Server Core 2016, 2022 and friends, like
   ``windows/servercore:ltsc2016``, ``windows/servercore:ltsc2022``, or
   ``windows/nanoserver:ltsc2022``.
+- Improve documentation about the Windows backend
 
 2023-02-14 0.3.0
 ================

@@ -64,22 +64,26 @@ reset the "Windows Docker Machine" installation directory. For example, it is:
 - On macOS: ``/Users/amo/Library/Application Support/racker/windows-docker-machine``
 
 
-
 **********
 racker run
 **********
 
 Purpose: Invoke programs in a Java/OpenJDK environment, within a
-virtualized/dockerized Windows installation.
+virtualized/dockerized, volatile/ephemeral Windows environment.
 
 Run the CrateDB test suite on OpenJDK 18 (Eclipse Temurin)::
 
-    time racker run --rm --platform=windows/amd64 eclipse-temurin:18-jdk \
+    time racker --verbose run --rm --platform=windows/amd64 eclipse-temurin:18-jdk \
         "sh -c 'mkdir /c/src; cd /c/src; git clone https://github.com/crate/crate --depth=1; cd crate; ./gradlew --no-daemon --parallel -PtestForks=2 :server:test -Dtests.crate.run-windows-incompatible=false --stacktrace'"
+
+Use the same image, but select a specific operating system version::
+
+    export RACKER_VM_BOX=2019-box
+    racker --verbose run --rm --platform=windows/amd64 eclipse-temurin:18-jdk -- wmic os get caption
 
 Invoke a Java command prompt (JShell) with OpenJDK 18::
 
-    racker run -it --rm --platform=windows/amd64 eclipse-temurin:18-jdk jshell
+    racker --verbose run -it --rm --platform=windows/amd64 eclipse-temurin:18-jdk jshell
     System.out.println("OS: " + System.getProperty("os.name") + ", version " + System.getProperty("os.version"))
     System.out.println("Java: " + System.getProperty("java.vendor") + ", version " + System.getProperty("java.version"))
 
