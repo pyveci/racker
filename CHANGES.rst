@@ -22,6 +22,9 @@ in progress
 - Rename environment variables used to control the Windows Docker Machine
   subsystem. The new names are ``RACKER_WDM_VCPUS``, ``RACKER_WDM_MEMORY``,
   and ``RACKER_WDM_MACHINE``.
+- Add environment variable ``RACKER_WDM_PROVIDER`` to reconfigure the
+  Vagrant virtualization backend differently than VirtualBox.
+
 
 2022-05-20 0.2.0
 ================
