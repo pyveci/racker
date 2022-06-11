@@ -18,6 +18,7 @@ in progress
 - Add support for Windows Server Core 2016, 2022 and friends, like
   ``windows/servercore:ltsc2016``, ``windows/servercore:ltsc2022``, or
   ``windows/nanoserver:ltsc2022``.
+- Improve documentation about the Windows backend
 
 2022-05-20 0.2.0
 ================

@@ -224,7 +224,9 @@ Racker
 The ``racker`` program aims to resemble the semantics of Docker by providing a
 command line interface compatible with the ``docker`` command.
 
-Linux examples::
+Linux
+-----
+::
 
     # Invoke the vanilla Docker `hello-world` image.
     # FIXME: Does not work yet.
@@ -256,47 +258,19 @@ Linux examples::
     time echo "hello world" | racker run -it --rm fedora:37 cat /dev/stdin > hello
     cat hello
 
-Windows examples::
+Windows
+-------
 
-    # Windows OS images, mostly LTSC (Long-Term Servicing Channel).
-    # Please note the download sizes.
-    # Nanoserver: 250 MB, Servercore: 6 GB, Servercore with Java: 7 GB, Windows: 15 GB
+An example of a basic command line invocation should get you started,
+especially if you are familiar with the ``docker`` command::
 
-    # Launch an interactive command prompt (cmd, PowerShell or Bash).
-    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2016-amd64 cmd
-    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 powershell
-    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2022-amd64 bash
+    racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2022 -- wmic os get caption
 
-    # Launch a single command.
-    racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 -- 'powershell -Command {echo "Hello, world."}'
-    racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 'sh -c "echo Hello, world."'
+    Caption
+    Microsoft Windows Server 2022 Datacenter
 
-    # Inquire system information.
-    racker run --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 wmic os get caption
-    racker run --rm --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2019-amd64 'powershell -Command Get-ComputerInfo'
-
-    # Use stdin and stdout, with time keeping.
-    time racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:1809-amd64 cmd /C echo "Hello, world." > hello
-    cat hello
-
-    # Invoke a Java command prompt (JShell) with different Java versions.
-    racker run -it --rm --platform=windows/amd64 openjdk:18-windowsservercore-1809 jshell
-    racker run -it --rm --platform=windows/amd64 openjdk:19-windowsservercore-ltsc2022 jshell
-    racker run -it --rm --platform=windows/amd64 eclipse-temurin:18-jdk jshell
-    System.out.println("OS: " + System.getProperty("os.name") + ", version " + System.getProperty("os.version"))
-    System.out.println("Java: " + System.getProperty("java.vendor") + ", version " + System.getProperty("java.version"))
-    /exit
-
-    # Windows Nano Server.
-    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:1809-amd64 cmd
-    racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:1809-amd64 cmd /C echo Hello, world.
-    racker --verbose run --rm --platform=windows/amd64 mcr.microsoft.com/windows/nanoserver:ltsc2022-amd64 cmd /C echo Hello, world.
-    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/powershell:nanoserver-ltsc2022 pwsh
-
-    # Full Windows.
-    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows:1809-amd64 cmd
-    racker --verbose run -it --rm --platform=windows/amd64 mcr.microsoft.com/windows:ltsc2022-amd64 cmd
-
+More extensive information, including many examples, can be found at the
+`Racker Windows backend`_ documentation.
 
 
 Postroj
@@ -483,6 +457,7 @@ Troubleshooting
 .. _Packer: https://www.packer.io/
 .. _Podman: https://podman.io/
 .. _Racker sandbox installation: https://github.com/cicerops/racker/blob/main/doc/sandbox.rst
+.. _Racker Windows backend: https://github.com/cicerops/racker/blob/main/doc/winrunner.rst
 .. _skopeo: https://github.com/containers/skopeo
 .. _systemd: https://www.freedesktop.org/wiki/Software/systemd/
 .. _systemd-nspawn: https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html
