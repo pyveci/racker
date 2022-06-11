@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 class WinRunner:
 
+    VAGRANT_PROVIDER = os.environ.get("RACKER_WDM_PROVIDER", "virtualbox")
     VCPUS = os.environ.get("RACKER_WDM_VCPUS", 4)
     MEMORY = os.environ.get("RACKER_WDM_MEMORY", 4096)
 
@@ -129,7 +130,7 @@ class WinRunner:
             provision_option = ""
             if provision:
                 provision_option = "--provision"
-            cmd(f"vagrant up --provider=virtualbox {provision_option} {self.wdm_machine}", cwd=self.wdmdir, use_stderr=True)
+            cmd(f"vagrant up --provider={self.VAGRANT_PROVIDER} {provision_option} {self.wdm_machine}", cwd=self.wdmdir, use_stderr=True)
 
         logger.info("Pinging Docker context")
         if not self.docker_context_online():

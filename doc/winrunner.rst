@@ -79,8 +79,26 @@ reset the `Windows Docker Machine`_ installation directory. For example, it is:
 - On Linux: ``/root/.local/state/racker/windows-docker-machine``
 - On macOS: ``/Users/amo/Library/Application Support/racker/windows-docker-machine``
 
-Runtime
-=======
+
+VM provider
+===========
+
+`Vagrant`_ is able to use different providers as virtualization backend. By
+default, Racker selects `VirtualBox`_. In order to change the backend,
+reconfigure this environment variable::
+
+    export RACKER_WDM_PROVIDER=vmware_workstation
+
+Possible values are, in alphabetical order, ``hyperv``, ``virtualbox``,
+``qemu``, ``vmware_fusion``, ``vmware_workstation``.
+
+Please note that this has not been tested with providers other than
+`VirtualBox`_, so we would welcome to receive feedback from the community
+whether this also works well for them on other hypervisors.
+
+
+VM machine
+==========
 
 The architecture of Windows leads to container compatibility requirements that
 are different than on Linux, more background about this detail can be found at
@@ -444,6 +462,8 @@ The whole software catalog can be inquired at `Chocolatey community packages`_.
 .. _Overview of System Center release options: https://docs.microsoft.com/en-us/system-center/ltsc-and-sac-overview
 .. _Python: https://www.python.org/
 .. _Using Racker and Postroj for CrateDB CI: https://github.com/cicerops/racker/blob/main/doc/cratedb.rst
+.. _Vagrant: https://www.vagrantup.com/
+.. _VirtualBox: https://www.virtualbox.org/
 .. _Windows Container Base Images: https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/container-base-images
 .. _Windows container version compatibility: https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility
 .. _Windows Docker Machine: https://github.com/StefanScherer/windows-docker-machine
