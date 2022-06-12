@@ -25,6 +25,9 @@ in progress
   and ``RACKER_WDM_MACHINE``.
 - Add environment variable ``RACKER_WDM_PROVIDER`` to reconfigure the
   Vagrant virtualization backend differently than VirtualBox.
+- Documentation: Add use case how to build a Python package within a
+  Windows environment, using Microsoft Visual C++ Build Tools 2015 and
+  Anaconda, both installed using Chocolatey, and ``cibuildwheel``.
 
 
 2023-02-14 0.3.0
