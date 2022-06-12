@@ -219,9 +219,9 @@ class WinRunner:
         return port_is_up(address.hostname, address.port)
 
 
-def hcmd(command, cwd=None, silent=False):
+def hcmd(command, cwd=None,  use_stderr=True, silent=False):
     logger.debug(f"Running command: {command}")
-    return cmd(command, cwd=cwd, use_stderr=True)
+    return cmd(command, cwd=cwd, use_stderr=use_stderr)
 
 
 def hshell(command, cwd=None):
@@ -230,9 +230,10 @@ def hshell(command, cwd=None):
     return subprocess.check_output(command, shell=True, cwd=cwd).decode()
 
 
-def ccmd(command, use_pty=False):
+def ccmd(command, use_pty=False, capture=False):
     logger.debug(f"Running command: {command}")
-    p = cmd(command=command, use_pty=use_pty)
+    p = cmd(command=command, use_pty=use_pty, capture=capture)
     stdout = p.stdout
-    fix_tty()
+    if use_pty:
+        fix_tty()
     return stdout
