@@ -11,8 +11,13 @@ from subprocess import CalledProcessError, CompletedProcess
 import pytest
 
 
+# Currently, this test module effectively runs well on macOS.
+# The following snippet skips invocation on both VirtualBox
+# and GitHub Actions.
+
 if "rackerhost-debian11" in socket.gethostname():
-    pytest.skip("Nested virtualization with VT-x fails on developer's macOS workstation", allow_module_level=True)
+    pytest.skip("Nested virtualization with VT-x fails within "
+                "VirtualBox environment on developer's macOS workstation", allow_module_level=True)
 
 if "GITHUB_ACTIONS" in os.environ:
     pytest.skip("Installing the Vagrant filesystem image for Windows "
