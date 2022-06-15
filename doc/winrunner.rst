@@ -180,6 +180,8 @@ different.
 - Windows Server: 4.8 GB
 - Windows: 7.1 GB
 
+Around 2016/2019, it was like https://stefanscherer.github.io/windows-docker-workshop/#20.
+
 
 System information
 ==================
