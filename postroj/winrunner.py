@@ -96,9 +96,11 @@ class WinRunner:
             raise ValueError(f"Container image {image} is not Windows, but {image_os_name} instead")
 
         # https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility
+        # https://stefanscherer.github.io/windows-docker-workshop/#91
         os_version_box_map = {
             "10.0.14393": "2016-box",
             "10.0.16299": "2019-box",   # openjdk:8-windowsservercore-1709
+            "10.0.17134": "2019-box",
             "10.0.17763": "2019-box",
             "10.0.19042": "2022-box",
             "10.0.20348": "2022-box",
@@ -189,8 +191,16 @@ class WinRunner:
         if interactive or tty:
             option_interactive = "-it"
 
-        # TODO: Propagate ``--rm`` appropriately.
-        command = f"docker --context={self.wdm_machine} run {option_interactive} --rm {self.image_real} {command}"
+        # TODO: Propagate ``--rm`` option appropriately.
+        # TODO: Propagate ``--volume`` option.
+        #       option_volume = "--volume=C:/Users/amo/dev/cicerops-foss/sources/postroj:C:/racker"
+        #       https://github.com/cicerops/racker/issues/8
+        option_volume = ""
+        #option_volume = "--volume=C:/Users/amo/dev/cicerops-foss/sources/postroj:C:/racker"
+        #option_volume = "--volume=C:/Users/amo/dev/panodata/sources/apprise:C:/apprise"
+        #option_volume = "--volume=C:/Users/amo/dev/earthobservations/wetterdienst:C:/wetterdienst"
+        #option_volume = "--volume=C:/Users/amo/dev/crate/sources/crate:C:/crate"
+        command = f"docker --context={self.wdm_machine} run {option_interactive} --rm {option_volume} {self.image_real} {command}"
 
         # When an interactive prompt is requested, spawn a shell without further ado.
         if interactive or tty:
