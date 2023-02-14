@@ -41,7 +41,7 @@ Racker
     :alt: License
 
 .. image:: https://pepy.tech/badge/racker/month
-    :target: https://pypi.org/project/racker/
+    :target: https://pepy.tech/project/racker
     :alt: PyPI downloads / month
 
 

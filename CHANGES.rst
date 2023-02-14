@@ -6,6 +6,10 @@ Racker changelog
 in progress
 ===========
 
+
+2023-02-14 0.3.0
+================
+
 - Increase resources assigned to Vagrant environment.
   Now, it gets 4 VCPUs and 4096 MB RAM.
 - Improve platform guards and naming things
