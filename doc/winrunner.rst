@@ -8,17 +8,18 @@ About
 *****
 
 Launch an interactive command prompt (cmd, PowerShell, or Bash) within a
-Windows environment (2016, 2019, or 2022) or invoke programs
+Windows environment (2016, 2019, or 2022), or invoke programs
 non-interactively.
 
 Features
 ========
 
 - The subsystem is heavily based on the excellent `Windows Docker Machine`_.
-- The package manager `Chocolatey`_ is pre-installed on the container images
-  where PowerShell is available.
+- The `Scoop`_ package manager is pre-installed on the container images
+  where PowerShell is available. The `Chocolatey`_ package manager can be
+  installed on demand.
 - Programs like ``busybox``, ``curl``, ``git``, ``nano``, and ``wget`` are
-  pre-installed on the container images where `Chocolatey`_ is available.
+  pre-installed on the container images where `Scoop`_ is available.
 - The `Windows container version compatibility`_ problem is conveniently
   solved by automatically selecting the right machine matching the requested
   container image.
@@ -190,7 +191,7 @@ Install and run `Winfetch`_::
 
     racker --verbose run --rm \
         --platform=windows/amd64 mcr.microsoft.com/windows/servercore:ltsc2022 -- \
-        cmd /C 'choco install --yes --force winfetch & refreshenv & winfetch'
+        cmd /C 'scoop install winfetch & winfetch'
 
 .. figure:: https://user-images.githubusercontent.com/453543/173195228-b75c8727-7187-4c38-ae28-f74098dfb450.png
     :width: 800
@@ -463,6 +464,7 @@ The whole software catalog can be inquired at `Chocolatey community packages`_.
 .. _Midnight Commander: https://en.wikipedia.org/wiki/Midnight_Commander
 .. _Overview of System Center release options: https://docs.microsoft.com/en-us/system-center/ltsc-and-sac-overview
 .. _Python: https://www.python.org/
+.. _Scoop: https://scoop.sh/
 .. _Using Racker and Postroj for CrateDB CI: https://github.com/cicerops/racker/blob/main/doc/cratedb.rst
 .. _Vagrant: https://www.vagrantup.com/
 .. _VirtualBox: https://www.virtualbox.org/
