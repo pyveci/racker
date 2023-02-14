@@ -23,6 +23,8 @@ class NspawnBackend:
         Launch a container.
 
         Define the command to spawn the container.
+        TODO: Mount directory from host.
+              # --bind=/usr/src/racker/tmp:/pkg \
         TODO: Why does `--ephemeral` not work?
         TODO: Maybe use `--register=false`?
         TODO: What about `--notify-ready=true`?

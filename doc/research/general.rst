@@ -173,3 +173,27 @@ Kubernetes
 - https://blog.tilt.dev/2021/03/18/kubernetes-is-so-simple.html
 - https://github.com/kubernetes-sigs/kind
 - https://www.docker.com/blog/welcome-tilt-fixing-the-pains-of-microservice-development-for-kubernetes/
+
+
+Virtualized macOS
+=================
+
+- KVM: https://github.com/kholia/OSX-KVM
+- VirtualBox: https://github.com/myspaghetti/macos-virtualbox
+
+
+Ignite / Firecracker
+====================
+
+- https://github.com/weaveworks/ignite
+
+
+Devbox
+======
+
+- https://github.com/jetpack-io/devbox
+
+Bocker
+======
+
+- https://github.com/p8952/bocker
