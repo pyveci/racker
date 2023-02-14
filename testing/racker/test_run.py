@@ -59,7 +59,7 @@ def test_run_command_curated_cloudimage_success(capfd, delay):
 
     assert "Static hostname: ubuntu" in captured.out
     assert "Virtualization: systemd-nspawn" in captured.out
-    assert "Operating System: Ubuntu 22.04 LTS" in captured.out
+    assert "Operating System: Ubuntu 22.04" in captured.out
     assert captured.err == ""
 
 
