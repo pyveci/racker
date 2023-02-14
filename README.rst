@@ -1,3 +1,6 @@
+.. highlight:: sh
+
+
 ######
 Racker
 ######
@@ -181,7 +184,6 @@ Install prerequisites::
 
     apt-get update
     apt-get install --yes systemd-container skopeo umoci python3-pip python3-venv
-
 
 Install Racker::
 
@@ -408,6 +410,17 @@ Troubleshooting
 1. If you see that your container might not have network access, make sure to
    provide a valid DNS configuration in your host's ``/etc/resolv.conf``.
    When in doubt, please add ``nameserver 9.9.9.9`` as the first entry.
+
+2. Sometimes, configuring an arbitrary name server is not permitted. An indicator
+   could be this configuration within ``/etc/resolv.conf``::
+
+       nameserver 127.0.0.53
+       options edns0 trust-ad
+
+   If that is the case, you can look up the trusted DNS servers by running
+   ``resolvectl status`` or ``resolvectl dns``. Then, use the DNS server listed
+   there to announce per ``nameserver <dns host>`` entry to your container's
+   ``/etc/resolv.conf``.
 
 
 .. _autopkgtest: https://www.freedesktop.org/wiki/Software/systemd/autopkgtest/

@@ -7,9 +7,18 @@ Racker backlog
     Those are just random notes about ideas and more.
 
 
-***********
-Iteration 3
-***********
+************
+Iteration +2
+************
+
+- [o] Improve mounting/provisioning of ``/etc/resolv.conf``,
+  see "Troubleshooting" section.
+- [o] Add Alma Linux
+
+
+************
+Iteration +3
+************
 
 - [o] Docs: Harness tool == Image bakery + Payload launcher
 - [o] Support for Windows. ``windows/nanoserver:1809`` and ``windows/servercore:ltsc2019``.
@@ -33,9 +42,9 @@ Iteration 3
   - https://github.com/asiffer/netspot/search?q=mkosi
 
 
-*************
-Iteration 3.5
-*************
+************
+Iteration +4
+************
 
 - [o] Windows support leftovers
 
@@ -72,9 +81,9 @@ Iteration 3.5
 
 
 
-***********
-Iteration 4
-***********
+************
+Iteration +5
+************
 
 - [o] Test case currently does not tear down container?
 - [o] Check using btrfs as container root.
