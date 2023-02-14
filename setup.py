@@ -47,6 +47,7 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Affero General Public License v3",
+        "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
         "Development Status :: 3 - Alpha",
         "Operating System :: POSIX :: Linux",
         "Natural Language :: English",
@@ -83,10 +84,14 @@ setup(
         "tld>=0.10,<1",
     ],
     extras_require={
+        "release": [
+            "build<1",
+            "twine<5",
+        ],
         "test": [
             "pytest>=6,<8",
             "pytest-cov>=2,<3",
             "re-assert>=1,<2",
-        ]
+        ],
     },
 )
