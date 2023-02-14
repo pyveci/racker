@@ -11,6 +11,7 @@ in progress
 - Improve platform guards and naming things
 - Improve central command invocation function
 - Improve documentation
+- Fix packaging
 
 
 2022-05-20 0.2.0

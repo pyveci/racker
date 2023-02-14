@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, "README.rst")).read()
@@ -15,7 +15,7 @@ setup(
     description="Racker is an experimental harness tool for provisioning and launching operating system containers",
     long_description=README,
     download_url="https://pypi.org/project/racker/",
-    packages=["racker", "postroj"],
+    packages=find_packages(),
     license="AGPL-3.0, EUPL-1.2",
     keywords=[
         "systemd",
