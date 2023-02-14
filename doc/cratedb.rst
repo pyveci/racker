@@ -26,6 +26,29 @@ Invoke a Java command prompt (JShell) with OpenJDK 18::
     System.out.println("OS: " + System.getProperty("os.name") + ", version " + System.getProperty("os.version"))
     System.out.println("Java: " + System.getProperty("java.vendor") + ", version " + System.getProperty("java.version"))
 
+Build CrateDB from source, extract Zip archive, and invoke available programs::
+
+    # Spawn a Windows environment with `cmd` shell.
+    # TODO: Bind-mounting not possible via command line yet, need to touch the code for this.
+    racker --verbose run --rm -it --platform=windows/amd64 eclipse-temurin:18-jdk -- cmd
+
+    # Build CrateDB.
+    cd \crate
+    gradlew clean distZip
+
+    # Extract zip archive.
+    mkdir \tmp
+    cd \tmp
+    unzip \crate\app\build\distributions\crate-5.3.0-SNAPSHOT-327070e3fe.zip
+    cd crate-5.3.0-SNAPSHOT-327070e3fe
+
+    # Run CrateDB and tools.
+    bin\crate
+    # Submit <Ctrl+C> to stop
+
+    bin\crate-node fix-metadata
+    # Send y to the prompt
+
 
 ****************
 postroj pkgprobe
