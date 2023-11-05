@@ -235,3 +235,21 @@ KISS Linux
 The distribution explicitly excludes logind, udev, dbus, systemd, polkit,
 pulseaudio, electron and all desktop environments. This software is either
 with lock-in, too complex or otherwise out of scope.
+
+
+LXC
+===
+
+- https://linuxcontainers.org/distrobuilder/
+- https://github.com/lxc/distrobuilder
+- https://uk.lxd.images.canonical.com/
+
+
+OCI-based Linux
+===============
+
+- https://s3hh.wordpress.com/2022/10/27/oci-based-linux/
+- https://github.com/project-stacker/stacker
+- https://stackerbuild.io/
+- https://zotregistry.io/
+- https://zothub.io/

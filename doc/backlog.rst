@@ -14,6 +14,10 @@ Iteration +2
 - [o] Improve mounting/provisioning of ``/etc/resolv.conf``,
   see "Troubleshooting" section.
 - [o] Add Alma Linux
+- [o] Provide ``Vagrantfile``s suitable for both running GA-releases of Racker,
+  or the sandbox variant directly from the repository, suitable for development
+  installations.
+- [o] Improve installation instructions: Linux vs. macOS
 
 
 ************

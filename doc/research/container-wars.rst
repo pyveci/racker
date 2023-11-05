@@ -74,6 +74,8 @@ Quotes
     Varlink-Standards ausgedacht.
 
     -- https://www.heise.de/select/ct/2020/8/2006310084759623163 (8/2020)
+    -- https://github.com/appc
+    -- Podman removed Varlink: https://podman.io/blogs/2020/01/17/podman-new-api.html
 
 
 ******
