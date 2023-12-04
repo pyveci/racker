@@ -7,6 +7,22 @@ Troubleshooting
     Just some random notes.
 
 
+*****************
+Use Vagrant 2.3.4
+*****************
+
+People reported problems with other versions.
+
+https://github.com/StefanScherer/windows-docker-machine/issues/94
+
+
+*********************
+Use VirtualBox 6.1.40
+*********************
+
+People reported problems with other versions.
+
+
 *******************
 machinectl pull-raw
 *******************

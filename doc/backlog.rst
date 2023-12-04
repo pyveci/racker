@@ -8,6 +8,23 @@ Racker backlog
 
 
 ************
+Iteration +1
+************
+::
+
+    ContainerAdministrator@9af42fa01a1a MINGW64 /c/pycaret
+    $ git branch
+    fatal: detected dubious ownership in repository at 'C:/pycaret'
+    'C:/pycaret' is owned by:
+            'S-1-5-21-501'
+    but the current user is:
+            'S-1-5-93-2-1'
+    To add an exception for this directory, call:
+
+            git config --global --add safe.directory C:/pycaret
+
+
+************
 Iteration +2
 ************
 
