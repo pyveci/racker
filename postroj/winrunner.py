@@ -200,6 +200,11 @@ class WinRunner:
         #option_volume = "--volume=C:/Users/amo/dev/panodata/sources/apprise:C:/apprise"
         #option_volume = "--volume=C:/Users/amo/dev/earthobservations/wetterdienst:C:/wetterdienst"
         #option_volume = "--volume=C:/Users/amo/dev/crate/sources/crate:C:/crate"
+        #option_volumes = [
+        #    "--volume=C:/Users/amo/dev/crate-workbench/sources/pycaret:C:/pycaret",
+        #    "--volume=C:/Users/amo/dev/tmp/pip-cache-windows:C:/Users/ContainerAdministrator/AppData/Local/pip/cache",
+        #]
+        #option_volume = " ".join(option_volumes)
         command = f"docker --context={self.wdm_machine} run {option_interactive} --rm {option_volume} {self.image_real} {command}"
 
         # When an interactive prompt is requested, spawn a shell without further ado.
