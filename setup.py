@@ -85,7 +85,7 @@ setup(
     ],
     extras_require={
         "release": [
-            "build<1",
+            "build<2",
             "twine<5",
         ],
         "test": [
