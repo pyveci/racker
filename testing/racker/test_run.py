@@ -29,19 +29,19 @@ def test_run_image_invalid(caplog):
 
 def test_run_command_docker_image_success(capfd, delay):
     """
-    Spawn a Debian 9 "stretch" container and run `hostnamectl` on it.
+    Spawn a Debian 10 "buster" container and run `hostnamectl` on it.
     The container image will be acquired from Docker.
     """
     runner = CliRunner()
 
-    result = runner.invoke(cli, "run -it --rm debian:stretch-slim /usr/bin/hostnamectl", catch_exceptions=False)
+    result = runner.invoke(cli, "run -it --rm debian:buster-slim /usr/bin/hostnamectl", catch_exceptions=False)
     assert result.exit_code == 0
 
     captured = capfd.readouterr()
 
     assert "Static hostname: debuerreotype" in captured.out
     assert "Virtualization: systemd-nspawn" in captured.out
-    assert "Operating System: Debian GNU/Linux 9 (stretch)" in captured.out
+    assert "Operating System: Debian GNU/Linux 10 (buster)" in captured.out
     assert captured.err == ""
 
 
@@ -69,7 +69,7 @@ def test_run_command_failure_path_not_absolute(capfd, delay):
     """
     runner = CliRunner()
 
-    result = runner.invoke(cli, "run -it --rm debian:stretch-slim foo", catch_exceptions=False)
+    result = runner.invoke(cli, "run -it --rm debian:buster-slim foo", catch_exceptions=False)
     assert result.exit_code == 1
 
     captured = capfd.readouterr()
@@ -84,7 +84,7 @@ def test_run_command_failure_command_not_found(caplog, delay):
     """
     runner = CliRunner()
 
-    result = runner.invoke(cli, "run -it --rm debian:stretch-slim /bin/foo", catch_exceptions=False)
+    result = runner.invoke(cli, "run -it --rm debian:buster-slim /bin/foo", catch_exceptions=False)
     assert result.exit_code == 203
 
     assert "Running command in container" in caplog.text
@@ -98,7 +98,7 @@ def test_run_stdin_stdout(monkeypatch, capsys, delay):
     """
     program_path = Path(sys.argv[0]).parent
     racker = program_path / "racker"
-    command = f"{racker} run -it --rm debian:stretch-slim /bin/cat /dev/stdin"
+    command = f"{racker} run -it --rm debian:buster-slim /bin/cat /dev/stdin"
     process = subprocess.run(shlex.split(command), input=b"foo", stdout=subprocess.PIPE, env={"TESTING": "true"})
     process.check_returncode()
     assert process.stdout == b"foo"
@@ -110,7 +110,7 @@ def test_run_stdin_stdout_original(capfd):
     runner = CliRunner()
 
     sys.stdin = io.BytesIO(b"foo")
-    result = runner.invoke(cli, "run -it --rm debian:stretch-slim /bin/cat /dev/stdin", input=b"foo", catch_exceptions=False)
+    result = runner.invoke(cli, "run -it --rm debian:buster-slim /bin/cat /dev/stdin", input=b"foo", catch_exceptions=False)
     assert result.exit_code == 0
 
     # FIXME: Why is stdout empty?
@@ -121,6 +121,6 @@ def test_run_stdin_stdout_original(capfd):
 """
 
 
-# TODO: Provoke `Directory tree /var/lib/testdrive/postroj/archive/debian-stretch-slim.img/rootfs is currently busy.`, by
+# TODO: Provoke `Directory tree /var/lib/testdrive/postroj/archive/debian-buster-slim.img/rootfs is currently busy.`, by
 #       a) running a command while the container is still running.
 #       b) trying to start a container twice.
