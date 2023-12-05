@@ -84,7 +84,7 @@ def test_acquire_provisioning_error():
     Simulate a provisioning error.
     """
     distribution = DynamicDistribution.empty()
-    distribution.image = "docker://docker.io/debian:stretch-slim"
+    distribution.image = "docker://docker.io/debian:buster-slim"
     ip = ImageProvider(distribution=distribution, autosetup=False)
 
     def raise_exception(*args, **kwargs):
@@ -192,7 +192,7 @@ def test_provision_systemd_unsupported_operating_system():
 
 
 def test_discover_os_release_file_invalid_command():
-    ip = ImageProvider(distribution=DynamicDistribution.from_image("debian:stretch-slim"), autosetup=False)
+    ip = ImageProvider(distribution=DynamicDistribution.from_image("debian:buster-slim"), autosetup=False)
     with patch("postroj.image.ImageProvider.CAT_COMMAND", "/bin/foo"):
         with pytest.raises(OsReleaseFileMissing) as ex:
             ip.discover()
@@ -203,7 +203,7 @@ def test_discover_os_release_file_invalid_command():
 
 
 def test_discover_os_release_file_invalid_file():
-    ip = ImageProvider(distribution=DynamicDistribution.from_image("debian:stretch-slim"), autosetup=False)
+    ip = ImageProvider(distribution=DynamicDistribution.from_image("debian:buster-slim"), autosetup=False)
     with patch("postroj.image.ImageProvider.OS_RELEASE_FILE", "/etc/bar"):
         with pytest.raises(OsReleaseFileMissing) as ex:
             ip.discover()
@@ -241,7 +241,7 @@ def test_activate_empty_directory_fails(tmpdir):
 
 
 def test_setup():
-    distribution = DynamicDistribution.from_image("debian:stretch-slim")
+    distribution = DynamicDistribution.from_image("debian:buster-slim")
     ip = ImageProvider(distribution=distribution, autosetup=False)
     ip.setup()
     assert ip.image.is_symlink()

@@ -6,6 +6,8 @@ Racker changelog
 in progress
 ===========
 
+- Remove support for Debian 9 "stretch"
+
 
 2023-02-14 0.3.0
 ================

@@ -18,5 +18,5 @@ def test_get_selftest_distributions(delay):
 
 
 def test_selftest_multiple(delay):
-    success = selftest_multiple(distributions=[CuratedOperatingSystem.DEBIAN_STRETCH], probes=[HostinfoProbe])
+    success = selftest_multiple(distributions=[CuratedOperatingSystem.DEBIAN_BUSTER], probes=[HostinfoProbe])
     assert success is True
