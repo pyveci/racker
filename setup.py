@@ -90,7 +90,7 @@ setup(
         ],
         "test": [
             "pytest>=6,<9",
-            "pytest-cov>=2,<5",
+            "pytest-cov>=2,<6",
             "re-assert>=1,<2",
         ],
     },
