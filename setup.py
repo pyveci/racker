@@ -96,7 +96,7 @@ setup(
         ],
         "test": [
             "pytest>=6,<10",
-            "pytest-cov>=2,<7",
+            "pytest-cov>=2,<8",
             "re-assert>=1,<2",
         ],
     },
