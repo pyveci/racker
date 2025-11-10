@@ -95,7 +95,7 @@ setup(
             "twine<7",
         ],
         "test": [
-            "pytest>=6,<9",
+            "pytest>=6,<10",
             "pytest-cov>=2,<7",
             "re-assert>=1,<2",
         ],
