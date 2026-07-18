@@ -6,6 +6,9 @@ Racker changelog
 in progress
 ===========
 
+2026-07-18 0.4.0
+================
+
 - Remove support for Debian 9 "stretch"
 - Added support for Debian 13 "trixie"
 - Added support for Ubuntu 24 "Noble Numbat"
