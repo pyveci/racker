@@ -14,18 +14,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Mount source code directory
   config.vm.synced_folder ".", "/usr/src/racker"
 
-  config.vm.define "rackerhost-debian11" do |machine|
+  config.vm.define "rackerhost-debian13" do |machine|
 
     # Don't check for box updates
     machine.vm.box_check_update = false
 
     # Specify the hostname of the VM
-    machine.vm.hostname = "rackerhost-debian11"
+    machine.vm.hostname = "rackerhost-debian13"
 
     # Specify the Vagrant box to use
-    machine.vm.box = "generic/debian11"
-    #machine.vm.box = "debian/stretch64"
+    #machine.vm.box = "generic/debian11"
+    #machine.vm.box = "debian/trixie64"
     #machine.vm.box = "ubuntu/bionic64"
+    machine.vm.box = "cloud-image/debian-13"
 
     # Configure host specifications
     machine.vm.provider :virtualbox do |v|
@@ -34,7 +35,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       v.cpus = 4
 
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      v.customize ["modifyvm", :id, "--name", "rackerhost-debian11"]
+      v.customize ["modifyvm", :id, "--name", "rackerhost-debian13"]
       #v.customize ["modifyvm", :id, "--memory", 4096]
 
       # Turn on nested virtualization.
