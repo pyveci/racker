@@ -17,7 +17,7 @@ from postroj.exceptions import InvalidImageReference, InvalidPhysicalImage, OsRe
 from postroj.image import ImageProvider
 from postroj.registry import CuratedOperatingSystem
 from racker.babelfish import DynamicDistribution
-from testing.util import AnyStringWith
+from tests.util import AnyStringWith
 
 
 if sys.platform != "linux":
