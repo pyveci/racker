@@ -133,17 +133,17 @@ well.
 
 Linux
 .....
-- AmazonLinux 2022
+- AmazonLinux 2023
 - Arch Linux 20220501
-- CentOS 7-9
-- Debian 9-12 and unstable (stretch, buster, bullseye, bookworm, sid)
-- Fedora 35-37
-- openSUSE 15 and latest (leap, tumbleweed)
-- Oracle Linux 8
-- Red Hat RHEL 8 and 9
-- Rocky Linux 8
+- CentOS 7-10
+- Debian 9-13 and unstable (stretch, buster, bullseye, bookworm, trixie, sid)
+- Fedora 35-37, 44-45
+- openSUSE 15, 16 and latest (leap, tumbleweed)
+- Oracle Linux 8-10
+- Red Hat RHEL 8-10
+- Rocky Linux 8-9
 - SUSE SLES 15 and BCI:latest
-- Ubuntu LTS 20 and 22 (focal, jammy)
+- Ubuntu LTS 20-24 (focal, jammy, noble)
 
 
 Prior art
