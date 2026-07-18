@@ -1,5 +1,3 @@
-.. highlight:: sh
-
 ######
 Racker
 ######

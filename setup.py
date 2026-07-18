@@ -14,6 +14,7 @@ setup(
     url="https://github.com/pyveci/racker",
     description="Racker is an experimental harness tool for provisioning and launching operating system containers",
     long_description=README,
+    long_description_content_type="text/x-rst",
     download_url="https://pypi.org/project/racker/",
     packages=find_packages(),
     license="MIT",
