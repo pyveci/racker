@@ -52,7 +52,7 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Operating System :: POSIX :: Linux",
         "Natural Language :: English",
         "Intended Audience :: Customer Service",
