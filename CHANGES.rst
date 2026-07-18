@@ -11,6 +11,24 @@ in progress
 - Added support for Ubuntu 24 "Noble Numbat"
 - Updated OS registry with Fedora 44 and 45, CentOS 10, RHEL 10, RockyLinux 9,
   OpenSUSE Leap 16, AmazonLinux 2023, Oracle Linux 9 and 10
+- Make Windows runner subsystem production ready.
+- Make Windows runner subsystem production ready.
+- Add support for Windows Server Core 2019 and friends, like
+  ``windows/servercore:ltsc2019``, ``windows/nanoserver:1809``, or
+  ``eclipse-temurin:17-jdk``.
+- Add support for Windows Server Core 2016, 2022 and friends, like
+  ``windows/servercore:ltsc2016``, ``windows/servercore:ltsc2022``, or
+  ``windows/nanoserver:ltsc2022``.
+- Improve documentation about the Windows backend
+- Rename environment variables used to control the Windows Docker Machine
+  subsystem. The new names are ``RACKER_WDM_VCPUS``, ``RACKER_WDM_MEMORY``,
+  and ``RACKER_WDM_MACHINE``.
+- Add environment variable ``RACKER_WDM_PROVIDER`` to reconfigure the
+  Vagrant virtualization backend differently than VirtualBox.
+- Documentation: Add use case how to build a Python package within a
+  Windows environment, using Microsoft Visual C++ Build Tools 2015 and
+  Anaconda, both installed using Chocolatey, and ``cibuildwheel``.
+
 
 2023-02-14 0.3.0
 ================
@@ -21,7 +39,6 @@ in progress
 - Improve central command invocation function
 - Improve documentation
 - Fix packaging
-
 
 2022-05-20 0.2.0
 ================

@@ -1,6 +1,6 @@
-#########################
-Using Postroj for CrateDB
-#########################
+#######################################
+Using Racker and Postroj for CrateDB CI
+#######################################
 
 
 ************
@@ -44,9 +44,76 @@ on the command line.
     }
 
 
-*******
-Probing
-*******
+*************
+Prerequisites
+*************
+
+When creating the "Windows Docker Machine" virtual machine, the program will
+configure it to use 6 VPUs and 6144 MB system memory.
+
+In order to adjust those values, use these environment variables before
+invoking the later commands::
+
+    export RACKER_VM_VCPUS=12
+    export RACKER_VM_MEMORY=8192
+
+If you want to adjust the values after the initial deployment, you will have to
+reset the "Windows Docker Machine" installation directory. For example, it is:
+
+- On Linux: ``/root/.local/state/racker/windows-docker-machine``
+- On macOS: ``/Users/amo/Library/Application Support/racker/windows-docker-machine``
+
+
+**********
+racker run
+**********
+
+Purpose: Invoke programs in a Java/OpenJDK environment, within a
+virtualized/dockerized, volatile/ephemeral Windows environment.
+
+Run the CrateDB test suite on OpenJDK 18 (Eclipse Temurin)::
+
+    time racker --verbose run --rm --platform=windows/amd64 eclipse-temurin:18-jdk \
+        "sh -c 'mkdir /c/src; cd /c/src; git clone https://github.com/crate/crate --depth=1; cd crate; ./gradlew --no-daemon --parallel -PtestForks=2 :server:test -Dtests.crate.run-windows-incompatible=false --stacktrace'"
+
+Use the same image, but select a specific operating system version::
+
+    export RACKER_WDM_MACHINE=2019-box
+    racker --verbose run --rm --platform=windows/amd64 eclipse-temurin:18-jdk -- wmic os get caption
+
+Invoke a Java command prompt (JShell) with OpenJDK 18::
+
+    racker --verbose run -it --rm --platform=windows/amd64 eclipse-temurin:18-jdk jshell
+    System.out.println("OS: " + System.getProperty("os.name") + ", version " + System.getProperty("os.version"))
+    System.out.println("Java: " + System.getProperty("java.vendor") + ", version " + System.getProperty("java.version"))
+
+Build CrateDB from source, extract Zip archive, and invoke available programs::
+
+    # Spawn a Windows environment with `cmd` shell.
+    # TODO: Bind-mounting not possible via command line yet, need to touch the code for this.
+    racker --verbose run --rm -it --platform=windows/amd64 eclipse-temurin:18-jdk -- cmd
+
+    # Build CrateDB.
+    cd \crate
+    gradlew clean distZip
+
+    # Extract zip archive.
+    mkdir \tmp
+    cd \tmp
+    unzip \crate\app\build\distributions\crate-5.3.0-SNAPSHOT-327070e3fe.zip
+    cd crate-5.3.0-SNAPSHOT-327070e3fe
+
+    # Run CrateDB and tools.
+    bin\crate
+    # Submit <Ctrl+C> to stop
+
+    bin\crate-node fix-metadata
+    # Send y to the prompt
+
+
+****************
+postroj pkgprobe
+****************
 
 
 Debian systems

@@ -81,8 +81,10 @@ setup(
         ],
     },
     install_requires=[
+        "appdirs>=1,<2",
         "click>=7,<9",
         "furl>=2,<3",
+        "setuptools<81",
         "subprocess-tee>=0.3,<1",
         "python-slugify>=6,<9",
         "tld>=0.10,<1",
