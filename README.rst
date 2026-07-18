@@ -1,54 +1,64 @@
 .. highlight:: sh
 
-
 ######
 Racker
 ######
 
-.. container::
+*Operating system containers for humans and machines.*
 
-    *Operating system containers for humans and machines.*
+:**Status**:
 
-    - **Documentation**: https://github.com/pyveci/racker
-    - **Source code**: https://github.com/pyveci/racker
-    - **PyPI**: https://pypi.org/project/racker/
+    .. image:: https://img.shields.io/pypi/status/racker.svg
+        :target: https://pypi.org/project/racker/
+        :alt: Maturity status
 
-|
+    .. image:: https://github.com/pyveci/racker/actions/workflows/tests.yaml/badge.svg
+        :target: https://github.com/pyveci/racker/actions/workflows/tests.yaml
+        :alt: Test suite status
 
-.. image:: https://img.shields.io/badge/systemd-239%20and%20newer-blue.svg
-    :target: https://github.com/systemd/systemd
-    :alt: systemd System and Service Manager
+    .. image:: https://codecov.io/gh/pyveci/racker/branch/main/graph/badge.svg
+        :target: https://codecov.io/gh/pyveci/racker
+        :alt: Test suite code coverage
 
-.. image:: https://img.shields.io/pypi/pyversions/racker.svg
-    :target: https://pypi.org/project/racker/
-    :alt: Python version
+    .. image:: https://img.shields.io/pypi/l/racker.svg
+        :target: https://pypi.org/project/racker/
+        :alt: License
 
-.. image:: https://img.shields.io/pypi/v/racker.svg
-    :target: https://pypi.org/project/racker/
-    :alt: Version
+    .. image:: https://img.shields.io/pypi/v/racker.svg
+        :target: https://pypi.org/project/racker/
+        :alt: Version
 
-.. image:: https://img.shields.io/pypi/status/racker.svg
-    :target: https://pypi.org/project/racker/
-    :alt: Maturity status
+:**Usage**:
 
-.. image:: https://github.com/pyveci/racker/workflows/Tests/badge.svg
-    :target: https://github.com/pyveci/racker/actions?workflow=Tests
-    :alt: Test suite status
+    .. image:: https://pepy.tech/badge/racker/month
+        :target: https://pepy.tech/project/racker
+        :alt: PyPI downloads / month
 
-.. image:: https://codecov.io/gh/pyveci/racker/branch/main/graph/badge.svg
-    :target: https://codecov.io/gh/pyveci/racker
-    :alt: Test suite code coverage
+:**Compatibility**:
 
-.. image:: https://img.shields.io/pypi/l/racker.svg
-    :target: https://pypi.org/project/racker/
-    :alt: License
+    .. image:: https://img.shields.io/badge/systemd-239%20and%20newer-blue.svg
+        :target: https://github.com/systemd/systemd
+        :alt: systemd System and Service Manager
 
-.. image:: https://pepy.tech/badge/racker/month
-    :target: https://pepy.tech/project/racker
-    :alt: PyPI downloads / month
+    .. image:: https://img.shields.io/pypi/pyversions/racker.svg
+        :target: https://pypi.org/project/racker/
+        :alt: Python version
 
+.. <!-- » [Documentation] -->
 
-----
+» `Changelog`_
+| `PyPI`_
+| `Issues`_
+| `Source code`_
+| `License`_
+
+.. _Changelog: https://github.com/pyveci/racker/blob/main/CHANGES.rst
+.. _Documentation: https://racker.readthedocs.io/
+.. _Issues: https://github.com/pyveci/racker/issues
+.. _License: https://github.com/pyveci/racker/blob/main/LICENSE
+.. _PyPI: https://pypi.org/project/racker/
+.. _Source code: https://github.com/pyveci/racker
+
 
 
 *****
