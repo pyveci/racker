@@ -35,6 +35,7 @@ def test_list_images():
         "debian-buster",
         "debian-bullseye",
         "debian-bookworm",
+        "debian-trixie",
         "debian-sid",
         "ubuntu-focal",
         "ubuntu-jammy",
@@ -84,7 +85,7 @@ def test_acquire_provisioning_error():
     Simulate a provisioning error.
     """
     distribution = DynamicDistribution.empty()
-    distribution.image = "docker://docker.io/debian:buster-slim"
+    distribution.image = "docker://docker.io/debian:trixie-slim"
     ip = ImageProvider(distribution=distribution, autosetup=False)
 
     def raise_exception(*args, **kwargs):
@@ -150,7 +151,8 @@ def test_discover_os_release_file_no_os_root(tmpdir):
         f"Container docker-foo at directory {tmpdir} lacks an operating system (os-release file is missing or "
         f"inaccessible). Error: CalledProcessError. Reason: Command 'systemd-nspawn --directory={tmpdir} "
         f"--bind-ro=/etc/resolv.conf:/etc/resolv.conf --pipe /bin/cat /etc/os-release' returned non-zero "
-        f"exit status 1. Reason: Directory {tmpdir} doesn't look like it has an OS tree. Refusing."
+        f"exit status 1. Reason: Directory {tmpdir} doesn't look like it has an OS tree (/usr/ directory "
+        f"is missing). Refusing."
     )
 
     assert ex.match(re.escape(message_reference))
@@ -192,7 +194,7 @@ def test_provision_systemd_unsupported_operating_system():
 
 
 def test_discover_os_release_file_invalid_command():
-    ip = ImageProvider(distribution=DynamicDistribution.from_image("debian:buster-slim"), autosetup=False)
+    ip = ImageProvider(distribution=DynamicDistribution.from_image("debian:trixie-slim"), autosetup=False)
     with patch("postroj.image.ImageProvider.CAT_COMMAND", "/bin/foo"):
         with pytest.raises(OsReleaseFileMissing) as ex:
             ip.discover()
@@ -203,14 +205,14 @@ def test_discover_os_release_file_invalid_command():
 
 
 def test_discover_os_release_file_invalid_file():
-    ip = ImageProvider(distribution=DynamicDistribution.from_image("debian:buster-slim"), autosetup=False)
+    ip = ImageProvider(distribution=DynamicDistribution.from_image("debian:trixie-slim"), autosetup=False)
     with patch("postroj.image.ImageProvider.OS_RELEASE_FILE", "/etc/bar"):
         with pytest.raises(OsReleaseFileMissing) as ex:
             ip.discover()
         message = str(ex.value)
         assert "os-release file is missing or inaccessible" in message
         assert "CalledProcessError" in message
-        assert "/bin/cat: /etc/bar: No such file or directory" in message
+        assert "cat: /etc/bar: No such file or directory" in message
 
 
 def test_activate_image_not_found_fails():
@@ -241,7 +243,7 @@ def test_activate_empty_directory_fails(tmpdir):
 
 
 def test_setup():
-    distribution = DynamicDistribution.from_image("debian:buster-slim")
+    distribution = DynamicDistribution.from_image("debian:trixie-slim")
     ip = ImageProvider(distribution=distribution, autosetup=False)
     ip.setup()
     assert ip.image.is_symlink()
