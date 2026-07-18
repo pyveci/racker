@@ -69,7 +69,7 @@ There is also `Boombox`_, `CoreOS toolbox`_, `docker-coreos-toolbox-ubuntu`_,
 
 .. _Boombox: https://github.com/anthr76/boombox
 .. _CoreOS toolbox: https://github.com/coreos/toolbox
-.. _Comparison with similar tools: https://github.com/cicerops/racker#comparison-with-similar-tools
+.. _Comparison with similar tools: https://github.com/pyveci/racker#comparison-with-similar-tools
 .. _Distrobox: https://github.com/89luca89/distrobox
 .. _Distrobox - Containers distribution support: https://distrobox.privatedns.org/compatibility.html#containers-distros
 .. _distrobox-init: https://distrobox.privatedns.org/usage/distrobox-init.html
