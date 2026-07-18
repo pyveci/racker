@@ -16,7 +16,7 @@ setup(
     long_description=README,
     download_url="https://pypi.org/project/racker/",
     packages=find_packages(),
-    license="AGPL-3.0, EUPL-1.2",
+    license="MIT",
     keywords=[
         "systemd",
         "systemd-nspawn",
@@ -52,8 +52,6 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
-        "License :: OSI Approved :: GNU Affero General Public License v3",
-        "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
         "Development Status :: 3 - Alpha",
         "Operating System :: POSIX :: Linux",
         "Natural Language :: English",
