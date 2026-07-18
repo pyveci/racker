@@ -40,6 +40,13 @@ class CuratedOperatingSystem(Enum):
         version="12",
         image="docker://docker.io/debian:bookworm-slim",
     )
+    DEBIAN_TRIXIE = LinuxDistribution(
+        family=OperatingSystemFamily.DEBIAN,
+        name=OperatingSystemName.DEBIAN,
+        release="trixie",
+        version="13",
+        image="docker://docker.io/debian:trixie-slim",
+    )
     DEBIAN_SID = LinuxDistribution(
         family=OperatingSystemFamily.DEBIAN,
         name=OperatingSystemName.DEBIAN,
@@ -186,6 +193,7 @@ CURATED_OPERATING_SYSTEMS: List[Enum] = [
     CuratedOperatingSystem.DEBIAN_BUSTER,
     CuratedOperatingSystem.DEBIAN_BULLSEYE,
     CuratedOperatingSystem.DEBIAN_BOOKWORM,
+    CuratedOperatingSystem.DEBIAN_TRIXIE,
     CuratedOperatingSystem.DEBIAN_SID,
     CuratedOperatingSystem.UBUNTU_FOCAL,
     CuratedOperatingSystem.UBUNTU_JAMMY,
