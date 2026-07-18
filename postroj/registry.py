@@ -98,6 +98,20 @@ class CuratedOperatingSystem(Enum):
         version="37",
         image="docker://docker.io/fedora:37",
     )
+    FEDORA_44 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.FEDORA,
+        release="44",
+        version="44",
+        image="docker://docker.io/fedora:44",
+    )
+    FEDORA_45 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.FEDORA,
+        release="45",
+        version="45",
+        image="docker://docker.io/fedora:45",
+    )
     CENTOS_7 = LinuxDistribution(
         family=OperatingSystemFamily.REDHAT,
         name=OperatingSystemName.CENTOS,
@@ -119,6 +133,13 @@ class CuratedOperatingSystem(Enum):
         version="9",
         image="docker://quay.io/centos/centos:stream9",
     )
+    CENTOS_10 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.CENTOS,
+        release="10",
+        version="10",
+        image="docker://quay.io/centos/centos:stream10",
+    )
     RHEL_8 = LinuxDistribution(
         family=OperatingSystemFamily.REDHAT,
         name=OperatingSystemName.RHEL,
@@ -131,7 +152,14 @@ class CuratedOperatingSystem(Enum):
         name=OperatingSystemName.RHEL,
         release="9",
         version="9",
-        image="docker://registry.access.redhat.com/ubi9-beta/ubi",
+        image="docker://registry.access.redhat.com/ubi9/ubi",
+    )
+    RHEL_10 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.RHEL,
+        release="10",
+        version="10",
+        image="docker://registry.access.redhat.com/ubi10/ubi",
     )
     ROCKYLINUX_8 = LinuxDistribution(
         family=OperatingSystemFamily.REDHAT,
@@ -140,12 +168,26 @@ class CuratedOperatingSystem(Enum):
         version="8",
         image="docker://docker.io/rockylinux:8",
     )
-    OPENSUSE_LEAP = LinuxDistribution(
+    ROCKYLINUX_9 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.ROCKYLINUX,
+        release="9",
+        version="9",
+        image="docker://docker.io/rockylinux:9",
+    )
+    OPENSUSE_LEAP_15 = LinuxDistribution(
         family=OperatingSystemFamily.SUSE,
         name=OperatingSystemName.OPENSUSE,
-        release="leap",
+        release="leap15",
         version="15",
         image="docker://docker.io/opensuse/leap:15",
+    )
+    OPENSUSE_LEAP_16 = LinuxDistribution(
+        family=OperatingSystemFamily.SUSE,
+        name=OperatingSystemName.OPENSUSE,
+        release="leap16",
+        version="16",
+        image="docker://docker.io/opensuse/leap:16",
     )
     OPENSUSE_TUMBLEWEED = LinuxDistribution(
         family=OperatingSystemFamily.SUSE,
@@ -168,12 +210,12 @@ class CuratedOperatingSystem(Enum):
         version="latest",
         image="docker://registry.suse.com/bci/bci-base:latest",
     )
-    AMAZONLINUX_2022 = LinuxDistribution(
+    AMAZONLINUX_2023 = LinuxDistribution(
         family=OperatingSystemFamily.REDHAT,
         name=OperatingSystemName.AMAZONLINUX,
-        release="2022",
-        version="2022",
-        image="docker://docker.io/amazonlinux:2022",
+        release="2023",
+        version="2023",
+        image="docker://docker.io/amazonlinux:2023",
     )
     ORACLELINUX_8 = LinuxDistribution(
         family=OperatingSystemFamily.REDHAT,
@@ -181,6 +223,20 @@ class CuratedOperatingSystem(Enum):
         release="8",
         version="8",
         image="docker://docker.io/oraclelinux:8",
+    )
+    ORACLELINUX_9 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.ORACLELINUX,
+        release="9",
+        version="9",
+        image="docker://docker.io/oraclelinux:9",
+    )
+    ORACLELINUX_10 = LinuxDistribution(
+        family=OperatingSystemFamily.REDHAT,
+        name=OperatingSystemName.ORACLELINUX,
+        release="10",
+        version="10",
+        image="docker://docker.io/oraclelinux:10",
     )
 
     # Other distributions, not based on .deb or .rpm.
@@ -209,9 +265,13 @@ CURATED_OPERATING_SYSTEMS: List[Enum] = [
     CuratedOperatingSystem.FEDORA_35,
     CuratedOperatingSystem.FEDORA_36,
     CuratedOperatingSystem.FEDORA_37,
+    CuratedOperatingSystem.FEDORA_44,
+    CuratedOperatingSystem.FEDORA_45,
     CuratedOperatingSystem.RHEL_8,
     CuratedOperatingSystem.RHEL_9,
-    CuratedOperatingSystem.OPENSUSE_LEAP,
+    CuratedOperatingSystem.RHEL_10,
+    CuratedOperatingSystem.OPENSUSE_LEAP_15,
+    CuratedOperatingSystem.OPENSUSE_LEAP_16,
     CuratedOperatingSystem.OPENSUSE_TUMBLEWEED,
     CuratedOperatingSystem.SLES_15,
     CuratedOperatingSystem.SLES_BCI,
@@ -219,9 +279,11 @@ CURATED_OPERATING_SYSTEMS: List[Enum] = [
     CuratedOperatingSystem.CENTOS_7,
     CuratedOperatingSystem.CENTOS_8,
     CuratedOperatingSystem.CENTOS_9,
+    CuratedOperatingSystem.CENTOS_10,
     CuratedOperatingSystem.ROCKYLINUX_8,
-    CuratedOperatingSystem.AMAZONLINUX_2022,
-    CuratedOperatingSystem.ORACLELINUX_8,
+    CuratedOperatingSystem.ROCKYLINUX_9,
+    CuratedOperatingSystem.AMAZONLINUX_2023,
+    CuratedOperatingSystem.ORACLELINUX_10,
     # others
     CuratedOperatingSystem.ARCHLINUX_20220501,
 ]

@@ -9,6 +9,8 @@ in progress
 - Remove support for Debian 9 "stretch"
 - Added support for Debian 13 "trixie"
 - Added support for Ubuntu 24 "Noble Numbat"
+- Updated OS registry with Fedora 44 and 45, CentOS 10, RHEL 10, RockyLinux 9,
+  OpenSUSE Leap 16, AmazonLinux 2023, Oracle Linux 9 and 10
 
 2023-02-14 0.3.0
 ================
