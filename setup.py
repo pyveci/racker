@@ -11,7 +11,7 @@ setup(
     version="0.3.0",
     author="Andreas Motl",
     author_email="andreas.motl@cicerops.de",
-    url="https://github.com/cicerops/racker",
+    url="https://github.com/pyveci/racker",
     description="Racker is an experimental harness tool for provisioning and launching operating system containers",
     long_description=README,
     download_url="https://pypi.org/project/racker/",

@@ -20,7 +20,7 @@ Getting started
 ::
 
     # Acquire sources.
-    git clone https://github.com/cicerops/racker
+    git clone https://github.com/pyveci/racker
     cd racker
 
     # Launch Linux environment.
@@ -38,4 +38,4 @@ Racker can now be used regularly like outlined in the `Racker usage`_
 documentation. In order to satisfy privileges, please invoke it with ``sudo``.
 
 
-.. _Racker usage: https://github.com/cicerops/racker/blob/main/README.rst#usage
+.. _Racker usage: https://github.com/pyveci/racker/blob/main/README.rst#usage

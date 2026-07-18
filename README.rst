@@ -9,8 +9,8 @@ Racker
 
     *Operating system containers for humans and machines.*
 
-    - **Documentation**: https://github.com/cicerops/racker
-    - **Source code**: https://github.com/cicerops/racker
+    - **Documentation**: https://github.com/pyveci/racker
+    - **Source code**: https://github.com/pyveci/racker
     - **PyPI**: https://pypi.org/project/racker/
 
 |
@@ -31,12 +31,12 @@ Racker
     :target: https://pypi.org/project/racker/
     :alt: Maturity status
 
-.. image:: https://github.com/cicerops/racker/workflows/Tests/badge.svg
-    :target: https://github.com/cicerops/racker/actions?workflow=Tests
+.. image:: https://github.com/pyveci/racker/workflows/Tests/badge.svg
+    :target: https://github.com/pyveci/racker/actions?workflow=Tests
     :alt: Test suite status
 
-.. image:: https://codecov.io/gh/cicerops/racker/branch/main/graph/badge.svg
-    :target: https://codecov.io/gh/cicerops/racker
+.. image:: https://codecov.io/gh/pyveci/racker/branch/main/graph/badge.svg
+    :target: https://codecov.io/gh/pyveci/racker
     :alt: Test suite code coverage
 
 .. image:: https://img.shields.io/pypi/l/racker.svg
@@ -193,7 +193,7 @@ Install Racker::
 
 To install the latest development version, use this command instead::
 
-    pip install git+https://github.com/cicerops/racker --upgrade
+    pip install git+https://github.com/pyveci/racker --upgrade
 
 .. note::
 
@@ -425,13 +425,13 @@ Troubleshooting
 
 .. _autopkgtest: https://www.freedesktop.org/wiki/Software/systemd/autopkgtest/
 .. _Chocolatey: https://chocolatey.org/
-.. _Comparison with similar tools - more details: https://github.com/cicerops/racker/blob/main/doc/comparison.rst
+.. _Comparison with similar tools - more details: https://github.com/pyveci/racker/blob/main/doc/comparison.rst
 .. _Container Tools Guide: https://github.com/containers/buildah/tree/main/docs/containertools
-.. _Container wars: https://github.com/cicerops/racker/blob/main/doc/research/container-wars.rst
+.. _Container wars: https://github.com/pyveci/racker/blob/main/doc/research/container-wars.rst
 .. _Distrobox: https://github.com/89luca89/distrobox
 .. _Docker: https://github.com/docker/
 .. _machinectl: https://www.freedesktop.org/software/systemd/man/machinectl.html
-.. _machinectl pull-dkr: https://github.com/cicerops/racker/blob/main/doc/research/machinectl-pull-dkr.rst
+.. _machinectl pull-dkr: https://github.com/pyveci/racker/blob/main/doc/research/machinectl-pull-dkr.rst
 .. _nerdctl: https://github.com/containerd/nerdctl
 .. _Microsoft Container Registry: https://mcr.microsoft.com/
 .. _mkosi: https://github.com/systemd/mkosi
@@ -441,11 +441,11 @@ Troubleshooting
 .. _OS-level virtualization: https://wiki.debian.org/SystemVirtualization#OS-level_virtualization
 .. _Packer: https://www.packer.io/
 .. _Podman: https://podman.io/
-.. _Racker sandbox installation: https://github.com/cicerops/racker/blob/main/doc/sandbox.rst
+.. _Racker sandbox installation: https://github.com/pyveci/racker/blob/main/doc/sandbox.rst
 .. _skopeo: https://github.com/containers/skopeo
 .. _systemd: https://www.freedesktop.org/wiki/Software/systemd/
 .. _systemd-nspawn: https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html
-.. _systemd-nspawn in a nutshell: https://github.com/cicerops/racker/blob/main/doc/systemd-nspawn.rst
+.. _systemd-nspawn in a nutshell: https://github.com/pyveci/racker/blob/main/doc/systemd-nspawn.rst
 .. _systemd-run: https://www.freedesktop.org/software/systemd/man/systemd-run.html
 .. _Toolbox: https://containertoolbx.org/
 .. _umoci: https://github.com/opencontainers/umoci
