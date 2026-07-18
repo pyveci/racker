@@ -9,17 +9,17 @@ multi_line_output = 3
 [tool.pytest.ini_options]
 minversion = "2.0"
 addopts = "-rfEXs -p pytester --strict-markers --verbosity=3 --cov"
-python_files = ["test_*.py", "*_test.py", "testing/python/*.py"]
+python_files = ["test_*.py", "*_test.py", "tests/python/*.py"]
 python_classes = ["Test", "Acceptance"]
 python_functions = ["test"]
-testpaths = ["testing"]
+testpaths = ["tests"]
 xfail_strict = true
 markers = [
 ]
 
 [tool.coverage.run]
 omit = [
-    "testing/*",
+    "tests/*",
     "postroj/winrunner.py",
 ]
 
