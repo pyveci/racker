@@ -68,6 +68,13 @@ class CuratedOperatingSystem(Enum):
         version="22",
         image="https://cloud-images.ubuntu.com/minimal/daily/jammy/current/jammy-minimal-cloudimg-amd64-root.tar.xz",
     )
+    UBUNTU_NOBLE = LinuxDistribution(
+        family=OperatingSystemFamily.DEBIAN,
+        name=OperatingSystemName.UBUNTU,
+        release="noble",
+        version="24",
+        image="https://cloud-images.ubuntu.com/minimal/daily/noble/current/noble-minimal-cloudimg-amd64-root.tar.xz",
+    )
 
     # .rpm-based distributions
     FEDORA_35 = LinuxDistribution(
@@ -197,6 +204,7 @@ CURATED_OPERATING_SYSTEMS: List[Enum] = [
     CuratedOperatingSystem.DEBIAN_SID,
     CuratedOperatingSystem.UBUNTU_FOCAL,
     CuratedOperatingSystem.UBUNTU_JAMMY,
+    CuratedOperatingSystem.UBUNTU_NOBLE,
     # .rpm-based I
     CuratedOperatingSystem.FEDORA_35,
     CuratedOperatingSystem.FEDORA_36,

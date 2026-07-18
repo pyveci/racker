@@ -39,6 +39,7 @@ def test_list_images():
         "debian-sid",
         "ubuntu-focal",
         "ubuntu-jammy",
+        "ubuntu-noble",
         "fedora-35",
         "fedora-36",
         "fedora-37",
