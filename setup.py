@@ -91,7 +91,7 @@ setup(
     extras_require={
         "release": [
             "build<2",
-            "twine<7",
+            "twine<8",
         ],
         "test": [
             "pytest>=6,<10",
